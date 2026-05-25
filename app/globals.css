@@ -1,18 +1,20 @@
-@import "tailwindcss";
-
-@theme {
-  --color-coral: #FF3D5A;
-  --color-muted: #6B7280;
-  --color-text:  #F0EDE8;
-  --color-bg:    #0A0C10;
-  --color-bg2:   #111318;
-  --color-bg3:   #1A1D26;
-  --font-family-display: "Playfair Display", serif;
-  --font-family-ui: "Syne", sans-serif;
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#08090B; --bg2:#0D0E12; --bg3:#131419;
+  --gold:#C9A84C; --gold-dim:rgba(201,168,76,0.15); --gold-glow:rgba(201,168,76,0.05);
+  --text:#F5EFE0; --muted:#5A5448; --muted2:#8A8070;
+  --border:rgba(201,168,76,0.12);
 }
-
-@keyframes pulse-dot {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
-}
-.animate-pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
+html,body{height:100%;}
+body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);font-weight:300;-webkit-font-smoothing:antialiased;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,0.2);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes shimmer{0%,100%{opacity:0.4}50%{opacity:1}}
+.animate-fade-up{animation:fadeUp 0.9s cubic-bezier(0.16,1,0.3,1) both;}
+.animate-fade-in{animation:fadeIn 0.8s ease both;}
+.delay-1{animation-delay:0.1s;}.delay-2{animation-delay:0.25s;}.delay-3{animation-delay:0.4s;}.delay-4{animation-delay:0.55s;}.delay-5{animation-delay:0.7s;}
+.font-display{font-family:"Cormorant Garamond",serif;}

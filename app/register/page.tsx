@@ -1,71 +1,73 @@
-'use client';
+"use client";
 import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { getSupabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function RegisterPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
 
-  const handleRegister = async () => {
-    if (password.length < 6) { setError('Пароль минимум 6 символов'); return; }
+  const handleSubmit = async () => {
     setLoading(true); setError('');
-    const supabase = getSupabase();
-    const { error } = await supabase.auth.signUp({ email, password,
-      options: { emailRedirectTo: `${window.location.origin}/onboarding/profile` }
-    });
-    if (error) { setError(error.message); setLoading(false); return; }
+    const { error: e } = await getSupabase().auth.signUp({ email, password });
+    if (e) { setError(e.message); setLoading(false); return; }
     setDone(true);
   };
 
-  if (done) return (
-    <div className="min-h-screen bg-[#0A0C10] flex items-center justify-center px-4">
-      <div className="text-center max-w-md">
-        <div className="text-5xl mb-6">📬</div>
-        <h2 className="text-2xl font-bold text-white mb-3" style={{fontFamily:'serif'}}>Проверь почту</h2>
-        <p className="text-gray-400 text-sm mb-6">Отправили письмо на <strong className="text-white">{email}</strong>. Перейди по ссылке чтобы подтвердить аккаунт.</p>
-        <Link href="/login" className="text-[#FF3D5A] hover:underline text-sm">← Войти</Link>
-      </div>
-    </div>
-  );
+  const inputStyle = {
+    width: '100%', padding: '12px 16px',
+    background: 'rgba(255,255,255,0.02)',
+    border: '0.5px solid rgba(201,168,76,0.15)',
+    color: '#F5EFE0', fontSize: 14,
+    fontFamily: '"DM Sans",sans-serif', fontWeight: 300, outline: 'none',
+  } as const;
 
   return (
-    <div className="min-h-screen bg-[#0A0C10] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <div className="w-12 h-12 rounded-xl bg-[#FF3D5A] flex items-center justify-center font-bold text-white text-xl mx-auto mb-4" style={{fontFamily:'serif'}}>S</div>
-          <h1 className="text-3xl font-bold text-white" style={{fontFamily:'serif'}}>Создать аккаунт</h1>
-          <p className="text-gray-500 mt-2 text-sm">Бесплатно · Без карты</p>
+    <div style={{position:'fixed',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'#08090B',fontFamily:'"DM Sans",sans-serif'}}>
+      <div style={{position:'absolute',top:'10%',left:'15%',width:600,height:600,borderRadius:'50%',background:'radial-gradient(circle,rgba(201,168,76,0.04) 0%,transparent 70%)',pointerEvents:'none'}}/>
+      <div style={{width:420,position:'relative',zIndex:1}}>
+        <div style={{textAlign:'center',marginBottom:48}}>
+          <Link href="/" style={{display:'inline-flex',alignItems:'center',gap:10,textDecoration:'none'}}>
+            <div style={{width:40,height:40,background:'linear-gradient(135deg,#C9A84C,#E8CC7A)',display:'flex',alignItems:'center',justifyContent:'center',fontFamily:'"Cormorant Garamond",serif',fontWeight:600,fontSize:20,color:'#08090B'}}>S</div>
+            <span style={{fontFamily:'"Cormorant Garamond",serif',fontSize:24,fontWeight:400,color:'#F5EFE0'}}>Syndi<span style={{color:'#C9A84C'}}>AI</span></span>
+          </Link>
         </div>
-        <div className="bg-[#111318] border border-white/10 rounded-2xl p-8 flex flex-col gap-4">
-          {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 rounded-xl">{error}</div>}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-gray-400">Email</label>
-            <input value={email} onChange={e => setEmail(e.target.value)}
-              type="email" placeholder="you@startup.com"
-              className="bg-[#1A1D26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#FF3D5A]/50"/>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm text-gray-400">Пароль</label>
-            <input value={password} onChange={e => setPassword(e.target.value)}
-              type="password" placeholder="минимум 6 символов"
-              onKeyDown={e => e.key === 'Enter' && handleRegister()}
-              className="bg-[#1A1D26] border border-white/10 rounded-xl px-4 py-3 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-[#FF3D5A]/50"/>
-          </div>
-          <button onClick={handleRegister} disabled={loading}
-            className="w-full py-3 bg-[#FF3D5A] text-white font-semibold rounded-xl hover:bg-[#FF3D5A]/90 disabled:opacity-50 transition-colors mt-2">
-            {loading ? 'Создаём...' : 'Создать аккаунт →'}
-          </button>
-          <p className="text-center text-sm text-gray-500 mt-2">
-            Уже есть аккаунт?{' '}
-            <Link href="/login" className="text-[#FF3D5A] hover:underline">Войти</Link>
-          </p>
+        <div style={{border:'0.5px solid rgba(201,168,76,0.15)',background:'#0D0E12',padding:48}}>
+          {done ? (
+            <div style={{textAlign:'center',padding:'24px 0'}}>
+              <div style={{fontSize:48,marginBottom:16}}>✉</div>
+              <h2 style={{fontFamily:'"Cormorant Garamond",serif',fontSize:28,fontWeight:300,color:'#F5EFE0',marginBottom:12}}>Проверь почту</h2>
+              <p style={{fontSize:13,fontWeight:300,color:'#5A5448',lineHeight:1.7}}>Мы отправили письмо на <span style={{color:'#C9A84C'}}>{email}</span>.<br/>Подтверди адрес чтобы войти.</p>
+            </div>
+          ) : (
+            <>
+              <h1 style={{fontFamily:'"Cormorant Garamond",serif',fontSize:36,fontWeight:300,color:'#F5EFE0',marginBottom:8}}>Начни путь</h1>
+              <p style={{fontSize:13,fontWeight:300,color:'#5A5448',marginBottom:32}}>Создай аккаунт SyndiAI</p>
+              {error && <div style={{padding:'12px 16px',background:'rgba(220,38,38,0.08)',border:'0.5px solid rgba(220,38,38,0.25)',color:'#F87171',fontSize:13,marginBottom:24}}>{error}</div>}
+              <div style={{marginBottom:20}}>
+                <label style={{display:'block',fontSize:10,color:'#C9A84C',letterSpacing:'0.12em',textTransform:'uppercase',marginBottom:8}}>Email</label>
+                <input value={email} onChange={e=>setEmail(e.target.value)} type="email" placeholder="founder@startup.com" style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')handleSubmit()}}/>
+              </div>
+              <div style={{marginBottom:32}}>
+                <label style={{display:'block',fontSize:10,color:'#C9A84C',letterSpacing:'0.12em',textTransform:'uppercase',marginBottom:8}}>Пароль</label>
+                <input value={password} onChange={e=>setPassword(e.target.value)} type="password" placeholder="••••••••" style={inputStyle} onKeyDown={e=>{if(e.key==='Enter')handleSubmit()}}/>
+              </div>
+              <button onClick={handleSubmit} disabled={loading} style={{width:'100%',padding:14,background:'linear-gradient(135deg,#C9A84C,#E8CC7A)',color:'#08090B',fontSize:12,fontWeight:500,letterSpacing:'0.1em',textTransform:'uppercase',border:'none',cursor:'pointer',fontFamily:'"DM Sans",sans-serif',opacity:loading?0.7:1}}>
+                {loading ? 'Создаём...' : 'Создать аккаунт'}
+              </button>
+            </>
+          )}
         </div>
+        {!done && (
+          <div style={{textAlign:'center',marginTop:24}}>
+            <span style={{fontSize:13,fontWeight:300,color:'#5A5448'}}>Уже есть аккаунт? </span>
+            <Link href="/login" style={{fontSize:13,fontWeight:400,color:'#C9A84C',textDecoration:'none'}}>Войти →</Link>
+          </div>
+        )}
       </div>
     </div>
   );
