@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-coral: #FF3D5A;
+  --color-muted: #6B7280;
+  --color-text:  #F0EDE8;
+  --color-bg:    #0A0C10;
+  --color-bg2:   #111318;
+  --color-bg3:   #1A1D26;
+  --font-family-display: "Playfair Display", serif;
+  --font-family-ui: "Syne", sans-serif;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+.animate-pulse-dot { animation: pulse-dot 1.6s ease-in-out infinite; }
