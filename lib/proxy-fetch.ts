@@ -19,7 +19,7 @@ export async function proxyFetch(
   const body    = init?.body as string | undefined;
 
   try {
-    const res = await axios({
+    const res: import('axios').AxiosResponse = await axios({
       url,
       method,
       headers,
