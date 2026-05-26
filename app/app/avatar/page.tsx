@@ -136,23 +136,23 @@ function IdentityTab({ id, setId }: any) {
   return (
     <div style={{display:'grid',gridTemplateColumns:'1fr 320px',gap:32}}>
       <div>
-        <Field label="Имя"><Input value={id.name} onChange={v=>setId({...id,name:v})}/></Field>
+        <Field label="Имя"><Input value={id.name} onChange={(v: string)=>setId({...id,name:v})}/></Field>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
-          <Field label="Роль"><Input value={id.role} onChange={v=>setId({...id,role:v})}/></Field>
-          <Field label="Домен"><Input value={id.domain} onChange={v=>setId({...id,domain:v})}/></Field>
+          <Field label="Роль"><Input value={id.role} onChange={(v: string)=>setId({...id,role:v})}/></Field>
+          <Field label="Домен"><Input value={id.domain} onChange={(v: string)=>setId({...id,domain:v})}/></Field>
         </div>
         <Field label="О себе (bio)">
-          <Textarea value={id.bio} onChange={v=>setId({...id,bio:v})} rows={4} placeholder="Краткая история — кто ты, что строишь, опыт"/>
+          <Textarea value={id.bio} onChange={(v: string)=>setId({...id,bio:v})} rows={4} placeholder="Краткая история — кто ты, что строишь, опыт"/>
         </Field>
         <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
-          <Field label="Локация"><Input value={id.location} onChange={v=>setId({...id,location:v})} placeholder="Berlin / Remote"/></Field>
+          <Field label="Локация"><Input value={id.location} onChange={(v: string)=>setId({...id,location:v})} placeholder="Berlin / Remote"/></Field>
           <Field label="Стадия">
-            <Select value={id.stage} onChange={v=>setId({...id,stage:v})}
+            <Select value={id.stage} onChange={(v: string)=>setId({...id,stage:v})}
               options={[['idea','Idea'],['mvp','MVP'],['seed','Seed'],['growth','Growth']]}/>
           </Field>
         </div>
         <Field label="Навыки">
-          <TagInput value={id.skills} onChange={v=>setId({...id,skills:v})} placeholder="Добавь навык + Enter"/>
+          <TagInput value={id.skills} onChange={(v: string[])=>setId({...id,skills:v})} placeholder="Добавь навык + Enter"/>
         </Field>
       </div>
 
@@ -175,22 +175,22 @@ function CapabilitiesTab({ id, setId }: any) {
   return (
     <div style={{maxWidth:680}}>
       <Field label="Чему могу научить партнёра">
-        <TagInput value={id.can_teach} onChange={v=>setId({...id,can_teach:v})} placeholder="React, fundraising, B2B sales..."/>
+        <TagInput value={id.can_teach} onChange={(v: string[])=>setId({...id,can_teach:v})} placeholder="React, fundraising, B2B sales..."/>
         <Hint>Это то, что ты сильно знаешь и хочешь передать.</Hint>
       </Field>
 
       <Field label="Чему хочу научиться">
-        <TagInput value={id.want_to_learn} onChange={v=>setId({...id,want_to_learn:v})} placeholder="ML Ops, design systems..."/>
+        <TagInput value={id.want_to_learn} onChange={(v: string[])=>setId({...id,want_to_learn:v})} placeholder="ML Ops, design systems..."/>
         <Hint>Аватар найдёт партнёров с этими сильными сторонами.</Hint>
       </Field>
 
       <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginTop:24}}>
         <Field label="Таймлайн">
-          <Select value={id.goals.timeline} onChange={v=>setId({...id,goals:{...id.goals,timeline:v}})}
+          <Select value={id.goals.timeline} onChange={(v: string)=>setId({...id,goals:{...id.goals,timeline:v}})}
             options={[['now','Сейчас'],['3-months','3 месяца'],['6-months','6 месяцев'],['exploring','Изучаю']]}/>
         </Field>
         <Field label="Commitment">
-          <Select value={id.goals.commitment} onChange={v=>setId({...id,goals:{...id.goals,commitment:v}})}
+          <Select value={id.goals.commitment} onChange={(v: string)=>setId({...id,goals:{...id.goals,commitment:v}})}
             options={[['full-time','Full-time'],['part-time','Part-time'],['advisory','Advisory']]}/>
         </Field>
       </div>
@@ -203,12 +203,12 @@ function FiltersTab({ id, setId }: any) {
   return (
     <div style={{maxWidth:680}}>
       <Field label="Я ИЩУ">
-        <TagInput value={id.looking_for} onChange={v=>setId({...id,looking_for:v})} placeholder="Технический сооснователь, ML опыт, fluent English"/>
+        <TagInput value={id.looking_for} onChange={(v: string[])=>setId({...id,looking_for:v})} placeholder="Технический сооснователь, ML опыт, fluent English"/>
         <Hint>Hard критерии. Аватар будет приоритизировать таких партнёров.</Hint>
       </Field>
 
       <Field label="Я НЕ ИЩУ">
-        <TagInput value={id.not_looking_for} onChange={v=>setId({...id,not_looking_for:v})} placeholder="advisors, remote only, без опыта в стартапах"/>
+        <TagInput value={id.not_looking_for} onChange={(v: string[])=>setId({...id,not_looking_for:v})} placeholder="advisors, remote only, без опыта в стартапах"/>
         <Hint>Аватар вежливо отклонит такие профили на screening этапе.</Hint>
       </Field>
     </div>
