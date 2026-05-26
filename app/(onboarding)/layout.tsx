@@ -1,5 +1,4 @@
-'use client';
-
+"use client";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -9,65 +8,79 @@ const STEPS = [
   { n: 3, label: 'Аватар',   path: '/onboarding/avatar'   },
 ];
 
-function getCurrentStep(pathname: string) {
-  if (pathname.includes('big-five')) return 2;
-  if (pathname.includes('avatar'))   return 3;
+function currentStep(p: string) {
+  if (p.includes('big-five')) return 2;
+  if (p.includes('avatar'))   return 3;
   return 1;
 }
 
 export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
-  const current  = getCurrentStep(pathname);
+  const path = usePathname() || '';
+  const cur = currentStep(path);
 
   return (
-    <div className="min-h-screen bg-[#0A0C10] flex flex-col">
-      <header className="px-8 py-5 flex items-center justify-between border-b border-white/[0.06]">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#FF3D5A] flex items-center justify-center font-bold text-white text-lg">S</div>
-          <span className="font-bold text-white">Syndi<span className="text-[#FF3D5A]">AI</span></span>
-        </div>
+    <div style={{minHeight:'100vh',display:'flex',flexDirection:'column',position:'relative'}}>
+      <header style={{
+        padding:'16px 48px',
+        borderBottom:'1px solid #374151',
+        background:'rgba(10,14,23,0.85)',
+        backdropFilter:'blur(16px)',
+        display:'flex',alignItems:'center',justifyContent:'space-between',
+        position:'sticky',top:0,zIndex:10
+      }}>
+        <Link href="/" style={{display:'flex',alignItems:'center',gap:10,textDecoration:'none'}}>
+          <div style={{
+            width:32,height:32,borderRadius:8,
+            background:'linear-gradient(135deg,#00d4aa,#2ec4b6)',
+            display:'flex',alignItems:'center',justifyContent:'center',
+            fontFamily:'"Space Grotesk",sans-serif',fontWeight:700,fontSize:18,color:'#0a0e17',
+            boxShadow:'0 0 16px rgba(0,212,170,0.3)'
+          }}>✦</div>
+          <span className="font-display gradient-text" style={{fontWeight:700,fontSize:18}}>Syndi AI</span>
+        </Link>
 
-        <nav className="flex items-center gap-2">
+        <nav style={{display:'flex',alignItems:'center',gap:8}}>
           {STEPS.map((step, i) => {
-            const done   = step.n < current;
-            const active = step.n === current;
+            const done   = step.n < cur;
+            const active = step.n === cur;
+            const color  = done ? '#00d4aa' : active ? '#c77dff' : '#6b7280';
             return (
-              <div key={step.n} className="flex items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <div className={[
-                    'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all',
-                    done   ? 'bg-[#FF3D5A] text-white' : '',
-                    active ? 'bg-[#FF3D5A]/20 text-[#FF3D5A] border-2 border-[#FF3D5A]' : '',
-                    !done && !active ? 'bg-white/5 text-gray-500 border border-white/10' : '',
-                  ].join(' ')}>
+              <div key={step.n} style={{display:'flex',alignItems:'center',gap:8}}>
+                <div style={{display:'flex',alignItems:'center',gap:10}}>
+                  <div style={{
+                    width:28, height:28, borderRadius:'50%',
+                    display:'flex',alignItems:'center',justifyContent:'center',
+                    fontFamily:'"Space Grotesk",sans-serif',
+                    fontSize:12,fontWeight:700,
+                    background: done ? 'linear-gradient(135deg,#00d4aa,#2ec4b6)' : active ? 'rgba(199,125,255,0.15)' : 'transparent',
+                    border: active ? '1px solid #c77dff' : done ? 'none' : '1px solid #374151',
+                    color: done ? '#0a0e17' : color,
+                    boxShadow: active ? '0 0 12px rgba(199,125,255,0.4)' : 'none',
+                    transition:'all 0.3s'
+                  }}>
                     {done ? '✓' : step.n}
                   </div>
-                  <span className={`text-sm font-medium ${active ? 'text-white' : 'text-gray-500'}`}>
-                    {step.label}
-                  </span>
+                  <span style={{
+                    fontSize:13, fontWeight:500, color,
+                    transition:'color 0.3s'
+                  }}>{step.label}</span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-8 h-px ${step.n < current ? 'bg-[#FF3D5A]/40' : 'bg-white/10'}`} />
+                  <div style={{
+                    width:24, height:1,
+                    background: done ? '#00d4aa' : '#374151',
+                    margin:'0 8px',
+                    transition:'background 0.3s'
+                  }}/>
                 )}
               </div>
             );
           })}
         </nav>
-
-        <div className="text-xs text-gray-500">Шаг {current} из {STEPS.length}</div>
       </header>
 
-      <div className="h-0.5 bg-white/5">
-        <div
-          className="h-full bg-[#FF3D5A] transition-all duration-500"
-          style={{ width: `${((current - 1) / (STEPS.length - 1)) * 100}%` }}
-        />
-      </div>
-
-      <main className="flex-1 flex items-start justify-center py-12 px-4">
-        <div className="w-full max-w-2xl">
-          {children}
-        </div>
+      <main style={{flex:1,position:'relative',zIndex:1}}>
+        {children}
       </main>
     </div>
   );
