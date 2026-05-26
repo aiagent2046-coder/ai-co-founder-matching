@@ -1,4 +1,5 @@
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
+const REPLICATE_MODEL = 'beautyyuyanli/multilingual-e5-large';
 
 export async function generateEssence(profile: any): Promise<string> {
   const userMsg = `Profile data:
@@ -29,8 +30,7 @@ Write ONE paragraph in English (3-5 sentences, max 100 words) capturing what the
   });
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Claude essence failed (${res.status}): ${err.slice(0, 200)}`);
+    throw new Error(`Claude essence failed (${res.status}): ${(await res.text()).slice(0, 200)}`);
   }
   const data = await res.json();
   const essence = (data.content?.[0]?.text || '').trim();
@@ -38,13 +38,15 @@ Write ONE paragraph in English (3-5 sentences, max 100 words) capturing what the
   return essence;
 }
 
-// Replicate BGE-large-en-v1.5 — input: text_batch (stringified JSON array)
+// multilingual-e5-large: input `texts` = JSON-string of array
 export async function computeEmbedding(text: string): Promise<number[]> {
-  console.log('[embedding] calling Replicate BGE, text length:', text.length);
+  console.log('[embedding] calling Replicate e5-multilingual, text length:', text.length);
 
-  // Step 1: создать prediction
+  // E5 best practice: prefix with "passage: " for indexed documents
+  const prefixed = `passage: ${text}`;
+
   const createRes = await fetch(
-    'https://api.replicate.com/v1/models/nateraw/bge-large-en-v1.5/predictions',
+    `https://api.replicate.com/v1/models/${REPLICATE_MODEL}/predictions`,
     {
       method: 'POST',
       headers: {
@@ -53,34 +55,30 @@ export async function computeEmbedding(text: string): Promise<number[]> {
       },
       body: JSON.stringify({
         input: {
-          text_batch: JSON.stringify([{ text }]),
+          texts: JSON.stringify([prefixed]),
+          normalize_embeddings: true,
+          batch_size: 1,
         },
       }),
     }
   );
 
   const createBody = await createRes.text();
-  console.log('[embedding] create status:', createRes.status, createBody.slice(0, 300));
+  console.log('[embedding] create:', createRes.status, createBody.slice(0, 300));
 
   if (!createRes.ok) {
-    throw new Error(`Replicate create failed (${createRes.status}): ${createBody.slice(0, 200)}`);
+    throw new Error(`Replicate create (${createRes.status}): ${createBody.slice(0, 200)}`);
   }
 
   const prediction = JSON.parse(createBody);
-  const predictionId = prediction.id;
 
-  // Step 2: poll до завершения
+  // Poll for completion
   let result = prediction;
   let attempts = 0;
-  const maxAttempts = 30;
-
-  while (
-    (result.status === 'starting' || result.status === 'processing') &&
-    attempts < maxAttempts
-  ) {
-    await new Promise(r => setTimeout(r, 1500));
+  while ((result.status === 'starting' || result.status === 'processing') && attempts < 30) {
+    await new Promise(r => setTimeout(r, 1000));
     const pollRes = await fetch(
-      `https://api.replicate.com/v1/predictions/${predictionId}`,
+      `https://api.replicate.com/v1/predictions/${result.id}`,
       { headers: { Authorization: `Bearer ${process.env.REPLICATE_API_KEY}` } }
     );
     result = await pollRes.json();
@@ -89,27 +87,20 @@ export async function computeEmbedding(text: string): Promise<number[]> {
   }
 
   if (result.status !== 'succeeded') {
-    throw new Error(`Prediction failed: ${result.status} ${result.error || ''}`);
+    throw new Error(`Prediction ${result.status}: ${result.error || ''}`);
   }
 
-  // Step 3: parse output
-  // BGE с text_batch возвращает [{ input: "...", embedding: [...] }]
+  // output: number[][] — array of arrays (one per input text)
   const out = result.output;
   let vector: number[] | null = null;
 
-  if (Array.isArray(out)) {
-    if (out[0]?.embedding && Array.isArray(out[0].embedding)) {
-      vector = out[0].embedding;
-    } else if (Array.isArray(out[0])) {
-      vector = out[0];
-    } else if (typeof out[0] === 'number') {
-      vector = out;
-    }
+  if (Array.isArray(out) && Array.isArray(out[0]) && typeof out[0][0] === 'number') {
+    vector = out[0];
   }
 
   if (!vector || vector.length !== 1024) {
     console.error('[embedding] unexpected output:', JSON.stringify(out).slice(0, 500));
-    throw new Error(`Bad embedding shape: got ${vector?.length || 'null'}, expected 1024`);
+    throw new Error(`Bad embedding: got ${vector?.length || 'null'}, expected 1024`);
   }
 
   console.log('[embedding] OK, dim:', vector.length);
