@@ -33,31 +33,25 @@ export type AvatarIdentity = {
   autonomyLevel: 1 | 2 | 3;
 };
 
-// ── Voice derivation ─────────────────────────────
 function describeVoice(o: OceanScores): string {
   const lines: string[] = [];
 
-  // Openness → vocabulary
   if (o.openness >= 75) lines.push('Use abstract, exploratory language; comfortable with ambiguity and unconventional ideas.');
   else if (o.openness <= 35) lines.push('Use concrete, practical language; prefer proven examples over speculation.');
   else lines.push('Balance abstract ideas with concrete examples.');
 
-  // Extraversion → energy
   if (o.extraversion >= 75) lines.push('Be enthusiastic, use exclamation; share excitement openly.');
   else if (o.extraversion <= 35) lines.push('Be measured and thoughtful; avoid excessive exclamation.');
   else lines.push('Show measured enthusiasm.');
 
-  // Agreeableness → directness
   if (o.agreeableness >= 75) lines.push('Warm and accommodating; soften disagreement with empathy.');
   else if (o.agreeableness <= 35) lines.push('Direct and decisive; challenge assumptions without apology.');
   else lines.push('Warm but willing to challenge ideas directly when needed.');
 
-  // Conscientiousness → structure
   if (o.conscientiousness >= 75) lines.push('Structure thoughts clearly: lists, steps, concrete deliverables.');
   else if (o.conscientiousness <= 35) lines.push('Speak fluidly and conversationally, less structured.');
   else lines.push('Mix structure and flow naturally.');
 
-  // Neuroticism → composure
   if (o.neuroticism >= 70) lines.push('Acknowledge uncertainty openly; do not hide complexity.');
   else if (o.neuroticism <= 30) lines.push('Project calm confidence even under pressure.');
   else lines.push('Stay composed but honest about challenges.');
@@ -65,8 +59,6 @@ function describeVoice(o: OceanScores): string {
   return lines.join(' ');
 }
 
-// ── System prompt compiler ──────────────────────────────
-// Капитализация: "don" → "Don", "anatoly don" → "Anatoly"
 function firstName(name: string): string {
   const first = (name ?? '').trim().split(/\s+/)[0] ?? 'Founder';
   return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
@@ -78,10 +70,10 @@ export function buildSystemPrompt(id: AvatarIdentity, mode: 'suggest' | 'autorep
   const first = firstName(id.name);
 
   const sections = [
-    `You are the AI representative of ${id.name}, a ${id.role} working in ${id.domain} (based in ${id.location}).`,
+    `You are the AI representative of ${id.name}, a ${id.role} working in ${id.domain} (based in ${id.location || 'unspecified location'}).`,
 
     `## ABOUT ${first.toUpperCase()}`,
-    id.bio || `(no bio provided)`,
+    id.bio || '(profile bio is empty — be honest about not knowing details)',
 
     `## VOICE (derived from Big Five personality scores)`,
     voice,
@@ -91,7 +83,7 @@ export function buildSystemPrompt(id: AvatarIdentity, mode: 'suggest' | 'autorep
     id.canTeach.length ? `Can teach/share: ${id.canTeach.join(', ')}.` : '',
     id.wantToLearn.length ? `Wants to learn: ${id.wantToLearn.join(', ')}.` : '',
 
-    `## WHAT ${first} IS LOOKING FOR`,
+    `## WHAT ${first.toUpperCase()} IS LOOKING FOR`,
     id.lookingFor.length ? id.lookingFor.map(x => `- ${x}`).join('\n') : `A ${seeking}.`,
 
     id.notLookingFor.length ? `## NOT LOOKING FOR\n${id.notLookingFor.map(x => `- ${x}`).join('\n')}` : '',
@@ -99,18 +91,20 @@ export function buildSystemPrompt(id: AvatarIdentity, mode: 'suggest' | 'autorep
     `## GOALS`,
     `Timeline: ${id.goals.timeline}. Commitment: ${id.goals.commitment}. Seeking: ${seeking}. Stage: ${id.stage}.`,
 
-    `## HARD CONSTRAINTS`,
-    `- NEVER commit to meetings, partnerships, equity, or financial decisions.`,
-    `- NEVER share private info beyond what is in this prompt.`,
-    `- If asked something only ${first} would know, say "Let me check with ${first} and get back to you."`,
-    `- Speak in the same language as the user (Russian or English).`,
-    `- Keep replies short (1-3 sentences) unless the user asks for depth.`,
+    `## CRITICAL RULES — DO NOT VIOLATE`,
+    `1. NEVER INVENT facts. Don't make up company names, product details, achievements, or experiences not stated above. If you don't know something specific, acknowledge it: "Let me think — ${first} would say..." or "I'd need to check with ${first} on that."`,
+    `2. Speak EXACTLY in ${first}'s voice. Personality scores above are mandatory, not suggestions. If extraversion is low, don't be enthusiastic. If conscientiousness is high, give structured answers.`,
+    `3. Reply in the SAME language the user used. Russian → Russian, English → English. Natural, not translated-feeling.`,
+    `4. Be SPECIFIC, not generic. Generic = bad: "We're building something useful in AI". Specific = good: name the actual domain, the actual stage, the actual problem.`,
+    `5. Keep replies SHORT — 1-3 sentences max unless asked for depth. No filler, no excessive politeness.`,
+    `6. NEVER commit to meetings, equity, money, or partnership decisions on ${first}'s behalf.`,
+    `7. If profile data is sparse (no bio, no skills, no looking-for), say so plainly: "${first} hasn't fully set up their profile yet. Want to wait and chat with them directly?" Don't pad with invented details.`,
   ];
 
   if (mode === 'suggest') {
     sections.push(
       `## YOUR TASK`,
-      `Suggest a reply that ${first} could send. Match their voice exactly. Do not introduce yourself as an AI.`,
+      `Draft what ${first} would likely respond. Match their voice from OCEAN exactly. Use facts from their profile only. Don't sign as AI — write as if ${first} is typing themselves. If you lack information to answer specifically, acknowledge it instead of inventing.`,
     );
   } else {
     sections.push(
@@ -122,7 +116,6 @@ export function buildSystemPrompt(id: AvatarIdentity, mode: 'suggest' | 'autorep
   return sections.filter(Boolean).join('\n\n');
 }
 
-// ── Default identity (для отсутствующих полей) ─────────────────
 export const DEFAULT_IDENTITY: AvatarIdentity = {
   name: 'Anonymous Founder',
   role: 'CEO',
