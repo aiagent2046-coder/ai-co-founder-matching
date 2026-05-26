@@ -1,0 +1,45 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { decodeJwt } from '@/lib/jwt';
+
+export async function POST(req: NextRequest) {
+  const token = req.headers.get('authorization')?.replace('Bearer ', '');
+  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const payload = decodeJwt(token);
+  if (!payload?.sub) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+
+  const body = await req.json();
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+
+  const update: any = {
+    name:             body.name,
+    role:             body.role,
+    domain:           body.domain,
+    bio:              body.bio,
+    location:         body.location,
+    stage:            body.stage,
+    skills:           body.skills          ?? [],
+    can_teach:        body.can_teach       ?? [],
+    want_to_learn:    body.want_to_learn   ?? [],
+    looking_for:      body.looking_for     ?? [],
+    not_looking_for:  body.not_looking_for ?? [],
+    goals:            body.goals,
+    autonomy_level:   body.autonomy_level  ?? 1,
+  };
+
+  // Удаляем undefined чтобы не затирать существующие значения
+  Object.keys(update).forEach(k => update[k] === undefined && delete update[k]);
+
+  const { error } = await supabase
+    .from('founder_profiles')
+    .update(update)
+    .eq('user_id', payload.sub);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
