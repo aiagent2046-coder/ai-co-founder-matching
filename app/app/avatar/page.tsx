@@ -28,6 +28,8 @@ export default function AvatarStudio() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [recomputing, setRecomputing] = useState(false);
+  const [embeddingInfo, setEmbeddingInfo] = useState<{essence?: string; dim?: number} | null>(null);
   const [tab, setTab] = useState<'identity' | 'capabilities' | 'filters' | 'test'>('identity');
 
   useEffect(() => { load(); }, []);
@@ -53,6 +55,19 @@ export default function AvatarStudio() {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const recompute = async () => {
+    setRecomputing(true);
+    setEmbeddingInfo(null);
+    const token = await getAuthToken();
+    const res = await fetch('/api/embedding/recompute', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token ?? ''}` },
+    });
+    const data = await res.json();
+    setEmbeddingInfo(data);
+    setRecomputing(false);
+  };
+
   if (loading) return <div style={{padding:48,color:'#9ca3af'}}>Загружаем аватар...</div>;
 
   return (
@@ -70,9 +85,14 @@ export default function AvatarStudio() {
           <p style={{fontSize:14,color:'#9ca3af'}}>Аватар представляет тебя в платформе. Чем точнее знание — тем лучше match.</p>
         </div>
 
-        <button onClick={save} disabled={saving} className="btn-primary">
-          {saving ? 'Сохраняем...' : saved ? '✓ Сохранено' : 'Сохранить'}
-        </button>
+        <div style={{display:'flex',gap:8}}>
+          <button onClick={recompute} disabled={recomputing} className="btn-ghost">
+            {recomputing ? 'Считаем embedding...' : '🧠 Recompute embedding'}
+          </button>
+          <button onClick={save} disabled={saving} className="btn-primary">
+            {saving ? 'Сохраняем...' : saved ? '✓ Сохранено' : 'Сохранить'}
+          </button>
+        </div>
       </div>
 
       {/* Autonomy level */}

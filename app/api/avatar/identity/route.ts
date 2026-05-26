@@ -41,5 +41,15 @@ export async function POST(req: NextRequest) {
     .eq('user_id', payload.sub);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Запускаем пересчёт embedding в фоне (не ждём результат)
+  const baseUrl = req.headers.get('x-forwarded-host')
+    ? `https://${req.headers.get('x-forwarded-host')}`
+    : (process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000');
+  fetch(`${baseUrl}/api/embedding/recompute`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  }).catch(e => console.error('embedding recompute failed:', e));
+
   return NextResponse.json({ ok: true });
 }
