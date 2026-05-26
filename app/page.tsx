@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Logo } from '@/components/brand/Logo';
 import { Stars } from '@/components/brand/Stars';
+import { FeatureCard } from '@/components/marketing/FeatureCard';
 
 export default function HomePage() {
   return (
@@ -174,29 +175,12 @@ export default function HomePage() {
         </h2>
         <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:24}}>
           {[
-            {accent:'#00d4aa',title:'OCEAN Анализ',desc:'15 адаптивных вопросов раскрывают твой психометрический портрет по пяти осям личности.'},
-            {accent:'#c77dff',title:'Живой AI-аватар',desc:'Твой цифровой двойник представляет тебя в чатах и встречах — общается, фильтрует, отбирает.'},
-            {accent:'#ff6b9d',title:'Алгоритм дополнения',desc:'Не ищем похожих — ищем тех, кто закрывает твои слабые стороны и усиливает сильные.'},
-          ].map((f,i)=>{
-            const a = f.accent;
-            const rgb = a==='#00d4aa'?'0,212,170':a==='#c77dff'?'199,125,255':'255,107,157';
-            return (
-              <div key={f.title} className="card animate-fade-up" style={{animationDelay:`${0.1+i*0.15}s`,'--accent':a} as any}
-                onMouseEnter={(e)=>{(e.currentTarget as HTMLElement).style.borderColor=a;(e.currentTarget as HTMLElement).style.boxShadow=`0 4px 32px rgba(${rgb},0.08)`;(e.currentTarget as HTMLElement).style.transform='translateY(-2px)'}}
-                onMouseLeave={(e)=>{(e.currentTarget as HTMLElement).style.borderColor='#374151';(e.currentTarget as HTMLElement).style.boxShadow='';(e.currentTarget as HTMLElement).style.transform=''}}>
-                <div style={{
-                  width:56,height:56,borderRadius:12,
-                  background:`rgba(${rgb},0.08)`,
-                  border:`1px solid rgba(${rgb},0.3)`,
-                  display:'flex',alignItems:'center',justifyContent:'center',marginBottom:20
-                }}>
-                  <div className="font-display" style={{fontWeight:700,fontSize:24,color:a}}>0{i+1}</div>
-                </div>
-                <div className="font-display" style={{fontWeight:700,fontSize:20,marginBottom:10}}>{f.title}</div>
-                <p style={{fontSize:15,color:'#9ca3af',lineHeight:1.6}}>{f.desc}</p>
-              </div>
-            );
-          })}
+            {accent:'#00d4aa',num:'01',title:'OCEAN Анализ',desc:'15 адаптивных вопросов раскрывают твой психометрический портрет по пяти осям личности.'},
+            {accent:'#c77dff',num:'02',title:'Живой AI-аватар',desc:'Твой цифровой двойник представляет тебя в чатах и встречах — общается, фильтрует, отбирает.'},
+            {accent:'#ff6b9d',num:'03',title:'Алгоритм дополнения',desc:'Не ищем похожих — ищем тех, кто закрывает твои слабые стороны и усиливает сильные.'},
+          ].map((f,i)=>(
+            <FeatureCard key={f.title} accent={f.accent} num={f.num} title={f.title} desc={f.desc} delay={0.1+i*0.15} />
+          ))}
         </div>
       </section>
 
