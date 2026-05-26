@@ -35,12 +35,20 @@ export async function POST(req: NextRequest) {
       .from('founder_profiles')
       .update({
         essence_text: essence,
-        embedding:    embedding,
+        embedding:    `[${embedding.join(',')}]`,
         embedded_at:  new Date().toISOString(),
       })
       .eq('user_id', payload.sub);
 
-    if (uErr) return NextResponse.json({ error: uErr.message }, { status: 500 });
+    if (uErr) {
+      console.error('[supabase] update failed:', uErr);
+      return NextResponse.json({
+        error: uErr.message,
+        details: uErr.details,
+        hint: uErr.hint,
+        code: uErr.code,
+      }, { status: 500 });
+    }
 
     return NextResponse.json({ ok: true, essence, dim: embedding.length });
   } catch (e: any) {
