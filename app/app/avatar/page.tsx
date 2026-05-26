@@ -220,6 +220,9 @@ function TestConversationTab() {
   const [msg, setMsg] = useState('');
   const [history, setHistory] = useState<Array<{ role: 'user' | 'avatar'; text: string }>>([]);
   const [loading, setLoading] = useState(false);
+  const [mode, setMode] = useState<'suggest'|'autoreply'>('suggest');
+
+  const reset = () => setHistory([]);
 
   const send = async () => {
     if (!msg.trim()) return;
@@ -235,7 +238,7 @@ function TestConversationTab() {
       body: JSON.stringify({
         messages: [...history.map(h => ({ senderId: h.role==='user' ? 'other' : 'me', content: h.text })),
                    { senderId: 'other', content: text }],
-        mode: 'autoreply',
+        mode,
       }),
     });
     const data = await res.json();
@@ -245,8 +248,25 @@ function TestConversationTab() {
 
   return (
     <div style={{maxWidth:680}}>
-      <div style={{fontSize:13,color:'#9ca3af',marginBottom:16,lineHeight:1.6}}>
-        Поговори со своим аватаром как незнакомый фаундер. Проверь стиль и тон — это то, как партнёры будут видеть тебя.
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+        <div style={{fontSize:13,color:'#9ca3af',lineHeight:1.6,maxWidth:480}}>
+          Поговори со своим аватаром как незнакомый фаундер. Проверь стиль и тон — это то, как партнёры будут видеть тебя.
+        </div>
+        <div style={{display:'flex',gap:8,alignItems:'center'}}>
+          <div style={{display:'flex',background:'#1f2937',border:'1px solid #374151',borderRadius:8,padding:4,gap:4}}>
+            {(['suggest','autoreply'] as const).map(m => (
+              <button key={m} onClick={()=>setMode(m)} style={{
+                padding:'6px 12px',borderRadius:6,
+                background: mode===m ? 'linear-gradient(135deg,#c77dff,#9333ea)' : 'transparent',
+                color: mode===m ? '#fff' : '#9ca3af',
+                border:'none',cursor:'pointer',
+                fontSize:11,fontWeight:600,
+                fontFamily:'"Inter",sans-serif',
+              }}>{m === 'suggest' ? 'Suggest (L1)' : 'Auto-reply (L2)'}</button>
+            ))}
+          </div>
+          <button onClick={reset} className="btn-ghost" style={{padding:'8px 14px',fontSize:12}}>Очистить</button>
+        </div>
       </div>
 
       <div className="card" style={{padding:0,minHeight:320,display:'flex',flexDirection:'column'}}>

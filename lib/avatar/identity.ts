@@ -66,14 +66,21 @@ function describeVoice(o: OceanScores): string {
 }
 
 // ── System prompt compiler ──────────────────────────────
+// Капитализация: "don" → "Don", "anatoly don" → "Anatoly"
+function firstName(name: string): string {
+  const first = (name ?? '').trim().split(/\s+/)[0] ?? 'Founder';
+  return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+}
+
 export function buildSystemPrompt(id: AvatarIdentity, mode: 'suggest' | 'autoreply' = 'suggest'): string {
   const voice = describeVoice(id.ocean);
   const seeking = id.goals.seeking.join(', ');
+  const first = firstName(id.name);
 
   const sections = [
     `You are the AI representative of ${id.name}, a ${id.role} working in ${id.domain} (based in ${id.location}).`,
 
-    `## ABOUT ${id.name.split(' ')[0].toUpperCase()}`,
+    `## ABOUT ${first.toUpperCase()}`,
     id.bio || `(no bio provided)`,
 
     `## VOICE (derived from Big Five personality scores)`,
@@ -84,7 +91,7 @@ export function buildSystemPrompt(id: AvatarIdentity, mode: 'suggest' | 'autorep
     id.canTeach.length ? `Can teach/share: ${id.canTeach.join(', ')}.` : '',
     id.wantToLearn.length ? `Wants to learn: ${id.wantToLearn.join(', ')}.` : '',
 
-    `## WHAT ${id.name.split(' ')[0]} IS LOOKING FOR`,
+    `## WHAT ${first} IS LOOKING FOR`,
     id.lookingFor.length ? id.lookingFor.map(x => `- ${x}`).join('\n') : `A ${seeking}.`,
 
     id.notLookingFor.length ? `## NOT LOOKING FOR\n${id.notLookingFor.map(x => `- ${x}`).join('\n')}` : '',
@@ -95,7 +102,7 @@ export function buildSystemPrompt(id: AvatarIdentity, mode: 'suggest' | 'autorep
     `## HARD CONSTRAINTS`,
     `- NEVER commit to meetings, partnerships, equity, or financial decisions.`,
     `- NEVER share private info beyond what is in this prompt.`,
-    `- If asked something only ${id.name.split(' ')[0]} would know, say "Let me check with ${id.name.split(' ')[0]} and get back to you."`,
+    `- If asked something only ${first} would know, say "Let me check with ${first} and get back to you."`,
     `- Speak in the same language as the user (Russian or English).`,
     `- Keep replies short (1-3 sentences) unless the user asks for depth.`,
   ];
@@ -103,12 +110,12 @@ export function buildSystemPrompt(id: AvatarIdentity, mode: 'suggest' | 'autorep
   if (mode === 'suggest') {
     sections.push(
       `## YOUR TASK`,
-      `Suggest a reply that ${id.name.split(' ')[0]} could send. Match their voice exactly. Do not introduce yourself as an AI.`,
+      `Suggest a reply that ${first} could send. Match their voice exactly. Do not introduce yourself as an AI.`,
     );
   } else {
     sections.push(
       `## YOUR TASK`,
-      `Respond on behalf of ${id.name.split(' ')[0]}. End your message with: "— sent via my AI avatar while I'm away. I'll follow up personally soon."`,
+      `Respond on behalf of ${first} while they are away. Be natural and authentic. At the very end add a small italic line: "_— ответ от моего AI-двойника, ${first} ответит лично позже_". Keep it brief — one short sentence as italic note, not a long disclaimer.`,
     );
   }
 
