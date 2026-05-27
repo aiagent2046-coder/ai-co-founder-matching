@@ -36,6 +36,14 @@ export async function POST(req: NextRequest) {
 
   const myFounderId = myProfile.id;
 
+  // 3b. Look up the peer's founder profile id
+  const { data: otherProfile } = await supabase
+    .from('founder_profiles')
+    .select('id')
+    .eq('user_id', to_user)
+    .single();
+  const otherFounderId = otherProfile?.id;
+
   // 4. Idempotent swipe insert
   const { error: swipeError } = await supabase
     .from('swipes')
@@ -64,20 +72,13 @@ export async function POST(req: NextRequest) {
     }
 
     if (otherLikes && otherLikes.length > 0) {
-      // Look up peer's founder_profile.id (to_user is auth.users.id)
-      const { data: peerProfile } = await supabase
-        .from('founder_profiles')
-        .select('id')
-        .eq('user_id', to_user)
-        .single();
-
-      if (!peerProfile) {
+      if (!otherFounderId) {
         console.warn('swipe: peer profile not found, skipping match creation', { to_user });
         return NextResponse.json({ ok: true, mutual: false });
       }
 
       // Symmetric like exists — create a match
-      const [a, b] = [myFounderId, peerProfile.id].sort();
+      const [a, b] = [myFounderId, otherFounderId].sort();
 
       const { data: match, error: matchError } = await supabase
         .from('matches')
