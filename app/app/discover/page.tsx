@@ -42,6 +42,30 @@ export default function DiscoverPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const swipe = async (action: 'like' | 'pass') => {
+    const candidate = candidates[idx];
+    if (!candidate) return;
+
+    try {
+      const token = await getAuthToken();
+      const res = await fetch('/api/swipe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+        body: JSON.stringify({ to_user: candidate.user_id, action }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.mutual === true) {
+          window.alert('Mutual match! Найдён в Матчах.');
+        }
+      }
+    } catch (e) {
+      console.error('swipe error', e);
+    }
+
+    setIdx(i => i + 1);
+  };
+
   useEffect(() => { load(); }, []);
 
   const load = async () => {
@@ -151,14 +175,14 @@ export default function DiscoverPage() {
             <div style={{width:380}}>
               <FounderCard c={candidates[idx]} expanded />
               <div style={{display:'flex',justifyContent:'center',gap:16,marginTop:24}}>
-                <button onClick={()=>setIdx(i=>i+1)} style={{
+                <button onClick={()=>swipe('pass')} style={{
                   width:64,height:64,borderRadius:'50%',
                   background:'rgba(31,41,55,0.8)',border:'1px solid #374151',color:'#9ca3af',
                   cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'
                 }}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
                 </button>
-                <button onClick={()=>setIdx(i=>i+1)} style={{
+                <button onClick={()=>swipe('like')} style={{
                   width:64,height:64,borderRadius:'50%',
                   background:'linear-gradient(135deg,#ff6b9d,#ec4899)',border:'none',color:'#fff',
                   cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',
