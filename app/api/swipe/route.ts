@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { decodeJwt } from '@/lib/jwt';
 
 export const maxDuration = 30;
 
@@ -10,22 +9,22 @@ export async function POST(req: NextRequest) {
     action: 'like' | 'pass';
   };
 
-  // 1. JWT auth
+  // 1. Auth
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const payload = decodeJwt(token);
-  if (!payload?.sub) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-
-  const userId = payload.sub;
-
-  // 2. Service-role supabase client
+  // 2. Create service-role client
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  // 3. Look up the current user's founder profile id (needed for matches table FK)
+  // 3. Server-side verify the JWT via supabase.auth
+  const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
+  if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  const userId = user.id;
+
+  // 4. Look up the current user's founder profile id
   const { data: myProfile } = await supabase
     .from('founder_profiles')
     .select('id')
@@ -36,7 +35,7 @@ export async function POST(req: NextRequest) {
 
   const myFounderId = myProfile.id;
 
-  // 3b. Look up the peer's founder profile id
+  // 5. Look up the peer's founder profile id
   const { data: otherProfile } = await supabase
     .from('founder_profiles')
     .select('id')
@@ -44,13 +43,12 @@ export async function POST(req: NextRequest) {
     .single();
   const otherFounderId = otherProfile?.id;
 
-  // 4. Idempotent swipe insert
+  // 6. Idempotent swipe insert
   const { error: swipeError } = await supabase
     .from('swipes')
     .insert({ from_user: userId, to_user, action });
 
   if (swipeError) {
-    // Unique constraint violation means the swipe already exists — idempotent
     if (swipeError.code === '23505' || swipeError.message?.includes('duplicate key')) {
       return NextResponse.json({ ok: true, mutual: false });
     }
@@ -58,7 +56,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to record swipe' }, { status: 500 });
   }
 
-  // 5. Mutual match detection (only for likes)
+  // 7. Mutual match detection (only for likes)
   if (action === 'like') {
     const { data: otherLikes, error: checkError } = await supabase
       .from('swipes')

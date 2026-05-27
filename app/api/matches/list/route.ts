@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { decodeJwt } from '@/lib/jwt';
 
 export const maxDuration = 30;
 
@@ -15,26 +14,29 @@ export async function GET(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const payload = decodeJwt(token);
-  if (!payload?.sub) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-
+  // ANON_KEY — RLS policies будут проверять auth.uid()
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   );
 
-  // 1. Look up my founder profile
+  // 1. Server-side verify the JWT
+  const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
+  if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  const userId = user.id;
+
+  // 2. Look up my founder profile
   const { data: myProfile } = await supabase
     .from('founder_profiles')
     .select('id')
-    .eq('user_id', payload.sub)
+    .eq('user_id', userId)
     .single();
 
   if (!myProfile) return NextResponse.json({ matches: [] });
 
   const myFounderId = myProfile.id;
 
-  // 2. Fetch matches where I am involved
+  // 3. Fetch matches where I am involved
   const { data: matches, error: matchError } = await supabase
     .from('matches')
     .select('id, founder1_id, founder2_id, score, status, created_at')
@@ -48,7 +50,7 @@ export async function GET(req: NextRequest) {
 
   if (!matches || matches.length === 0) return NextResponse.json({ matches: [] });
 
-  // 3. Collect peer founder IDs and match IDs
+  // 4. Collect peer founder IDs and match IDs
   const peerIds: string[] = [];
   const matchIds: string[] = [];
   for (const m of matches) {
@@ -57,7 +59,7 @@ export async function GET(req: NextRequest) {
     peerIds.push(peerId);
   }
 
-  // 4. Fetch peer profiles in one query
+  // 5. Fetch peer profiles in one query
   const { data: peers } = await supabase
     .from('founder_profiles')
     .select('id, user_id, name, role, domain')
@@ -65,7 +67,7 @@ export async function GET(req: NextRequest) {
 
   const peerMap = new Map((peers ?? []).map(p => [p.id, p]));
 
-  // 5. Fetch last message for each match in one query
+  // 6. Fetch last message for each match in one query
   const { data: allMessages } = await supabase
     .from('messages')
     .select('match_id, sender_id, content, is_ai_reply, created_at')
@@ -88,7 +90,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 6. Build response
+  // 7. Build response
   const result = matches.map(m => {
     const peerId = m.founder1_id === myFounderId ? m.founder2_id : m.founder1_id;
     const peer = peerMap.get(peerId);
