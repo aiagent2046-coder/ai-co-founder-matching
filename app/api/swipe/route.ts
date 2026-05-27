@@ -64,8 +64,20 @@ export async function POST(req: NextRequest) {
     }
 
     if (otherLikes && otherLikes.length > 0) {
+      // Look up peer's founder_profile.id (to_user is auth.users.id)
+      const { data: peerProfile } = await supabase
+        .from('founder_profiles')
+        .select('id')
+        .eq('user_id', to_user)
+        .single();
+
+      if (!peerProfile) {
+        console.warn('swipe: peer profile not found, skipping match creation', { to_user });
+        return NextResponse.json({ ok: true, mutual: false });
+      }
+
       // Symmetric like exists — create a match
-      const [a, b] = [myFounderId, to_user].sort();
+      const [a, b] = [myFounderId, peerProfile.id].sort();
 
       const { data: match, error: matchError } = await supabase
         .from('matches')
