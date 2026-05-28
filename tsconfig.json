@@ -25,15 +25,6 @@
     "paths": {
       "@/*": [
         "./*"
-      ],
-      "@syndi/types": [
-        "./packages/types/src/index.ts"
-      ],
-      "@syndi/ai-agents": [
-        "./packages/ai-agents/src/index.ts"
-      ],
-      "@syndi/supabase": [
-        "./packages/supabase/src/client.ts"
       ]
     }
   },
