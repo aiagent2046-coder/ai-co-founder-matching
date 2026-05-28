@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import ratelimit from '@/lib/rate-limit';
 import { generateEssence, computeEmbedding } from '@/lib/avatar/essence';
 
 export const maxDuration = 60;
@@ -15,6 +16,12 @@ export async function POST(req: NextRequest) {
 
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+
+  // Rate limit: 5 запросов в 60 секунд на пользователя
+  const { success } = await ratelimit.limit(user.id);
+  if (!success) {
+    return NextResponse.json({ error: 'Too many requests. Please wait a minute.' }, { status: 429 });
+  }
 
   const { data: profile, error: pErr } = await supabase
     .from('founder_profiles')
