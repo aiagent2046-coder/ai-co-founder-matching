@@ -33,13 +33,10 @@ export async function GET(req: NextRequest) {
     .single();
 
   if (!myProfile) {
-    console.log('[matches-list-debug] NO founder profile for user:', user.id);
     return NextResponse.json({ matches: [] });
   }
 
   const myFounderId = myProfile.id;
-  console.log('[matches-list-debug] user.id:', user.id);
-  console.log('[matches-list-debug] myFounderId:', myFounderId);
 
   // 3. Fetch matches where I am involved
   const { data: matches, error: matchError } = await supabase
@@ -53,8 +50,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: matchError.message }, { status: 500 });
   }
 
-  console.log('[matches-list-debug] raw matches count:', matches?.length ?? 0);
-  console.log('[matches-list-debug] matches data:', JSON.stringify(matches));
 
   if (!matches || matches.length === 0) return NextResponse.json({ matches: [] });
 
