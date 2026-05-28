@@ -49,16 +49,18 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!matchId) return;
+    let currentUserId: string | undefined;
+    const supabaseClient = getSupabase();
+    let channel: ReturnType<typeof supabaseClient.channel> | null = null;
+
     (async () => {
       try {
         setLoading(true);
         const token = await getAuthToken();
         const headers = { Authorization: `Bearer ${token ?? ''}` };
 
-        // Получаем текущего юзера через getSupabase().auth.getSession()
-        const supabaseClient = getSupabase();
         const { data: { session } } = await supabaseClient.auth.getSession();
-        const currentUserId = session?.user?.id;
+        currentUserId = session?.user?.id;
 
         // Загрузить peer info из /api/matches/list
         const mlRes = await fetch('/api/matches/list', { headers });
@@ -95,7 +97,43 @@ export default function ChatPage() {
       } finally {
         setLoading(false);
       }
+
+      // Realtime: подписка на новые сообщения в этом match
+      channel = supabaseClient
+        .channel('messages:' + matchId)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'messages',
+            filter: `match_id=eq.${matchId}`,
+          },
+          (payload) => {
+            // Не дублировать сообщения, отправленные текущим юзером (уже в optimistic update)
+            if (payload.new && payload.new.sender_id !== currentUserId) {
+              const m = payload.new as any;
+              setMessages(prev => {
+                // Проверка на дубликат (на случай если Realtime запоздал к исторической загрузке)
+                if (prev.some(x => x.id === m.id)) return prev;
+                return [...prev, {
+                  id: m.id,
+                  role: 'them',
+                  text: m.content,
+                  time: formatTime(m.created_at),
+                }];
+              });
+            }
+          }
+        )
+        .subscribe();
     })();
+
+    return () => {
+      if (channel) {
+        supabaseClient.removeChannel(channel);
+      }
+    };
   }, [matchId]);
 
   const send = async () => {
