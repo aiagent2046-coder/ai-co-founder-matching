@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
     .from('messages')
     .insert({
       match_id: matchId,
-      sender_id: user.id, // Используем user.id из auth, чтобы соответствовать FK в БД
+      sender_id: myProfile.id, // founder_profiles.id для FK, чтобы соответствовать FK в БД
       content: content.trim(),
       type: 'text',
     })
