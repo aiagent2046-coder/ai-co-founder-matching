@@ -96,6 +96,13 @@ export async function POST(req: NextRequest) {
         console.error('match insert error', matchError);
       }
 
+      // L2: Auto-reply при взаимном мэтче (в фоне, не блокирует ответ)
+      if (match?.id) {
+        generateAutoReply(supabase, match.id, myFounderId, to_user).catch(e =>
+          console.error('auto_reply failed:', e)
+        );
+      }
+
       return NextResponse.json({
         ok: true,
         mutual: true,
@@ -105,4 +112,80 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json({ ok: true, mutual: false });
+}
+
+/**
+ * Генерирует первое сообщение от лица текущего фаундера при взаимном мэтче
+ * через claude-haiku (быстро, дешево). Ошибки не ломают свайп.
+ */
+async function generateAutoReply(
+  supabase: any,
+  matchId: string,
+  myFounderId: string,
+  toUserId: string,
+) {
+  // Загружаем имена, роли, домены обоих (исправленная версия)
+  const [{ data: me }, { data: them }] = await Promise.all([
+    supabase.from('founder_profiles').select('name, role, domain').eq('id', myFounderId).single(),
+    supabase.from('founder_profiles').select('name, role, domain').eq('user_id', toUserId).single(),
+  ]);
+
+  if (!me || !them) {
+    console.warn('auto_reply: missing profile data');
+    return;
+  }
+
+  const prompt = `Ты AI-аватар фаундера ${me.name}, ${me.role}. Вы только что совпали с ${them.name} — ${them.role}, ${them.domain ?? '—'}. Напиши короткое, дружелюбное первое сообщение (1-2 предложения), чтобы начать диалог о возможном сотрудничестве. Ответь ТОЛЬКО текстом сообщения.`;
+
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000); // haiku быстро
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 150,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timer);
+
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('auto_reply: claude error', err);
+      return;
+    }
+
+    const data = await res.json();
+    const content = data.content?.[0]?.text;
+    if (!content) {
+      console.warn('auto_reply: empty response');
+      return;
+    }
+
+    const { error: insErr } = await supabase.from('messages').insert({
+      match_id: matchId,
+      sender_id: myFounderId,
+      content,
+      type: 'auto_reply',
+    });
+
+    if (insErr) {
+      console.error('auto_reply: insert error', insErr);
+    }
+  } catch (e: any) {
+    if (e?.name === 'AbortError') {
+      console.warn('auto_reply: claude timeout');
+    } else {
+      console.error('auto_reply: unhandled error', e);
+    }
+  }
 }
