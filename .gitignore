@@ -6,3 +6,4 @@ dist/
 *.log
 package-lock.json
 tsconfig.tsbuildinfo
+build-log.txt

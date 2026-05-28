@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { proxyFetch } from '@/lib/proxy-fetch';
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
@@ -10,7 +9,7 @@ export async function POST(req: NextRequest) {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { global: { fetch: proxyFetch as any } }
+  
     );
 
     const { data: { user } } = await supabase.auth.getUser(token);
