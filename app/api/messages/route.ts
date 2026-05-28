@@ -186,7 +186,7 @@ export async function POST(req: NextRequest) {
           if (aiReply) {
             await supabase.from('messages').insert({
               match_id: matchId,
-              sender_id: recipient.user_id,
+              sender_id: recipientFounderId,
               content: aiReply,
               is_ai_reply: true,
             });
