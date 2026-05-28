@@ -1,14 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { decodeJwt } from '@/lib/jwt';
 import { buildSystemPrompt, DEFAULT_IDENTITY, type AvatarIdentity } from '@/lib/avatar/identity';
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const payload = decodeJwt(token);
-  if (!payload?.sub) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+
+  const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
+  if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
   const { messages, mode = 'suggest' } = await req.json() as {
     messages: Array<{ senderId: string; content: string }>;
@@ -16,15 +20,10 @@ export async function POST(req: NextRequest) {
   };
 
   // 1. Загрузить identity из БД
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-
   const { data: profile } = await supabase
     .from('founder_profiles')
     .select('*')
-    .eq('user_id', payload.sub)
+    .eq('user_id', user.id)
     .single();
 
   // 2. Собрать identity (с дефолтами для отсутствующих полей)
@@ -50,7 +49,7 @@ export async function POST(req: NextRequest) {
 
   // 4. Собрать conversation для Claude
   const conversation = messages.map(m => ({
-    role: m.senderId === payload.sub ? 'assistant' : 'user',
+    role: m.senderId === user.id ? 'assistant' : 'user',
     content: m.content,
   }));
 

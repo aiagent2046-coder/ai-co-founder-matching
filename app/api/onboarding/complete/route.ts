@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { decodeJwt } from '@/lib/jwt';
 import { proxyFetch } from '@/lib/proxy-fetch';
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ ok: true }); // graceful — редиректим в любом случае
-
-  const payload = decodeJwt(token);
-  if (!payload?.sub) return NextResponse.json({ ok: true });
 
   try {
     const supabase = createClient(
@@ -17,10 +13,13 @@ export async function POST(req: NextRequest) {
       { global: { fetch: proxyFetch as any } }
     );
 
+    const { data: { user } } = await supabase.auth.getUser(token);
+    if (!user) return NextResponse.json({ ok: true });
+
     await supabase
       .from('founder_profiles')
       .update({ onboarding_done: true })
-      .eq('user_id', payload.sub);
+      .eq('user_id', user.id);
   } catch {
     // Не блокируем редирект если ошибка
   }
