@@ -15,5 +15,6 @@ export function getSupabase() {
 export async function getAuthToken(): Promise<string | null> {
   const supabase = getSupabase();
   const { data: { session } } = await supabase.auth.getSession();
+  console.log('[getAuthToken-debug] session:', session ? 'exists' : 'NULL');
   return session?.access_token ?? null;
 }

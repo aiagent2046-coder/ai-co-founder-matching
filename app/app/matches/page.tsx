@@ -45,9 +45,14 @@ export default function MatchesPage() {
     (async () => {
       try {
         const token = await getAuthToken();
+        console.log('[matches-debug] token:', token ? 'exists, len=' + token.length : 'NULL');
+        console.log('[matches-debug] token preview:', token?.slice(0, 30) ?? 'no token');
         const res = await fetch('/api/matches/list', {
           headers: { Authorization: `Bearer ${token ?? ''}` },
         });
+        console.log('[matches-debug] response status:', res.status);
+        const errText = await res.clone().text();
+        console.log('[matches-debug] error body:', errText);
         const data = await res.json();
         setMatches(data.matches ?? []);
       } catch {
