@@ -50,8 +50,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!matchId) return;
     let currentUserId: string | undefined;
-    const supabaseClient = getSupabase();
-    let channel: ReturnType<typeof supabaseClient.channel> | null = null;
+    let pollTimer: ReturnType<typeof setInterval> | null = null;
 
     (async () => {
       try {
@@ -59,7 +58,7 @@ export default function ChatPage() {
         const token = await getAuthToken();
         const headers = { Authorization: `Bearer ${token ?? ''}` };
 
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        const { data: { session } } = await getSupabase().auth.getSession();
         currentUserId = session?.user?.id;
 
         // Загрузить peer info из /api/matches/list
@@ -98,41 +97,27 @@ export default function ChatPage() {
         setLoading(false);
       }
 
-      // Realtime: подписка на новые сообщения в этом match
-      channel = supabaseClient
-        .channel('messages:' + matchId)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `match_id=eq.${matchId}`,
-          },
-          (payload) => {
-            // Не дублировать сообщения, отправленные текущим юзером (уже в optimistic update)
-            if (payload.new && payload.new.sender_id !== currentUserId) {
-              const m = payload.new as any;
-              setMessages(prev => {
-                // Проверка на дубликат (на случай если Realtime запоздал к исторической загрузке)
-                if (prev.some(x => x.id === m.id)) return prev;
-                return [...prev, {
-                  id: m.id,
-                  role: 'them',
-                  text: m.content,
-                  time: formatTime(m.created_at),
-                }];
-              });
-            }
-          }
-        )
-        .subscribe();
+      // Polling: проверяем новые сообщения каждые 5 секунд
+      pollTimer = setInterval(async () => {
+        try {
+          const token = await getAuthToken();
+          const res = await fetch('/api/messages?matchId=' + matchId, {
+            headers: { Authorization: 'Bearer ' + token },
+          });
+          const data = await res.json();
+          const msgs: Msg[] = (data.messages ?? []).map((m: any) => ({
+            id: m.id,
+            role: m.sender_id === currentUserId ? 'me' : 'them',
+            text: m.content,
+            time: formatTime(m.created_at),
+          }));
+          setMessages(msgs);
+        } catch {}
+      }, 5000);
     })();
 
     return () => {
-      if (channel) {
-        supabaseClient.removeChannel(channel);
-      }
+      if (pollTimer) clearInterval(pollTimer);
     };
   }, [matchId]);
 
