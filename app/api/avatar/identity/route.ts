@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import ratelimit from '@/lib/rate-limit';
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
@@ -12,6 +13,8 @@ export async function POST(req: NextRequest) {
 
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  const { success: _rlOk } = await ratelimit.limit(user.id);
+  if (!_rlOk) return NextResponse.json({ error: 'Слишком много запросов' }, { status: 429 });
 
   const body = await req.json();
 
