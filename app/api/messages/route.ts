@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { parseBody, messagesSchema } from '@/lib/validation';
 import { buildSystemPrompt, DEFAULT_IDENTITY, type AvatarIdentity } from '@/lib/avatar/identity';
 
 export async function GET(req: NextRequest) {
@@ -68,7 +69,13 @@ export async function POST(req: NextRequest) {
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
-  const { matchId, content } = await req.json();
+  let parsed;
+  try {
+    parsed = await parseBody(messagesSchema, req);
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : 'Bad request' }, { status: 400 });
+  }
+  const { matchId, content } = parsed;
   if (!matchId || !content?.trim()) {
     return NextResponse.json({ error: 'matchId and content are required' }, { status: 400 });
   }

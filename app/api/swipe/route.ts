@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { parseBody, swipeSchema } from '@/lib/validation';
 
 export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
-  const { to_user, action } = await req.json() as {
-    to_user: string;
-    action: 'like' | 'pass';
-  };
+  let parsed;
+  try {
+    parsed = await parseBody(swipeSchema, req);
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : 'Bad request' }, { status: 400 });
+  }
+  const { to_user, action } = parsed;
 
   // 1. Auth
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
