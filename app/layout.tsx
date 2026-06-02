@@ -1,33 +1,93 @@
-import type { Metadata } from 'next';
-import { Playfair_Display, Syne } from 'next/font/google';
+// app/layout.tsx
+import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-display',
+const inter = Inter({
+  subsets: ['latin', 'cyrillic'],
+  variable: '--font-inter',
   display: 'swap',
 });
 
-const syne = Syne({
-  subsets: ['latin'],
-  variable: '--font-ui',
-  display: 'swap',
-});
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://syndiai.com';
 
-export const metadata: Metadata = {
-  title:       'SyndiAI — Найди ко-фаундера за 48 часов',
-  description: 'AI-powered co-founder matching platform with Big Five personality testing, AI avatars, and intelligent agent system.',
-  openGraph: {
-    title:       'SyndiAI',
-    description: 'Tinder for Co-Founders, powered by AI',
-    type:        'website',
-  },
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  themeColor: '#0f172a',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
+  title: {
+    default: 'SyndiAI — Find Your Perfect Co-Founder',
+    template: '%s | SyndiAI',
+  },
+  description:
+    '65% of startups fail due to founder conflict. SyndiAI uses Big Five psychometrics and multi-agent AI to match you with a compatible, vetted co-founder. Stop guessing, start building.',
+  keywords: [
+    'co-founder matching',
+    'startup founder',
+    'Big Five personality test',
+    'AI matchmaking',
+    'psychometric compatibility',
+    'найти кофаундера',
+    'психометрика для стартапов',
+  ],
+  authors: [{ name: 'SyndiAI Team', url: baseUrl }],
+  creator: 'SyndiAI',
+  publisher: 'SyndiAI',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    alternateLocale: 'ru_RU',
+    url: '/',
+    siteName: 'SyndiAI',
+    title: 'SyndiAI — Find Your Perfect Co-Founder',
+    description:
+      'AI-powered co-founder matching based on Big Five psychometrics. Stop guessing, start building.',
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'SyndiAI - AI Co-founder Matching Platform',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'SyndiAI — Find Your Perfect Co-Founder',
+    description:
+      'AI-powered co-founder matching based on Big Five psychometrics.',
+    images: ['/opengraph-image.png'], // ← Исправлено с /og-image.png
+    creator: '@syndiai',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  // icons убраны временно - добавим когда будут все файлы
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="ru" className={`${playfair.variable} ${syne.variable}`}>
-      <body className="bg-[#0A0C10] text-[#F0EDE8] antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} font-sans antialiased`}>
         {children}
       </body>
     </html>
