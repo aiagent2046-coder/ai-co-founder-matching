@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { Ratelimit } from '@upstash/ratelimit';
@@ -10,15 +9,30 @@ console.log('[MW INIT] UPSTASH_TOKEN:', process.env.UPSTASH_REDIS_REST_TOKEN ? '
 const redis = new Redis({
   url: process.env.UPSTASH_REDIS_REST_URL!,
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
-  // Для Edge Runtime важно указать automaticDeserialization: false
   automaticDeserialization: false,
 });
 
 const ratelimit = new Ratelimit({
   redis,
-  limiter: Ratelimit.slidingWindow(5, '60 s'), // 5 запросов в минуту на IP
+  limiter: Ratelimit.slidingWindow(5, '60 s'),
   analytics: true,
 });
+
+// Хелпер для получения реального IP клиента
+function getClientIp(request: NextRequest): string {
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    // x-forwarded-for может содержать цепочку: "client, proxy1, proxy2"
+    // Берем первый (самый левый) IP — это реальный клиент
+    return forwardedFor.split(',')[0].trim();
+  }
+  
+  const realIp = request.headers.get('x-real-ip');
+  if (realIp) return realIp;
+  
+  // Fallback для локальной разработки
+  return '127.0.0.1';
+}
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -34,7 +48,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const ip = request.ip ?? '127.0.0.1';
+  const ip = getClientIp(request);
   const identifier = `ratelimit:${ip}`;
 
   try {
@@ -57,7 +71,6 @@ export async function middleware(request: NextRequest) {
       );
     }
 
-    // Добавляем заголовки с лимитами для успешных запросов
     const response = NextResponse.next();
     response.headers.set('X-RateLimit-Limit', String(limit));
     response.headers.set('X-RateLimit-Remaining', String(remaining));
@@ -65,8 +78,6 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     console.error('[MW ERROR] Rate limit check failed:', error);
-    // Fail-open: если Redis упал, пропускаем запрос (но логируем)
-    // В проде можно изменить на fail-closed (вернуть 503)
     return NextResponse.next();
   }
 }
