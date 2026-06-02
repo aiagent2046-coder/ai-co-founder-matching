@@ -1,55 +1,76 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+// middleware.ts
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
 
-const PUBLIC_ROUTES = ['/', '/login', '/register'];
+console.log('[MW INIT] UPSTASH_URL:', process.env.UPSTASH_REDIS_REST_URL ? '✅ present' : '❌ MISSING');
+console.log('[MW INIT] UPSTASH_TOKEN:', process.env.UPSTASH_REDIS_REST_TOKEN ? '✅ present' : '❌ MISSING');
 
-export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+  // Для Edge Runtime важно указать automaticDeserialization: false
+  automaticDeserialization: false,
+});
 
-  // Пропускаем статику и публичные роуты
-  const isStatic =
-    pathname.startsWith('/_next/') ||
-    pathname === '/favicon.ico';
-  if (isStatic || PUBLIC_ROUTES.includes(pathname)) {
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(5, '60 s'), // 5 запросов в минуту на IP
+  analytics: true,
+});
+
+export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Пропускаем статику
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon') ||
+    pathname.endsWith('.png') ||
+    pathname.endsWith('.ico') ||
+    pathname === '/'
+  ) {
     return NextResponse.next();
   }
 
-  const res = NextResponse.next();
+  const ip = request.ip ?? '127.0.0.1';
+  const identifier = `ratelimit:${ip}`;
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: any) {
-          req.cookies.set({ name, value, ...options });
-          res.cookies.set({ name, value, ...options });
-        },
-        remove(name: string, options: any) {
-          req.cookies.set({ name, value: '', ...options });
-          res.cookies.set({ name, value: '', ...options });
-        },
-      },
+  try {
+    const { success, limit, remaining, reset } = await ratelimit.limit(identifier);
+    console.log(`[MW] ${pathname} | IP: ${ip} | success: ${success} | remaining: ${remaining}/${limit}`);
+
+    if (!success) {
+      console.log(`[MW] 🛑 RATE LIMIT EXCEEDED for ${ip} on ${pathname}`);
+      return new NextResponse(
+        JSON.stringify({ error: 'Too Many Requests. Please try again later.' }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'X-RateLimit-Limit': String(limit),
+            'X-RateLimit-Remaining': String(remaining),
+            'X-RateLimit-Reset': String(reset),
+          },
+        }
+      );
     }
-  );
 
-  // Обновляем сессию — это заодно обновляет токен в куках
-  const { data: { user }, error: userErr } = await supabase.auth.getUser();
+    // Добавляем заголовки с лимитами для успешных запросов
+    const response = NextResponse.next();
+    response.headers.set('X-RateLimit-Limit', String(limit));
+    response.headers.set('X-RateLimit-Remaining', String(remaining));
+    return response;
 
-  // Если пользователь не авторизован и запрос к защищённому роуту — редирект
-  if ((userErr || !user) && pathname.startsWith('/app')) {
-    const url = req.nextUrl.clone();
-    url.pathname = '/login';
-    url.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(url);
+  } catch (error) {
+    console.error('[MW ERROR] Rate limit check failed:', error);
+    // Fail-open: если Redis упал, пропускаем запрос (но логируем)
+    // В проде можно изменить на fail-closed (вернуть 503)
+    return NextResponse.next();
   }
-
-  return res;
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/api/:path*'],
 };
