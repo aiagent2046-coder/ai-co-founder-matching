@@ -12,11 +12,15 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const router = useRouter();
 
   const submit = async () => {
     setLoading(true); setError('');
-    const { error: e } = await getSupabase().auth.signUp({ email, password });
+    const { data, error: e } = await getSupabase().auth.signUp({ email, password });
     if (e) { setError(e.message); setLoading(false); return; }
+    // Подтверждение почты выключено → Supabase сразу вернёт session → в онбординг.
+    // Включено → session нет → показываем экран "Проверь почту".
+    if (data.session) { router.push('/onboarding/profile'); return; }
     setDone(true);
   };
 
