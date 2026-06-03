@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import ratelimit from '@/lib/rate-limit';
+import { checkLimit } from '@/lib/rate-limit';
 import { buildSystemPrompt, DEFAULT_IDENTITY, type AvatarIdentity } from '@/lib/avatar/identity';
 
 const TIMEOUT_MS = 25_000;
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
   // Rate limit: 5 запросов в 60 секунд на пользователя
-  const { success } = await ratelimit.limit(user.id);
+  const success = await checkLimit(`avatar-suggest:${user.id}`);
   if (!success) {
     return NextResponse.json({ error: 'Too many requests. Please wait a minute.' }, { status: 429 });
   }
