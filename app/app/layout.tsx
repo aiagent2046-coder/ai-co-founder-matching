@@ -1,6 +1,7 @@
 "use client";
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { getSupabase } from '@/lib/supabase';
 
 const ICONS = {
@@ -48,11 +49,25 @@ const nav = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  // Гард приватной зоны: нет сессии → на логин.
+  useEffect(() => {
+    let active = true;
+    getSupabase().auth.getSession().then(({ data }) => {
+      if (!active) return;
+      if (!data.session) router.replace('/login');
+      else setChecking(false);
+    });
+    return () => { active = false; };
+  }, [router]);
 
   const logout = async () => {
     await getSupabase().auth.signOut();
     router.push('/');
   };
+
+  if (checking) return null;
 
   return (
     <div style={{display:'flex',height:'100vh',overflow:'hidden',position:'relative'}}>
