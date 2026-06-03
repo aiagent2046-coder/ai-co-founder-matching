@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import ratelimit from '@/lib/rate-limit';
+import { checkLimit } from '@/lib/rate-limit';
 
 export const maxDuration = 30;
 
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   // Server-side verify the JWT
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-  const { success: _rlOk } = await ratelimit.limit(user.id);
+  const _rlOk = await checkLimit(`discover-match:${user.id}`);
   if (!_rlOk) return NextResponse.json({ error: 'Слишком много запросов' }, { status: 429 });
   const userId = user.id;
 
