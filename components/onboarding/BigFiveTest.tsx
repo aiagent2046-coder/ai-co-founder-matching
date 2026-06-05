@@ -91,7 +91,7 @@ export function BigFiveTest() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
         body: JSON.stringify({ scores }),
       });
-      router.push('/onboarding/avatar');
+      router.push('/onboarding/behavioral');
     } catch {
       setSaving(false);
     }
@@ -106,7 +106,7 @@ export function BigFiveTest() {
       <div style={{marginBottom:28}}>
         <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
           <span style={{width:8,height:8,borderRadius:'50%',background:'#c77dff',boxShadow:'0 0 8px #c77dff',animation:'twinkle 2s infinite'}}/>
-          <span style={{fontSize:11,fontWeight:600,color:'#c77dff',letterSpacing:'0.12em',textTransform:'uppercase'}}>Шаг 2 из 3</span>
+          <span style={{fontSize:11,fontWeight:600,color:'#c77dff',letterSpacing:'0.12em',textTransform:'uppercase'}}>Шаг 2 из 4</span>
         </div>
         <h1 className="font-display" style={{fontWeight:700,fontSize:32,letterSpacing:'-0.01em',marginBottom:8}}>
           <span className="gradient-text">Big Five</span> тест
