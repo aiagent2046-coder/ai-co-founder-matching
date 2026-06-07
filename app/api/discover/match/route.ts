@@ -4,6 +4,44 @@ import { checkLimit } from '@/lib/rate-limit';
 
 export const maxDuration = 30;
 
+const BEHAVIORAL_ENABLED = process.env.BEHAVIORAL_MATCH_ENABLED === 'true';
+
+// Thomas-Kilmann compatibility matrix — score 0..1 для пары стилей
+// Высокие значения: оба collaborating, один collaborating + другой compromising
+// Низкие: оба competing (постоянный клинч), оба avoiding (никто не решает)
+const CONFLICT_MATRIX: Record<string, Record<string, number>> = {
+  competing:     { competing: 0.25, collaborating: 0.55, compromising: 0.65, avoiding: 0.40 },
+  collaborating: { competing: 0.55, collaborating: 0.90, compromising: 0.80, avoiding: 0.50 },
+  compromising:  { competing: 0.65, collaborating: 0.80, compromising: 0.70, avoiding: 0.60 },
+  avoiding:      { competing: 0.40, collaborating: 0.50, compromising: 0.60, avoiding: 0.35 },
+};
+
+// Red flag: то, что A назвал raздражителем, реально присутствует у B
+function redFlagPenalty(a: any, b: any): number {
+  const irr = a?.projective?.partner_irritants;
+  const dec = b?.projective?.decision_style;
+  if (irr === 'chaos' && dec === 'do') return 0.5;            // A не выносит хаоса — B действует без плана
+  if (irr === 'overthink' && dec === 'plan') return 0.5;      // A бесит analysis paralysis — B всегда планирует
+  if (irr === 'no_ambition' && (b?.values?.achievement_power ?? 50) < 30) return 0.3;
+  return 0;
+}
+
+function behavioralCompat(a: any, b: any): number {
+  if (!a || !b) return 0.5; // нейтрально, если у кого-то нет behavioral
+  const hA = a.honesty_humility ?? 50;
+  const hB = b.honesty_humility ?? 50;
+  const honestyScore = 1 - Math.abs(hA - hB) / 100;
+  const styleA = a.conflict?.primary_style ?? 'compromising';
+  const styleB = b.conflict?.primary_style ?? 'compromising';
+  const conflictScore = CONFLICT_MATRIX[styleA]?.[styleB] ?? 0.5;
+  const penalty = redFlagPenalty(a, b);
+  return Math.max(0, Math.min(1,
+    0.3 * honestyScore +
+    0.5 * conflictScore +
+    0.2 * (1 - penalty)
+  ));
+}
+
 // OCEAN complementarity — bell curve вокруг 40% разницы
 function oceanComplement(a: any, b: any): number {
   if (!a || !b) return 0.5;
@@ -35,7 +73,7 @@ export async function POST(req: NextRequest) {
 
   const { data: me } = await supabase
     .from('founder_profiles')
-    .select('embedding, big_five')
+    .select('embedding, big_five, behavioral_profile')
     .eq('user_id', userId)
     .single();
 
@@ -56,12 +94,16 @@ export async function POST(req: NextRequest) {
 
   const ranked = (matches || []).map((m: any) => {
     const oceanScore = oceanComplement(me.big_five, m.big_five);
-    const hybridScore = m.similarity * 0.6 + oceanScore * 0.4;
+    const behavScore = behavioralCompat((me as any).behavioral_profile, m.behavioral_profile);
+    const hybridScore = BEHAVIORAL_ENABLED
+      ? m.similarity * 0.4 + oceanScore * 0.4 + behavScore * 0.2
+      : m.similarity * 0.6 + oceanScore * 0.4;
     return {
       ...m,
-      ocean_score:  Math.round(oceanScore * 100),
-      vector_score: Math.round(m.similarity * 100),
-      match:        Math.round(hybridScore * 100),
+      ocean_score:      Math.round(oceanScore * 100),
+      vector_score:     Math.round(m.similarity * 100),
+      behavioral_score: Math.round(behavScore * 100),  // всегда в ответе, удобно для debug/UI
+      match:            Math.round(hybridScore * 100),
     };
   }).sort((a: any, b: any) => b.match - a.match);
 
