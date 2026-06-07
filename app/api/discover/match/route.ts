@@ -92,9 +92,23 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // match_founders RPC не возвращает behavioral_profile — подтягиваем отдельным запросом
+  const matchedIds = (matches || []).map((m: any) => m.user_id).filter(Boolean);
+  const behavioralMap = new Map<string, any>();
+  if (matchedIds.length > 0) {
+    const { data: bps } = await supabase
+      .from('founder_profiles')
+      .select('user_id, behavioral_profile')
+      .in('user_id', matchedIds);
+    for (const row of bps || []) {
+      behavioralMap.set(row.user_id, row.behavioral_profile);
+    }
+  }
+
   const ranked = (matches || []).map((m: any) => {
+    const candidateBehavioral = m.behavioral_profile ?? behavioralMap.get(m.user_id) ?? null;
     const oceanScore = oceanComplement(me.big_five, m.big_five);
-    const behavScore = behavioralCompat((me as any).behavioral_profile, m.behavioral_profile);
+    const behavScore = behavioralCompat((me as any).behavioral_profile, candidateBehavioral);
     const hybridScore = BEHAVIORAL_ENABLED
       ? m.similarity * 0.4 + oceanScore * 0.4 + behavScore * 0.2
       : m.similarity * 0.6 + oceanScore * 0.4;
