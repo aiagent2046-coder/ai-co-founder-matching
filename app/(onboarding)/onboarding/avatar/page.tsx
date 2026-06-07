@@ -9,6 +9,7 @@ export default function AvatarOnboardingPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [essence, setEssence] = useState<string | null>(null);
 
   useEffect(() => { (async () => {
@@ -114,14 +115,16 @@ export default function AvatarOnboardingPage() {
         )}
 
         {!essence ? (
-                {error && (
-        <div style={{padding:12,marginBottom:16,borderRadius:8,background:'#7f1d1d40',color:'#fca5a5',fontSize:13,border:'1px solid #ef444440'}}>
-          {error}
-        </div>
-      )}
-      <button onClick={generate} disabled={generating} className="btn-primary btn-primary-lg" style={{width:'100%',justifyContent:'center'}}>
-            {generating ? 'Генерируем embedding...' : '🧠 Сгенерировать AI-двойника'}
-          </button>
+          <>
+            {error && (
+              <div style={{padding:12,marginBottom:16,borderRadius:8,background:'#7f1d1d40',color:'#fca5a5',fontSize:13,border:'1px solid #ef444440'}}>
+                {error}
+              </div>
+            )}
+            <button onClick={() => generate()} disabled={generating} className="btn-primary btn-primary-lg" style={{width:'100%',justifyContent:'center'}}>
+              {generating ? 'Генерируем embedding...' : '🧠 Сгенерировать AI-двойника'}
+            </button>
+          </>
         ) : (
           <button onClick={finish} className="btn-primary btn-primary-lg" style={{width:'100%',justifyContent:'center'}}>
             Войти в Syndi AI →
