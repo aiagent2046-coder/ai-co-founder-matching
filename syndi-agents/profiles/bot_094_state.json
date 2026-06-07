@@ -1,0 +1,12 @@
+{
+  "name": "Denis Abramov",
+  "user_id": "e03c3891-2246-467c-b341-131d5561bc49",
+  "onboarding_complete": false,
+  "candidates_seen": 20,
+  "matches": 1,
+  "conversations": {
+    "d1e6dbde-4e45-48e8-a2e2-94b3473f430d": [
+      "Привет, Anton Kolesnikov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
+}

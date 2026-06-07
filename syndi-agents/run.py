@@ -90,6 +90,18 @@ def _get_credentials(args: argparse.Namespace) -> tuple[str, str]:
     return supabase_url, anon_key
 
 
+async def cmd_two_phase(args: argparse.Namespace) -> None:
+    """Двухфазный запуск: все онбордятся -> все свайпят."""
+    profiles = _get_profiles(args)
+    supabase_url, anon_key = _get_credentials(args)
+    orch = Orchestrator(
+        supabase_url=supabase_url,
+        supabase_anon_key=anon_key,
+        concurrency=getattr(args, "concurrency", 5),
+    )
+    await orch.run_two_phase(profiles)
+
+
 async def cmd_full(args: argparse.Namespace) -> None:
     """Полный цикл."""
     profiles = _get_profiles(args)
@@ -188,6 +200,14 @@ Examples:
     full_parser.add_argument("--concurrency", type=int, default=5, help="Max concurrent bots (default: 5)")
     full_parser.add_argument("--regenerate", action="store_true", help="Regenerate profiles even if exists")
     full_parser.set_defaults(func=lambda a: asyncio.run(cmd_full(a)))
+
+    # Two-phase: onboard all -> discover all
+    tp_parser = subparsers.add_parser("two-phase", help="Two-phase: onboard all, then discover all")
+    tp_parser.add_argument("--supabase-url", default=None)
+    tp_parser.add_argument("--anon-key", default=None)
+    tp_parser.add_argument("--count", type=int, default=100)
+    tp_parser.add_argument("--regenerate", action="store_true")
+    tp_parser.set_defaults(func=lambda a: asyncio.run(cmd_two_phase(a)))
 
     # onboard
     on_parser = subparsers.add_parser("onboard", help="Onboarding only")

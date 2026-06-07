@@ -20,16 +20,35 @@ export default function AvatarOnboardingPage() {
     setLoading(false);
   })(); }, []);
 
-  const generate = async () => {
+  const generate = async (retryCount = 0): Promise<void> => {
     setGenerating(true);
-    const token = await getAuthToken();
-    const res = await fetch('/api/embedding/recompute', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token ?? ''}` },
-    });
-    const data = await res.json();
-    setEssence(data.essence ?? null);
-    setGenerating(false);
+    if (retryCount === 0) setError(null);
+    try {
+      const token = await getAuthToken();
+      const res = await fetch('/api/embedding/recompute', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token ?? ''}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const isRateLimit = res.status === 429;
+        const retryAfter = isRateLimit ? parseInt(res.headers.get('Retry-After') || '60', 10) : 0;
+        if (isRateLimit && retryCount < 2) {
+          setError(`Сейчас высокая нагрузка на AI. Повторю автоматически через ${retryAfter}с…`);
+          setTimeout(() => generate(retryCount + 1), retryAfter * 1000);
+          return;
+        }
+        setError(data.error || `Ошибка ${res.status}. Попробуй ещё раз.`);
+        setGenerating(false);
+        return;
+      }
+      setEssence(data.essence ?? null);
+      setError(null);
+    } catch (e: any) {
+      setError(e?.message || 'Сетевая ошибка');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const finish = async () => {
@@ -95,7 +114,12 @@ export default function AvatarOnboardingPage() {
         )}
 
         {!essence ? (
-          <button onClick={generate} disabled={generating} className="btn-primary btn-primary-lg" style={{width:'100%',justifyContent:'center'}}>
+                {error && (
+        <div style={{padding:12,marginBottom:16,borderRadius:8,background:'#7f1d1d40',color:'#fca5a5',fontSize:13,border:'1px solid #ef444440'}}>
+          {error}
+        </div>
+      )}
+      <button onClick={generate} disabled={generating} className="btn-primary btn-primary-lg" style={{width:'100%',justifyContent:'center'}}>
             {generating ? 'Генерируем embedding...' : '🧠 Сгенерировать AI-двойника'}
           </button>
         ) : (

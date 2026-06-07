@@ -1,8 +1,12 @@
 {
   "name": "Veronika Smirnov",
-  "user_id": "fa0408b1-840d-4f35-8645-223590a3cc5c",
+  "user_id": "4faeda34-80a1-4155-988c-899f8641fdea",
   "onboarding_complete": false,
-  "candidates_seen": 21,
-  "matches": 0,
-  "conversations": {}
+  "candidates_seen": 20,
+  "matches": 1,
+  "conversations": {
+    "3be477f7-8a37-4107-ab32-d265e572897c": [
+      "Привет, Elena Morozov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

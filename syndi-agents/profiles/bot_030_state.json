@@ -1,8 +1,12 @@
 {
   "name": "German Tikhonov",
-  "user_id": "96b68dcf-c5f1-4179-be6b-f115be498be1",
+  "user_id": "a978db2e-7984-48f6-8a19-226f0d196ede",
   "onboarding_complete": false,
-  "candidates_seen": 21,
+  "candidates_seen": 20,
   "matches": 0,
-  "conversations": {}
+  "conversations": {
+    "1ad55bf4-97c5-4eb2-84a8-010d21b09afe": [
+      "Привет, David Frolov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

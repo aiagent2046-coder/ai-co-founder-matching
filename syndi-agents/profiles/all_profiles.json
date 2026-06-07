@@ -3,6 +3,7 @@
     "index": 0,
     "name": "Artem Volkov",
     "email": "agent000@syndi.demo",
+    "password": "AgentDemo000!",
     "role": "CTO",
     "domain": "HealthTech",
     "location": "Moscow",
@@ -45,29 +46,37 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
-      "Kafka",
+      "Agile",
       "Elasticsearch",
-      "Computer Vision"
+      "FastAPI"
     ],
     "want_to_learn": [
-      "UX Design",
-      "Sound Design",
-      "Marketing"
+      "Microservices",
+      "Sustainability",
+      "React"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "full-time",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 46,
+      "anger": 80,
+      "cunning": 71,
+      "lying": 38,
+      "honesty": 63
+    }
   },
   {
     "index": 1,
     "name": "Bogdan Kozlov",
     "email": "agent001@syndi.demo",
+    "password": "AgentDemo001!",
     "role": "CEO",
     "domain": "LegalTech",
     "location": "Saint Petersburg",
@@ -106,29 +115,37 @@
       " non-committed partners"
     ],
     "can_teach": [
-      "Customer Development",
       "Competitive Analysis",
-      "Fundraising"
+      "GTM Strategy",
+      "Due Diligence"
     ],
     "want_to_learn": [
-      "Clean Architecture",
-      "MLOps",
-      "Growth"
+      "Computer Vision",
+      "Deep Learning",
+      "Brand Design"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "part-time",
       "seeking": [
         "investors",
-        "first-hires"
+        "co-founder"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 61,
+      "anger": 13,
+      "cunning": 43,
+      "lying": 18,
+      "honesty": 48
+    }
   },
   {
     "index": 2,
     "name": "Vladimir Novikov",
     "email": "agent002@syndi.demo",
+    "password": "AgentDemo002!",
     "role": "CPO",
     "domain": "AgriTech",
     "location": "Kazan",
@@ -166,29 +183,37 @@
       " non-committed partners"
     ],
     "can_teach": [
-      "NLP",
-      "Tax Planning",
-      "M&A"
+      "Fundraising",
+      "WebSocket",
+      "Community"
     ],
     "want_to_learn": [
-      "Computer Vision",
-      "GraphQL",
-      "User Research"
+      "Documentation",
+      "Pitch Decks",
+      "Storytelling"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "nights-weekends",
       "seeking": [
-        "first-hires",
-        "investors"
+        "advisors",
+        "co-founder"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 31,
+      "anger": 79,
+      "cunning": 25,
+      "lying": 15,
+      "honesty": 66
+    }
   },
   {
     "index": 3,
     "name": "Dmitry Morozov",
     "email": "agent003@syndi.demo",
+    "password": "AgentDemo003!",
     "role": "VP of Engineering",
     "domain": "EdTech",
     "location": "Novosibirsk",
@@ -228,29 +253,37 @@
       " large teams pre-product"
     ],
     "can_teach": [
-      "CI/CD",
-      "Solidity",
-      "Government Relations"
+      "Product Analytics",
+      "React Native",
+      "SEO"
     ],
     "want_to_learn": [
-      "IP Strategy",
-      "Customer Development",
-      "Creative Direction"
+      "Financial Modeling",
+      "Game Design",
+      "Level Design"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "flexible",
       "seeking": [
-        "first-hires",
-        "advisors"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 43,
+      "anger": 14,
+      "cunning": 55,
+      "lying": 45,
+      "honesty": 69
+    }
   },
   {
     "index": 4,
     "name": "Egor Petrov",
     "email": "agent004@syndi.demo",
+    "password": "AgentDemo004!",
     "role": "Head of Product",
     "domain": "CleanTech",
     "location": "Yekaterinburg",
@@ -288,29 +321,37 @@
       " investors who want control"
     ],
     "can_teach": [
-      "Legal",
+      "IP Strategy",
       "Product Strategy",
-      "A/B Testing"
+      "MongoDB"
     ],
     "want_to_learn": [
-      "Interaction Design",
-      "M&A",
-      "OpenAI API"
+      "Character Design",
+      "MLOps",
+      "Python"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "full-time",
       "seeking": [
-        "co-founder",
-        "investors"
+        "investors",
+        "advisors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 86,
+      "anger": 73,
+      "cunning": 77,
+      "lying": 37,
+      "honesty": 40
+    }
   },
   {
     "index": 5,
     "name": "Ivan Sokolov",
     "email": "agent005@syndi.demo",
+    "password": "AgentDemo005!",
     "role": "Tech Lead",
     "domain": "Cybersecurity",
     "location": "Innopolis",
@@ -349,29 +390,37 @@
       " remote-only workers"
     ],
     "can_teach": [
-      "Customer Development",
-      "Level Design",
+      "Public Relations",
+      "gRPC",
       "Technical Writing"
     ],
     "want_to_learn": [
-      "Vesting",
-      "Cap Table",
-      "Competitive Analysis"
+      "Ethereum",
+      "Product Analytics",
+      "Design Systems"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "part-time",
       "seeking": [
         "advisors",
-        "investors"
+        "co-founder"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 45,
+      "anger": 20,
+      "cunning": 54,
+      "lying": 65,
+      "honesty": 87
+    }
   },
   {
     "index": 6,
     "name": "Kirill Vasilyev",
     "email": "agent006@syndi.demo",
+    "password": "AgentDemo006!",
     "role": "Full-Stack Developer",
     "domain": "SaaS",
     "location": "Dubai",
@@ -412,29 +461,37 @@
       " consultants only"
     ],
     "can_teach": [
-      "WebAssembly",
-      "Clean Architecture",
-      "Product Analytics"
+      "Brand Strategy",
+      "Scrum",
+      "React Native"
     ],
     "want_to_learn": [
-      "Art Direction",
-      "Character Design",
-      "Design Systems"
+      "GCP",
+      "UI Design",
+      "Creative Direction"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "nights-weekends",
       "seeking": [
-        "co-founder",
-        "first-hires"
+        "investors",
+        "co-founder"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 57,
+      "anger": 24,
+      "cunning": 14,
+      "lying": 49,
+      "honesty": 94
+    }
   },
   {
     "index": 7,
     "name": "Leonid Kuznetsov",
     "email": "agent007@syndi.demo",
+    "password": "AgentDemo007!",
     "role": "ML Engineer",
     "domain": "PropTech",
     "location": "Tbilisi",
@@ -471,29 +528,37 @@
       " solo operators"
     ],
     "can_teach": [
-      "Pitch Decks",
       "Zero-Knowledge Proofs",
-      "SEO"
+      "NLP",
+      "Pitch Decks"
     ],
     "want_to_learn": [
-      "Team Building",
-      "LangChain",
-      "Data Engineering"
+      "Spring Boot",
+      "IP Strategy",
+      "AWS"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "flexible",
       "seeking": [
         "advisors",
-        "investors"
+        "co-founder"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 80,
+      "anger": 24,
+      "cunning": 38,
+      "lying": 68,
+      "honesty": 71
+    }
   },
   {
     "index": 8,
     "name": "Maxim Smirnov",
     "email": "agent008@syndi.demo",
+    "password": "AgentDemo008!",
     "role": "Data Scientist",
     "domain": "HealthTech",
     "location": "Almaty",
@@ -538,29 +603,37 @@
       " idea people without execution"
     ],
     "can_teach": [
-      "Financial Modeling",
-      "Kubernetes",
-      "Accessibility"
+      "NLP",
+      "Strategic Planning",
+      "3D Modeling"
     ],
     "want_to_learn": [
-      "OIDC",
-      "Pitching",
-      "Elasticsearch"
+      "Redis",
+      "Public Relations",
+      "Compliance"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "full-time",
       "seeking": [
         "co-founder",
-        "advisors"
+        "investors"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 51,
+      "anger": 32,
+      "cunning": 42,
+      "lying": 55,
+      "honesty": 75
+    }
   },
   {
     "index": 9,
     "name": "Nikita Popov",
     "email": "agent009@syndi.demo",
+    "password": "AgentDemo009!",
     "role": "DevOps Engineer",
     "domain": "Blockchain",
     "location": "Minsk",
@@ -604,28 +677,36 @@
     ],
     "can_teach": [
       "Penetration Testing",
-      "Design Systems",
-      "Customer Development"
+      "Node.js",
+      "Product Analytics"
     ],
     "want_to_learn": [
-      "Strategic Planning",
-      "M&A",
-      "Brand Strategy"
+      "Redis",
+      "Copywriting",
+      "MongoDB"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "part-time",
       "seeking": [
-        "advisors",
-        "co-founder"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 61,
+      "anger": 17,
+      "cunning": 76,
+      "lying": 35,
+      "honesty": 82
+    }
   },
   {
     "index": 10,
     "name": "Oleg Lebedev",
     "email": "agent010@syndi.demo",
+    "password": "AgentDemo010!",
     "role": "Backend Developer",
     "domain": "AI/ML",
     "location": "Tashkent",
@@ -668,29 +749,37 @@
       " remote-only workers"
     ],
     "can_teach": [
-      "Cap Table",
+      "OKRs",
       "Go",
-      "OKRs"
+      "React"
     ],
     "want_to_learn": [
-      "Negotiation",
-      "Documentation",
-      "Content Marketing"
+      "Node.js",
+      "Pitch Decks",
+      "Board Management"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "nights-weekends",
       "seeking": [
-        "co-founder",
+        "advisors",
         "investors"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 31,
+      "anger": 26,
+      "cunning": 59,
+      "lying": 60,
+      "honesty": 68
+    }
   },
   {
     "index": 11,
     "name": "Pavel Kuzmin",
     "email": "agent011@syndi.demo",
+    "password": "AgentDemo011!",
     "role": "Frontend Developer",
     "domain": "EdTech",
     "location": "Baku",
@@ -729,29 +818,37 @@
       " non-committed partners"
     ],
     "can_teach": [
-      "Edge Computing",
-      "Financial Modeling",
+      "DevRel",
+      "Deep Learning",
       "Machine Learning"
     ],
     "want_to_learn": [
-      "Penetration Testing",
-      "Cap Table",
-      "Django"
+      "Agile",
+      "Brand Strategy",
+      "WebAssembly"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "flexible",
       "seeking": [
-        "advisors",
-        "first-hires"
+        "investors",
+        "advisors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 87,
+      "anger": 15,
+      "cunning": 67,
+      "lying": 42,
+      "honesty": 50
+    }
   },
   {
     "index": 12,
     "name": "Roman Semyonov",
     "email": "agent012@syndi.demo",
+    "password": "AgentDemo012!",
     "role": "Mobile Developer",
     "domain": "AI/ML",
     "location": "Warsaw",
@@ -789,29 +886,37 @@
       " idea people without execution"
     ],
     "can_teach": [
-      "Content Marketing",
-      "A/B Testing",
-      "Data Engineering"
+      "Data Engineering",
+      "SEO",
+      "PostgreSQL"
     ],
     "want_to_learn": [
-      "Board Management",
-      "TypeScript",
-      "Support"
+      "Pricing Strategy",
+      "Typography",
+      "Community"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "full-time",
       "seeking": [
         "investors",
-        "advisors"
+        "first-hires"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 64,
+      "anger": 48,
+      "cunning": 66,
+      "lying": 64,
+      "honesty": 30
+    }
   },
   {
     "index": 13,
     "name": "Sergey Pavlov",
     "email": "agent013@syndi.demo",
+    "password": "AgentDemo013!",
     "role": "Blockchain Developer",
     "domain": "Logistics",
     "location": "Berlin",
@@ -853,29 +958,37 @@
       " idea people without execution"
     ],
     "can_teach": [
-      "MongoDB",
-      "Machine Learning",
+      "Community Building",
+      "System Design",
       "FastAPI"
     ],
     "want_to_learn": [
-      "TypeScript",
-      "Character Design",
-      "Pricing Strategy"
+      "DDD",
+      "DevRel",
+      "Fundraising"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "part-time",
       "seeking": [
-        "investors",
-        "co-founder"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 62,
+      "anger": 31,
+      "cunning": 68,
+      "lying": 10,
+      "honesty": 71
+    }
   },
   {
     "index": 14,
     "name": "Timur Stepanov",
     "email": "agent014@syndi.demo",
+    "password": "AgentDemo014!",
     "role": "Security Engineer",
     "domain": "HR Tech",
     "location": "Lisbon",
@@ -913,14 +1026,14 @@
       " non-committed partners"
     ],
     "can_teach": [
-      "Kafka",
-      "Node.js",
-      "WebSocket"
+      "Python",
+      "Flutter",
+      "Clean Architecture"
     ],
     "want_to_learn": [
-      "Kotlin",
-      "Computer Vision",
-      "Wireframing"
+      "Tax Planning",
+      "IP Strategy",
+      "Sustainability"
     ],
     "goals": {
       "timeline": "2-years",
@@ -930,12 +1043,20 @@
         "advisors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 25,
+      "anger": 17,
+      "cunning": 12,
+      "lying": 16,
+      "honesty": 93
+    }
   },
   {
     "index": 15,
     "name": "Fedor Orlov",
     "email": "agent015@syndi.demo",
+    "password": "AgentDemo015!",
     "role": "Growth Hacker",
     "domain": "Fintech",
     "location": "Istanbul",
@@ -970,29 +1091,37 @@
       " quick flippers"
     ],
     "can_teach": [
+      "Recruiting",
       "Fundraising",
-      "Vesting",
-      "Due Diligence"
+      "Agile"
     ],
     "want_to_learn": [
-      "Spring Boot",
-      "Product Analytics",
-      "Advisory"
+      "LangChain",
+      "MLOps",
+      "ESG"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "flexible",
       "seeking": [
-        "first-hires",
-        "advisors"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 81,
+      "anger": 78,
+      "cunning": 30,
+      "lying": 18,
+      "honesty": 87
+    }
   },
   {
     "index": 16,
     "name": "Yuri Nikitin",
     "email": "agent016@syndi.demo",
+    "password": "AgentDemo016!",
     "role": "Product Manager",
     "domain": "InsurTech",
     "location": "Bangkok",
@@ -1030,28 +1159,36 @@
     ],
     "can_teach": [
       "Customer Success",
-      "Agile",
+      "Content Strategy",
       "Sustainability"
     ],
     "want_to_learn": [
-      "Product Analytics",
-      "Advisory",
-      "Due Diligence"
+      "Prototyping",
+      "GTM Strategy",
+      "Penetration Testing"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "full-time",
       "seeking": [
-        "investors",
+        "advisors",
         "co-founder"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 4,
+    "emotions": {
+      "empathy": 71,
+      "anger": 29,
+      "cunning": 27,
+      "lying": 39,
+      "honesty": 85
+    }
   },
   {
     "index": 17,
     "name": "Alexander Makarov",
     "email": "agent017@syndi.demo",
+    "password": "AgentDemo017!",
     "role": "UX Designer",
     "domain": "Fintech",
     "location": "Ho Chi Minh",
@@ -1088,29 +1225,37 @@
       " part-time partners"
     ],
     "can_teach": [
-      "Art Direction",
       "Color Theory",
-      "Information Architecture"
+      "Information Architecture",
+      "Art Direction"
     ],
     "want_to_learn": [
-      "Public Relations",
-      "Customer Success",
-      "Game Design"
+      "Photography",
+      "UX Design",
+      "Python"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "part-time",
       "seeking": [
-        "co-founder",
-        "first-hires"
+        "first-hires",
+        "co-founder"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 43,
+      "anger": 63,
+      "cunning": 37,
+      "lying": 61,
+      "honesty": 78
+    }
   },
   {
     "index": 18,
     "name": "Andrey Zakharov",
     "email": "agent018@syndi.demo",
+    "password": "AgentDemo018!",
     "role": "Data Engineer",
     "domain": "Fintech",
     "location": "Jakarta",
@@ -1153,14 +1298,14 @@
       " solo operators"
     ],
     "can_teach": [
-      "System Design",
-      "Fundraising",
-      "Next.js"
+      "Figma",
+      "Event Sourcing",
+      "A/B Testing"
     ],
     "want_to_learn": [
-      "Sales",
-      "Character Design",
-      "Brand Design"
+      "Machine Learning",
+      "Marketing",
+      "GTM Strategy"
     ],
     "goals": {
       "timeline": "1-year",
@@ -1170,12 +1315,20 @@
         "investors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 70,
+      "anger": 32,
+      "cunning": 40,
+      "lying": 48,
+      "honesty": 88
+    }
   },
   {
     "index": 19,
     "name": "Anton Zaytsev",
     "email": "agent019@syndi.demo",
+    "password": "AgentDemo019!",
     "role": "Research Scientist",
     "domain": "Fintech",
     "location": "Nairobi",
@@ -1215,29 +1368,37 @@
       " part-time partners"
     ],
     "can_teach": [
-      "Wireframing",
-      "Due Diligence",
-      "Photography"
+      "Microservices",
+      "Customer Development",
+      "Wireframing"
     ],
     "want_to_learn": [
-      "DevRel",
-      "Community Building",
-      "Growth Hacking"
+      "Vesting",
+      "A/B Testing",
+      "CI/CD"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "flexible",
       "seeking": [
-        "investors",
-        "advisors"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 76,
+      "anger": 22,
+      "cunning": 43,
+      "lying": 50,
+      "honesty": 82
+    }
   },
   {
     "index": 20,
     "name": "Boris Solovyov",
     "email": "agent020@syndi.demo",
+    "password": "AgentDemo020!",
     "role": "Solutions Architect",
     "domain": "Fintech",
     "location": "Lagos",
@@ -1281,29 +1442,37 @@
       " part-time partners"
     ],
     "can_teach": [
-      "Information Architecture",
-      "OAuth",
-      "Typography"
+      "Pricing Strategy",
+      "Pitching",
+      "Brand Design"
     ],
     "want_to_learn": [
-      "Fundraising",
-      "CQRS",
-      "Docker"
+      "Pitch Decks",
+      "Growth Hacking",
+      "Sustainability"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "full-time",
       "seeking": [
-        "first-hires",
+        "investors",
         "co-founder"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 73,
+      "anger": 63,
+      "cunning": 23,
+      "lying": 64,
+      "honesty": 56
+    }
   },
   {
     "index": 21,
     "name": "Vadim Borisov",
     "email": "agent021@syndi.demo",
+    "password": "AgentDemo021!",
     "role": "Platform Engineer",
     "domain": "Fintech",
     "location": "Mexico City",
@@ -1344,29 +1513,37 @@
       " contractors"
     ],
     "can_teach": [
-      "OIDC",
-      "Mobile UI/UX",
-      "Clean Architecture"
+      "Product Analytics",
+      "Government Relations",
+      "OIDC"
     ],
     "want_to_learn": [
-      "Legal",
-      "Strategic Planning",
-      "Team Building"
+      "Kafka",
+      "Competitive Analysis",
+      "DevRel"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "part-time",
       "seeking": [
-        "first-hires",
-        "co-founder"
+        "co-founder",
+        "advisors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 68,
+      "anger": 58,
+      "cunning": 48,
+      "lying": 36,
+      "honesty": 70
+    }
   },
   {
     "index": 22,
     "name": "Gleb Yakovlev",
     "email": "agent022@syndi.demo",
+    "password": "AgentDemo022!",
     "role": "AI Researcher",
     "domain": "Fintech",
     "location": "Sao Paulo",
@@ -1408,14 +1585,14 @@
       " non-technical co-founders"
     ],
     "can_teach": [
-      "Support",
-      "Character Design",
-      "Accessibility"
+      "Team Building",
+      "Accessibility",
+      "OKRs"
     ],
     "want_to_learn": [
-      "Information Architecture",
-      "Kafka",
-      "Legal"
+      "Spring Boot",
+      "Tax Planning",
+      "GraphQL"
     ],
     "goals": {
       "timeline": "6-months",
@@ -1425,12 +1602,20 @@
         "investors"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 42,
+      "anger": 30,
+      "cunning": 32,
+      "lying": 52,
+      "honesty": 93
+    }
   },
   {
     "index": 23,
     "name": "Denis Gusev",
     "email": "agent023@syndi.demo",
+    "password": "AgentDemo023!",
     "role": "NLP Engineer",
     "domain": "Fintech",
     "location": "Buenos Aires",
@@ -1470,28 +1655,36 @@
     ],
     "can_teach": [
       "Terraform",
-      "Django",
-      "A/B Testing"
+      "Pitch Decks",
+      "NLP"
     ],
     "want_to_learn": [
-      "OAuth",
-      "Pitching",
-      "Cybersecurity"
+      "Sales",
+      "TensorFlow",
+      "Support"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "flexible",
       "seeking": [
-        "investors",
-        "co-founder"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 40,
+      "anger": 24,
+      "cunning": 26,
+      "lying": 25,
+      "honesty": 75
+    }
   },
   {
     "index": 24,
     "name": "Ilya Grigoryev",
     "email": "agent024@syndi.demo",
+    "password": "AgentDemo024!",
     "role": "Computer Vision Engineer",
     "domain": "Fintech",
     "location": "Austin",
@@ -1531,29 +1724,37 @@
       " quick flippers"
     ],
     "can_teach": [
+      "Python",
       "React",
-      "IP Strategy",
       "FastAPI"
     ],
     "want_to_learn": [
-      "Cybersecurity",
-      "User Research",
-      "Content Strategy"
+      "PostgreSQL",
+      "Kotlin",
+      "GraphQL"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "full-time",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "advisors",
+        "co-founder"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 28,
+      "anger": 10,
+      "cunning": 30,
+      "lying": 52,
+      "honesty": 52
+    }
   },
   {
     "index": 25,
     "name": "Konstantin Vinogradov",
     "email": "agent025@syndi.demo",
+    "password": "AgentDemo025!",
     "role": "CTO",
     "domain": "Social Media",
     "location": "San Francisco",
@@ -1591,29 +1792,37 @@
       " investors who want control"
     ],
     "can_teach": [
-      "Design Systems",
+      "Financial Modeling",
       "AWS",
       "DevRel"
     ],
     "want_to_learn": [
-      "Accessibility",
-      "User Testing",
-      "IP Strategy"
+      "Fundraising",
+      "Term Sheets",
+      "Motion Design"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "part-time",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "advisors",
+        "co-founder"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 85,
+      "anger": 38,
+      "cunning": 73,
+      "lying": 41,
+      "honesty": 69
+    }
   },
   {
     "index": 26,
     "name": "Mikhail Bogdanov",
     "email": "agent026@syndi.demo",
+    "password": "AgentDemo026!",
     "role": "CEO",
     "domain": "EdTech",
     "location": "Toronto",
@@ -1653,29 +1862,37 @@
       " large teams pre-product"
     ],
     "can_teach": [
-      "Support",
-      "Vesting",
-      "Investor Relations"
+      "Partnerships",
+      "Term Sheets",
+      "User Research"
     ],
     "want_to_learn": [
-      "Solidity",
-      "Kafka",
-      "3D Modeling"
+      "Growth Hacking",
+      "Fundraising",
+      "Community"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "nights-weekends",
       "seeking": [
         "co-founder",
-        "first-hires"
+        "investors"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 40,
+      "anger": 62,
+      "cunning": 31,
+      "lying": 66,
+      "honesty": 51
+    }
   },
   {
     "index": 27,
     "name": "Stanislav Fedorov",
     "email": "agent027@syndi.demo",
+    "password": "AgentDemo027!",
     "role": "CPO",
     "domain": "HealthTech",
     "location": "London",
@@ -1714,29 +1931,37 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
-      "Lean Startup",
-      "MLOps",
-      "User Testing"
+      "GraphQL",
+      "FastAPI",
+      "MLOps"
     ],
     "want_to_learn": [
-      "Competitive Analysis",
-      "Azure",
-      "Customer Success"
+      "Serverless",
+      "Narrative Design",
+      "Public Relations"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "flexible",
       "seeking": [
-        "investors",
-        "first-hires"
+        "co-founder",
+        "advisors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 90,
+      "anger": 20,
+      "cunning": 59,
+      "lying": 68,
+      "honesty": 36
+    }
   },
   {
     "index": 28,
     "name": "Yaroslav Ponomarev",
     "email": "agent028@syndi.demo",
+    "password": "AgentDemo028!",
     "role": "VP of Engineering",
     "domain": "MarTech",
     "location": "Singapore",
@@ -1779,29 +2004,37 @@
       " investors who want control"
     ],
     "can_teach": [
-      "Python",
-      "DevRel",
-      "Docker"
+      "Event Sourcing",
+      "Deep Learning",
+      "Python"
     ],
     "want_to_learn": [
-      "Zero-Knowledge Proofs",
-      "System Design",
-      "Typography"
+      "Node.js",
+      "GraphQL",
+      "Financial Modeling"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "full-time",
       "seeking": [
         "co-founder",
-        "investors"
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 4,
+    "emotions": {
+      "empathy": 23,
+      "anger": 22,
+      "cunning": 53,
+      "lying": 19,
+      "honesty": 57
+    }
   },
   {
     "index": 29,
     "name": "Alexey Mikhailov",
     "email": "agent029@syndi.demo",
+    "password": "AgentDemo029!",
     "role": "Head of Product",
     "domain": "HealthTech",
     "location": "Bangalore",
@@ -1837,29 +2070,37 @@
       " consultants only"
     ],
     "can_teach": [
-      "Business Development",
+      "Storytelling",
       "MongoDB",
-      "Sales"
+      "Business Development"
     ],
     "want_to_learn": [
-      "Motion Design",
-      "Swift",
-      "Character Design"
+      "OKRs",
+      "OpenAI API",
+      "User Testing"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "part-time",
       "seeking": [
-        "first-hires",
+        "advisors",
         "co-founder"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 20,
+      "anger": 35,
+      "cunning": 56,
+      "lying": 39,
+      "honesty": 33
+    }
   },
   {
     "index": 30,
     "name": "German Tikhonov",
     "email": "agent030@syndi.demo",
+    "password": "AgentDemo030!",
     "role": "Tech Lead",
     "domain": "FoodTech",
     "location": "Tel Aviv",
@@ -1902,29 +2143,37 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
-      "Character Design",
-      "Team Building",
-      "TypeScript"
+      "FastAPI",
+      "TypeScript",
+      "Information Architecture"
     ],
     "want_to_learn": [
-      "Wireframing",
-      "Mobile UI/UX",
-      "TensorFlow"
+      "Recruiting",
+      "Redis",
+      "Partnerships"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "nights-weekends",
       "seeking": [
-        "advisors",
+        "co-founder",
         "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 24,
+      "anger": 54,
+      "cunning": 23,
+      "lying": 58,
+      "honesty": 92
+    }
   },
   {
     "index": 31,
     "name": "David Frolov",
     "email": "agent031@syndi.demo",
+    "password": "AgentDemo031!",
     "role": "Full-Stack Developer",
     "domain": "EdTech",
     "location": "Seoul",
@@ -1963,29 +2212,37 @@
       "employees"
     ],
     "can_teach": [
-      "NLP",
-      "Clean Architecture",
-      "CI/CD"
+      "DevRel",
+      "Growth Hacking",
+      "Product Analytics"
     ],
     "want_to_learn": [
-      "Solidity",
-      "Agile",
-      "FastAPI"
+      "Customer Success",
+      "Financial Modeling",
+      "Penetration Testing"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "flexible",
       "seeking": [
-        "investors",
-        "first-hires"
+        "first-hires",
+        "advisors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 28,
+      "anger": 73,
+      "cunning": 24,
+      "lying": 19,
+      "honesty": 70
+    }
   },
   {
     "index": 32,
     "name": "Daniel Kalin",
     "email": "agent032@syndi.demo",
+    "password": "AgentDemo032!",
     "role": "ML Engineer",
     "domain": "Social Media",
     "location": "Tokyo",
@@ -2022,28 +2279,36 @@
     ],
     "can_teach": [
       "PyTorch",
-      "React Native",
+      "Python",
       "WebAssembly"
     ],
     "want_to_learn": [
-      "Support",
-      "AWS",
-      "Recruiting"
+      "Cybersecurity",
+      "DevRel",
+      "Content Strategy"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "full-time",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 21,
+      "anger": 31,
+      "cunning": 16,
+      "lying": 60,
+      "honesty": 81
+    }
   },
   {
     "index": 33,
     "name": "Tikhon Antonov",
     "email": "agent033@syndi.demo",
+    "password": "AgentDemo033!",
     "role": "Data Scientist",
     "domain": "Social Media",
     "location": "Sydney",
@@ -2081,29 +2346,37 @@
       " contractors"
     ],
     "can_teach": [
-      "Docker",
+      "Recruiting",
       "Figma",
-      "Design Systems"
+      "Docker"
     ],
     "want_to_learn": [
-      "Pitching",
-      "Mobile UI/UX",
-      "Prototyping"
+      "Animation",
+      "A/B Testing",
+      "Product Strategy"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "part-time",
       "seeking": [
-        "co-founder",
-        "investors"
+        "first-hires",
+        "advisors"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 41,
+      "anger": 51,
+      "cunning": 56,
+      "lying": 21,
+      "honesty": 92
+    }
   },
   {
     "index": 34,
     "name": "Platon Efimov",
     "email": "agent034@syndi.demo",
+    "password": "AgentDemo034!",
     "role": "DevOps Engineer",
     "domain": "Social Media",
     "location": "Helsinki",
@@ -2142,29 +2415,37 @@
       " non-technical co-founders"
     ],
     "can_teach": [
-      "Kotlin",
-      "Fundraising",
-      "OpenAI API"
+      "ESG",
+      "Community Building",
+      "Fundraising"
     ],
     "want_to_learn": [
-      "Copywriting",
-      "Computer Vision",
-      "Brand Strategy"
+      "OAuth",
+      "Negotiation",
+      "CQRS"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "nights-weekends",
       "seeking": [
         "first-hires",
-        "investors"
+        "co-founder"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 76,
+      "anger": 40,
+      "cunning": 70,
+      "lying": 17,
+      "honesty": 74
+    }
   },
   {
     "index": 35,
     "name": "Mark Komarov",
     "email": "agent035@syndi.demo",
+    "password": "AgentDemo035!",
     "role": "Backend Developer",
     "domain": "AI/ML",
     "location": "Riga",
@@ -2207,29 +2488,37 @@
       " quick flippers"
     ],
     "can_teach": [
+      "Ethereum",
       "System Design",
-      "Pitch Decks",
-      "User Research"
+      "Pitch Decks"
     ],
     "want_to_learn": [
-      "Term Sheets",
-      "GCP",
-      "Financial Modeling"
+      "Photography",
+      "Negotiation",
+      "Partnerships"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "flexible",
       "seeking": [
         "investors",
-        "first-hires"
+        "co-founder"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 58,
+      "anger": 80,
+      "cunning": 62,
+      "lying": 52,
+      "honesty": 35
+    }
   },
   {
     "index": 36,
     "name": "Lev Davydov",
     "email": "agent036@syndi.demo",
+    "password": "AgentDemo036!",
     "role": "Frontend Developer",
     "domain": "AI/ML",
     "location": "Prague",
@@ -2275,28 +2564,36 @@
     ],
     "can_teach": [
       "Next.js",
-      "DevRel",
-      "User Research"
+      "Elasticsearch",
+      "DevRel"
     ],
     "want_to_learn": [
-      "Narrative Design",
-      "Impact Measurement",
-      "Roadmapping"
+      "Tax Planning",
+      "Brand Design",
+      "Vesting"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "full-time",
       "seeking": [
-        "advisors",
-        "investors"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 58,
+      "anger": 71,
+      "cunning": 75,
+      "lying": 53,
+      "honesty": 79
+    }
   },
   {
     "index": 37,
     "name": "Adam Melnikov",
     "email": "agent037@syndi.demo",
+    "password": "AgentDemo037!",
     "role": "Mobile Developer",
     "domain": "SpaceTech",
     "location": "Moscow",
@@ -2332,29 +2629,37 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
-      "Content Marketing",
-      "Machine Learning",
+      "Clean Architecture",
+      "Kafka",
       "Event Sourcing"
     ],
     "want_to_learn": [
-      "Data Engineering",
-      "Term Sheets",
-      "Motion Design"
+      "Azure",
+      "Docker",
+      "Color Theory"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "part-time",
       "seeking": [
-        "first-hires",
+        "co-founder",
         "investors"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 24,
+      "anger": 54,
+      "cunning": 10,
+      "lying": 17,
+      "honesty": 86
+    }
   },
   {
     "index": 38,
     "name": "Samir Shcherbakov",
     "email": "agent038@syndi.demo",
+    "password": "AgentDemo038!",
     "role": "Blockchain Developer",
     "domain": "Energy",
     "location": "Saint Petersburg",
@@ -2394,29 +2699,37 @@
       " non-technical co-founders"
     ],
     "can_teach": [
+      "Rust",
       "CQRS",
-      "Azure",
-      "User Research"
+      "Terraform"
     ],
     "want_to_learn": [
-      "Character Design",
-      "Revenue Operations",
-      "Serverless"
+      "Interaction Design",
+      "Fundraising",
+      "Zero-Knowledge Proofs"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "nights-weekends",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "advisors",
+        "investors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 23,
+      "anger": 26,
+      "cunning": 50,
+      "lying": 64,
+      "honesty": 77
+    }
   },
   {
     "index": 39,
     "name": "Said Blokhin",
     "email": "agent039@syndi.demo",
+    "password": "AgentDemo039!",
     "role": "Security Engineer",
     "domain": "IoT",
     "location": "Kazan",
@@ -2455,29 +2768,37 @@
       " remote-only workers"
     ],
     "can_teach": [
-      "Financial Modeling",
-      "Node.js",
-      "React"
+      "Go",
+      "CQRS",
+      "SEO"
     ],
     "want_to_learn": [
-      "Pricing Strategy",
-      "gRPC",
-      "Wireframing"
+      "DevRel",
+      "System Design",
+      "Clean Architecture"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "flexible",
       "seeking": [
-        "investors",
-        "co-founder"
+        "co-founder",
+        "investors"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 54,
+      "anger": 43,
+      "cunning": 74,
+      "lying": 70,
+      "honesty": 72
+    }
   },
   {
     "index": 40,
     "name": "Askhab Kolesnikov",
     "email": "agent040@syndi.demo",
+    "password": "AgentDemo040!",
     "role": "Growth Hacker",
     "domain": "BioTech",
     "location": "Novosibirsk",
@@ -2519,29 +2840,37 @@
       " solo operators"
     ],
     "can_teach": [
-      "Partnerships",
-      "Growth Hacking",
-      "Content Strategy"
+      "Content Strategy",
+      "Compliance",
+      "Lean Startup"
     ],
     "want_to_learn": [
-      "Edge Computing",
-      "Accessibility",
-      "WebSocket"
+      "System Design",
+      "Motion Design",
+      "GraphQL"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "full-time",
       "seeking": [
-        "first-hires",
-        "investors"
+        "investors",
+        "co-founder"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 62,
+      "anger": 71,
+      "cunning": 18,
+      "lying": 25,
+      "honesty": 92
+    }
   },
   {
     "index": 41,
     "name": "Anastasia Petrenko",
     "email": "agent041@syndi.demo",
+    "password": "AgentDemo041!",
     "role": "Product Manager",
     "domain": "AI/ML",
     "location": "Yekaterinburg",
@@ -2579,29 +2908,37 @@
       " consultants only"
     ],
     "can_teach": [
-      "Government Relations",
-      "Tax Planning",
-      "Board Management"
+      "Board Management",
+      "IP Strategy",
+      "Tax Planning"
     ],
     "want_to_learn": [
-      "UI Design",
-      "CI/CD",
-      "Market Research"
+      "Lean Startup",
+      "Content Strategy",
+      "UX Design"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "part-time",
       "seeking": [
-        "first-hires",
-        "advisors"
+        "advisors",
+        "investors"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 84,
+      "anger": 72,
+      "cunning": 67,
+      "lying": 53,
+      "honesty": 43
+    }
   },
   {
     "index": 42,
     "name": "Victoria Martynov",
     "email": "agent042@syndi.demo",
+    "password": "AgentDemo042!",
     "role": "UX Designer",
     "domain": "Cybersecurity",
     "location": "Innopolis",
@@ -2640,27 +2977,35 @@
     "can_teach": [
       "Animation",
       "Video Production",
-      "Brand Design"
+      "Information Architecture"
     ],
     "want_to_learn": [
-      "Cybersecurity",
-      "gRPC",
-      "FastAPI"
+      "Due Diligence",
+      "Technical Writing",
+      "DevRel"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "nights-weekends",
       "seeking": [
-        "advisors",
-        "investors"
+        "co-founder",
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 56,
+      "anger": 55,
+      "cunning": 32,
+      "lying": 16,
+      "honesty": 49
+    }
   },
   {
     "index": 43,
     "name": "Daria Golovin",
     "email": "agent043@syndi.demo",
+    "password": "AgentDemo043!",
     "role": "Data Engineer",
     "domain": "Data Engineering",
     "location": "Dubai",
@@ -2699,29 +3044,37 @@
       " non-technical co-founders"
     ],
     "can_teach": [
-      "FastAPI",
+      "Serverless",
       "NLP",
-      "Penetration Testing"
+      "Technical Writing"
     ],
     "want_to_learn": [
-      "Agile",
-      "Spring Boot",
-      "Next.js"
+      "Design Systems",
+      "GraphQL",
+      "Motion Design"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "flexible",
       "seeking": [
-        "co-founder",
-        "investors"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 30,
+      "anger": 51,
+      "cunning": 28,
+      "lying": 19,
+      "honesty": 33
+    }
   },
   {
     "index": 44,
     "name": "Ekaterina Abramov",
     "email": "agent044@syndi.demo",
+    "password": "AgentDemo044!",
     "role": "Research Scientist",
     "domain": "SaaS",
     "location": "Tbilisi",
@@ -2763,29 +3116,37 @@
       " quick flippers"
     ],
     "can_teach": [
-      "UI Design",
-      "Analytics",
-      "Spring Boot"
+      "Zero-Knowledge Proofs",
+      "Scrum",
+      "Game Design"
     ],
     "want_to_learn": [
-      "Community",
-      "Product Strategy",
-      "Sustainability"
+      "Public Relations",
+      "Character Design",
+      "Term Sheets"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "full-time",
       "seeking": [
-        "first-hires",
-        "co-founder"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 65,
+      "anger": 21,
+      "cunning": 46,
+      "lying": 27,
+      "honesty": 81
+    }
   },
   {
     "index": 45,
     "name": "Alina Akhmedov",
     "email": "agent045@syndi.demo",
+    "password": "AgentDemo045!",
     "role": "Solutions Architect",
     "domain": "Cybersecurity",
     "location": "Almaty",
@@ -2828,29 +3189,37 @@
       " solo operators"
     ],
     "can_teach": [
-      "Solidity",
-      "Impact Measurement",
+      "Government Relations",
+      "PostgreSQL",
       "Negotiation"
     ],
     "want_to_learn": [
-      "Terraform",
-      "Event Sourcing",
-      "Tax Planning"
+      "Vesting",
+      "Tax Planning",
+      "Color Theory"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "part-time",
       "seeking": [
-        "co-founder",
-        "first-hires"
+        "first-hires",
+        "investors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 42,
+      "anger": 71,
+      "cunning": 18,
+      "lying": 62,
+      "honesty": 43
+    }
   },
   {
     "index": 46,
     "name": "Anna Ismailov",
     "email": "agent046@syndi.demo",
+    "password": "AgentDemo046!",
     "role": "Platform Engineer",
     "domain": "IoT",
     "location": "Minsk",
@@ -2886,14 +3255,14 @@
       " remote-only workers"
     ],
     "can_teach": [
-      "OAuth",
       "NLP",
+      "Azure",
       "DDD"
     ],
     "want_to_learn": [
-      "Market Research",
-      "Color Theory",
-      "Cap Table"
+      "MLOps",
+      "WebSocket",
+      "Marketing"
     ],
     "goals": {
       "timeline": "3-months",
@@ -2903,12 +3272,20 @@
         "first-hires"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 25,
+      "anger": 65,
+      "cunning": 35,
+      "lying": 34,
+      "honesty": 86
+    }
   },
   {
     "index": 47,
     "name": "Maria Kadyrov",
     "email": "agent047@syndi.demo",
+    "password": "AgentDemo047!",
     "role": "AI Researcher",
     "domain": "IoT",
     "location": "Tashkent",
@@ -2951,29 +3328,37 @@
       "employees"
     ],
     "can_teach": [
-      "Typography",
-      "Due Diligence",
-      "Content Strategy"
+      "Vesting",
+      "Node.js",
+      "Advisory"
     ],
     "want_to_learn": [
-      "NLP",
-      "Machine Learning",
-      "DevRel"
+      "User Research",
+      "OKRs",
+      "Edge Computing"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "flexible",
       "seeking": [
-        "advisors",
-        "co-founder"
+        "co-founder",
+        "investors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 31,
+      "anger": 12,
+      "cunning": 66,
+      "lying": 17,
+      "honesty": 43
+    }
   },
   {
     "index": 48,
     "name": "Olga Magomedov",
     "email": "agent048@syndi.demo",
+    "password": "AgentDemo048!",
     "role": "NLP Engineer",
     "domain": "AI/ML",
     "location": "Baku",
@@ -3016,29 +3401,37 @@
       "employees"
     ],
     "can_teach": [
+      "Sales",
       "Financial Modeling",
-      "Community Building",
-      "User Research"
+      "Community Building"
     ],
     "want_to_learn": [
-      "Product Analytics",
-      "Design Systems",
-      "Kafka"
+      "Pitching",
+      "WebAssembly",
+      "Computer Vision"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "full-time",
       "seeking": [
         "investors",
-        "co-founder"
+        "advisors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 29,
+      "anger": 45,
+      "cunning": 25,
+      "lying": 20,
+      "honesty": 37
+    }
   },
   {
     "index": 49,
     "name": "Polina Dzhalilov",
     "email": "agent049@syndi.demo",
+    "password": "AgentDemo049!",
     "role": "Computer Vision Engineer",
     "domain": "SaaS",
     "location": "Warsaw",
@@ -3080,29 +3473,37 @@
       " part-time partners"
     ],
     "can_teach": [
+      "DDD",
       "IP Strategy",
-      "WebAssembly",
-      "Kubernetes"
+      "React"
     ],
     "want_to_learn": [
-      "Ethereum",
-      "Animation",
-      "Elasticsearch"
+      "SEO",
+      "MLOps",
+      "Legal"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "part-time",
       "seeking": [
-        "investors",
+        "first-hires",
         "advisors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 25,
+      "anger": 26,
+      "cunning": 24,
+      "lying": 55,
+      "honesty": 48
+    }
   },
   {
     "index": 50,
     "name": "Sofia Volkov",
     "email": "agent050@syndi.demo",
+    "password": "AgentDemo050!",
     "role": "CTO",
     "domain": "Gaming",
     "location": "Berlin",
@@ -3139,29 +3540,37 @@
       " non-technical co-founders"
     ],
     "can_teach": [
-      "Azure",
       "OAuth",
-      "Redis"
+      "Azure",
+      "Go"
     ],
     "want_to_learn": [
-      "Technical Writing",
-      "Investor Relations",
-      "Community"
+      "CI/CD",
+      "DDD",
+      "Information Architecture"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "nights-weekends",
       "seeking": [
-        "investors",
-        "first-hires"
+        "first-hires",
+        "co-founder"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 77,
+      "anger": 47,
+      "cunning": 38,
+      "lying": 67,
+      "honesty": 77
+    }
   },
   {
     "index": 51,
     "name": "Tatiana Kozlov",
     "email": "agent051@syndi.demo",
+    "password": "AgentDemo051!",
     "role": "CEO",
     "domain": "Gaming",
     "location": "Lisbon",
@@ -3200,28 +3609,36 @@
     ],
     "can_teach": [
       "Investor Relations",
-      "Compliance",
-      "Public Relations"
+      "Vesting",
+      "User Research"
     ],
     "want_to_learn": [
-      "Agile",
-      "OpenAI API",
-      "Figma"
+      "Computer Vision",
+      "Game Design",
+      "Marketing"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "flexible",
       "seeking": [
-        "investors",
-        "co-founder"
+        "co-founder",
+        "first-hires"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 4,
+    "emotions": {
+      "empathy": 67,
+      "anger": 56,
+      "cunning": 54,
+      "lying": 46,
+      "honesty": 41
+    }
   },
   {
     "index": 52,
     "name": "Yulia Novikov",
     "email": "agent052@syndi.demo",
+    "password": "AgentDemo052!",
     "role": "CPO",
     "domain": "Gaming",
     "location": "Istanbul",
@@ -3261,29 +3678,37 @@
       " contractors"
     ],
     "can_teach": [
+      "Accessibility",
       "Team Building",
-      "Pricing Strategy",
-      "A/B Testing"
+      "Kotlin"
     ],
     "want_to_learn": [
-      "NLP",
-      "Product Analytics",
-      "Ethereum"
+      "Competitive Analysis",
+      "Content Strategy",
+      "Growth"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "full-time",
       "seeking": [
-        "first-hires",
-        "co-founder"
+        "co-founder",
+        "first-hires"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 35,
+      "anger": 25,
+      "cunning": 24,
+      "lying": 18,
+      "honesty": 49
+    }
   },
   {
     "index": 53,
     "name": "Elena Morozov",
     "email": "agent053@syndi.demo",
+    "password": "AgentDemo053!",
     "role": "VP of Engineering",
     "domain": "Gaming",
     "location": "Bangkok",
@@ -3323,29 +3748,37 @@
       " consultants only"
     ],
     "can_teach": [
-      "MLOps",
       "Django",
+      "Government Relations",
       "Mobile UI/UX"
     ],
     "want_to_learn": [
-      "Data Engineering",
-      "WebAssembly",
-      "NLP"
+      "Fundraising",
+      "Due Diligence",
+      "Node.js"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "part-time",
       "seeking": [
-        "advisors",
-        "investors"
+        "co-founder",
+        "first-hires"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 32,
+      "anger": 77,
+      "cunning": 26,
+      "lying": 24,
+      "honesty": 45
+    }
   },
   {
     "index": 54,
     "name": "Irina Petrov",
     "email": "agent054@syndi.demo",
+    "password": "AgentDemo054!",
     "role": "Head of Product",
     "domain": "Gaming",
     "location": "Ho Chi Minh",
@@ -3385,28 +3818,36 @@
     ],
     "can_teach": [
       "Roadmapping",
-      "AWS",
-      "Impact Measurement"
+      "Investor Relations",
+      "Public Relations"
     ],
     "want_to_learn": [
-      "Legal",
-      "Due Diligence",
-      "gRPC"
+      "Partnerships",
+      "DDD",
+      "OIDC"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "nights-weekends",
       "seeking": [
-        "co-founder",
+        "investors",
         "advisors"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 32,
+      "anger": 28,
+      "cunning": 37,
+      "lying": 30,
+      "honesty": 84
+    }
   },
   {
     "index": 55,
     "name": "Natalia Sokolov",
     "email": "agent055@syndi.demo",
+    "password": "AgentDemo055!",
     "role": "Tech Lead",
     "domain": "Gaming",
     "location": "Jakarta",
@@ -3443,29 +3884,37 @@
       " idea people without execution"
     ],
     "can_teach": [
-      "Cybersecurity",
-      "Investor Relations",
-      "Mobile UI/UX"
+      "OKRs",
+      "Mobile UI/UX",
+      "Cybersecurity"
     ],
     "want_to_learn": [
       "Brand Design",
-      "Government Relations",
-      "Product Strategy"
+      "Growth",
+      "Brand Strategy"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "flexible",
       "seeking": [
         "investors",
-        "co-founder"
+        "advisors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 67,
+      "anger": 19,
+      "cunning": 79,
+      "lying": 39,
+      "honesty": 92
+    }
   },
   {
     "index": 56,
     "name": "Svetlana Vasilyev",
     "email": "agent056@syndi.demo",
+    "password": "AgentDemo056!",
     "role": "Full-Stack Developer",
     "domain": "Gaming",
     "location": "Nairobi",
@@ -3502,29 +3951,37 @@
       " part-time partners"
     ],
     "can_teach": [
-      "Event Sourcing",
+      "Product Analytics",
       "Penetration Testing",
-      "Product Analytics"
+      "Node.js"
     ],
     "want_to_learn": [
-      "Marketing",
-      "Machine Learning",
-      "Support"
+      "React",
+      "Kafka",
+      "OIDC"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "full-time",
       "seeking": [
-        "first-hires",
+        "investors",
         "co-founder"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 4,
+    "emotions": {
+      "empathy": 53,
+      "anger": 36,
+      "cunning": 44,
+      "lying": 17,
+      "honesty": 81
+    }
   },
   {
     "index": 57,
     "name": "Valeria Kuznetsov",
     "email": "agent057@syndi.demo",
+    "password": "AgentDemo057!",
     "role": "ML Engineer",
     "domain": "Gaming",
     "location": "Lagos",
@@ -3566,29 +4023,37 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
-      "Azure",
-      "Community Building",
+      "Financial Modeling",
+      "Solidity",
       "OIDC"
     ],
     "want_to_learn": [
-      "Recruiting",
-      "Customer Success",
-      "Term Sheets"
+      "GraphQL",
+      "Lean Startup",
+      "Advisory"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "part-time",
       "seeking": [
-        "co-founder",
-        "investors"
+        "first-hires",
+        "advisors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 35,
+      "anger": 18,
+      "cunning": 13,
+      "lying": 28,
+      "honesty": 76
+    }
   },
   {
     "index": 58,
     "name": "Veronika Smirnov",
     "email": "agent058@syndi.demo",
+    "password": "AgentDemo058!",
     "role": "Data Scientist",
     "domain": "Social Media",
     "location": "Mexico City",
@@ -3626,13 +4091,13 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
+      "Event Sourcing",
       "DevRel",
-      "FastAPI",
-      "Figma"
+      "User Research"
     ],
     "want_to_learn": [
-      "CI/CD",
-      "Legal",
+      "Roadmapping",
+      "Scrum",
       "Content Marketing"
     ],
     "goals": {
@@ -3640,15 +4105,23 @@
       "commitment": "nights-weekends",
       "seeking": [
         "first-hires",
-        "co-founder"
+        "advisors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 81,
+      "anger": 43,
+      "cunning": 23,
+      "lying": 53,
+      "honesty": 69
+    }
   },
   {
     "index": 59,
     "name": "Mila Popov",
     "email": "agent059@syndi.demo",
+    "password": "AgentDemo059!",
     "role": "DevOps Engineer",
     "domain": "Gaming",
     "location": "Sao Paulo",
@@ -3686,29 +4159,37 @@
       " part-time partners"
     ],
     "can_teach": [
-      "Pitch Decks",
       "Community Building",
-      "LangChain"
+      "Pitch Decks",
+      "TypeScript"
     ],
     "want_to_learn": [
-      "FastAPI",
-      "React",
-      "User Research"
+      "Impact Measurement",
+      "M&A",
+      "Machine Learning"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "flexible",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 80,
+      "anger": 27,
+      "cunning": 10,
+      "lying": 27,
+      "honesty": 35
+    }
   },
   {
     "index": 60,
     "name": "Zarina Lebedev",
     "email": "agent060@syndi.demo",
+    "password": "AgentDemo060!",
     "role": "Backend Developer",
     "domain": "Mobility",
     "location": "Buenos Aires",
@@ -3744,29 +4225,37 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
-      "React",
       "Cybersecurity",
-      "OAuth"
+      "React",
+      "Pitch Decks"
     ],
     "want_to_learn": [
-      "Data Engineering",
-      "Kubernetes",
-      "Penetration Testing"
+      "Agile",
+      "Community Building",
+      "Content Strategy"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "full-time",
       "seeking": [
-        "advisors",
-        "co-founder"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 47,
+      "anger": 79,
+      "cunning": 19,
+      "lying": 11,
+      "honesty": 45
+    }
   },
   {
     "index": 61,
     "name": "Amina Kuzmin",
     "email": "agent061@syndi.demo",
+    "password": "AgentDemo061!",
     "role": "Frontend Developer",
     "domain": "Mobility",
     "location": "Austin",
@@ -3802,29 +4291,37 @@
       " contractors"
     ],
     "can_teach": [
-      "Swift",
       "React Native",
-      "GraphQL"
+      "Terraform",
+      "Swift"
     ],
     "want_to_learn": [
-      "Negotiation",
-      "Node.js",
-      "Event Sourcing"
+      "Narrative Design",
+      "UX Design",
+      "Team Building"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "part-time",
       "seeking": [
         "advisors",
-        "co-founder"
+        "first-hires"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 33,
+      "anger": 39,
+      "cunning": 44,
+      "lying": 30,
+      "honesty": 31
+    }
   },
   {
     "index": 62,
     "name": "Karina Semyonov",
     "email": "agent062@syndi.demo",
+    "password": "AgentDemo062!",
     "role": "Mobile Developer",
     "domain": "Logistics",
     "location": "San Francisco",
@@ -3861,14 +4358,14 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
-      "Product Analytics",
-      "Public Relations",
-      "Tax Planning"
+      "Docker",
+      "React",
+      "Public Relations"
     ],
     "want_to_learn": [
-      "IP Strategy",
-      "3D Modeling",
-      "Roadmapping"
+      "Board Management",
+      "Investor Relations",
+      "Event Sourcing"
     ],
     "goals": {
       "timeline": "6-months",
@@ -3878,12 +4375,20 @@
         "first-hires"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 49,
+      "anger": 77,
+      "cunning": 40,
+      "lying": 59,
+      "honesty": 70
+    }
   },
   {
     "index": 63,
     "name": "Kristina Pavlov",
     "email": "agent063@syndi.demo",
+    "password": "AgentDemo063!",
     "role": "Blockchain Developer",
     "domain": "Mobility",
     "location": "Toronto",
@@ -3921,29 +4426,37 @@
       " quick flippers"
     ],
     "can_teach": [
-      "Business Development",
       "React Native",
+      "System Design",
       "Edge Computing"
     ],
     "want_to_learn": [
-      "Pricing Strategy",
-      "User Research",
-      "Design Systems"
+      "Flutter",
+      "Clean Architecture",
+      "Revenue Operations"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "flexible",
       "seeking": [
-        "co-founder",
+        "investors",
         "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 49,
+      "anger": 70,
+      "cunning": 53,
+      "lying": 21,
+      "honesty": 52
+    }
   },
   {
     "index": 64,
     "name": "Margarita Stepanov",
     "email": "agent064@syndi.demo",
+    "password": "AgentDemo064!",
     "role": "Security Engineer",
     "domain": "Mobility",
     "location": "London",
@@ -3984,29 +4497,37 @@
       " idea people without execution"
     ],
     "can_teach": [
-      "Content Marketing",
-      "Terraform",
-      "Azure"
+      "Rust",
+      "Penetration Testing",
+      "PostgreSQL"
     ],
     "want_to_learn": [
-      "Design Systems",
-      "Sales",
-      "UX Design"
+      "Go",
+      "Vesting",
+      "DevRel"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "full-time",
       "seeking": [
-        "first-hires",
+        "co-founder",
         "advisors"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 38,
+      "anger": 57,
+      "cunning": 80,
+      "lying": 30,
+      "honesty": 50
+    }
   },
   {
     "index": 65,
     "name": "Olesya Orlov",
     "email": "agent065@syndi.demo",
+    "password": "AgentDemo065!",
     "role": "Growth Hacker",
     "domain": "Mobility",
     "location": "Singapore",
@@ -4049,29 +4570,37 @@
       " remote-only workers"
     ],
     "can_teach": [
-      "Compliance",
-      "Recruiting",
-      "Advisory"
+      "Tax Planning",
+      "Customer Success",
+      "Public Relations"
     ],
     "want_to_learn": [
-      "DevRel",
-      "Computer Vision",
-      "Fundraising"
+      "Character Design",
+      "Cap Table",
+      "Competitive Analysis"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "part-time",
       "seeking": [
-        "first-hires",
-        "advisors"
+        "co-founder",
+        "investors"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 71,
+      "anger": 45,
+      "cunning": 11,
+      "lying": 24,
+      "honesty": 45
+    }
   },
   {
     "index": 66,
     "name": "Rina Nikitin",
     "email": "agent066@syndi.demo",
+    "password": "AgentDemo066!",
     "role": "Product Manager",
     "domain": "Logistics",
     "location": "Bangalore",
@@ -4111,29 +4640,37 @@
       " contractors"
     ],
     "can_teach": [
-      "Team Building",
-      "Legal",
-      "Scrum"
+      "Financial Modeling",
+      "Competitive Analysis",
+      "IP Strategy"
     ],
     "want_to_learn": [
+      "Python",
       "Sales",
-      "Negotiation",
-      "Kubernetes"
+      "Negotiation"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "nights-weekends",
       "seeking": [
-        "advisors",
-        "investors"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 49,
+      "anger": 47,
+      "cunning": 44,
+      "lying": 23,
+      "honesty": 69
+    }
   },
   {
     "index": 67,
     "name": "Liana Makarov",
     "email": "agent067@syndi.demo",
+    "password": "AgentDemo067!",
     "role": "UX Designer",
     "domain": "Logistics",
     "location": "Tel Aviv",
@@ -4172,28 +4709,36 @@
     ],
     "can_teach": [
       "Typography",
-      "Illustration",
-      "GTM Strategy"
+      "Accessibility",
+      "Design Systems"
     ],
     "want_to_learn": [
-      "Solidity",
-      "UI Design",
-      "Next.js"
+      "Copywriting",
+      "Fundraising",
+      "Content Marketing"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "flexible",
       "seeking": [
-        "investors",
-        "co-founder"
+        "first-hires",
+        "investors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 60,
+      "anger": 59,
+      "cunning": 31,
+      "lying": 46,
+      "honesty": 90
+    }
   },
   {
     "index": 68,
     "name": "Madina Zakharov",
     "email": "agent068@syndi.demo",
+    "password": "AgentDemo068!",
     "role": "Data Engineer",
     "domain": "Mobility",
     "location": "Seoul",
@@ -4236,29 +4781,37 @@
       " quick flippers"
     ],
     "can_teach": [
+      "OpenAI API",
       "Solidity",
-      "DevRel",
-      "Next.js"
+      "Analytics"
     ],
     "want_to_learn": [
-      "Scrum",
-      "Illustration",
-      "FastAPI"
+      "Django",
+      "Market Research",
+      "Support"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "full-time",
       "seeking": [
-        "co-founder",
-        "investors"
+        "first-hires",
+        "co-founder"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 32,
+      "anger": 61,
+      "cunning": 54,
+      "lying": 30,
+      "honesty": 87
+    }
   },
   {
     "index": 69,
     "name": "Kamilla Zaytsev",
     "email": "agent069@syndi.demo",
+    "password": "AgentDemo069!",
     "role": "Research Scientist",
     "domain": "Logistics",
     "location": "Tokyo",
@@ -4297,29 +4850,37 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
-      "Vesting",
+      "Brand Strategy",
       "3D Modeling",
       "Azure"
     ],
     "want_to_learn": [
-      "Redis",
-      "Roadmapping",
-      "Scrum"
+      "Accessibility",
+      "M&A",
+      "Financial Modeling"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "part-time",
       "seeking": [
-        "investors",
-        "co-founder"
+        "advisors",
+        "investors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 22,
+      "anger": 78,
+      "cunning": 53,
+      "lying": 13,
+      "honesty": 67
+    }
   },
   {
     "index": 70,
     "name": "Elina Solovyov",
     "email": "agent070@syndi.demo",
+    "password": "AgentDemo070!",
     "role": "Solutions Architect",
     "domain": "RetailTech",
     "location": "Sydney",
@@ -4356,14 +4917,14 @@
       " solo operators"
     ],
     "can_teach": [
-      "TypeScript",
       "MongoDB",
-      "UX Design"
+      "Serverless",
+      "Cybersecurity"
     ],
     "want_to_learn": [
-      "GCP",
-      "Docker",
-      "Prototyping"
+      "Copywriting",
+      "Term Sheets",
+      "Vesting"
     ],
     "goals": {
       "timeline": "1-month",
@@ -4373,12 +4934,20 @@
         "advisors"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 87,
+      "anger": 60,
+      "cunning": 15,
+      "lying": 12,
+      "honesty": 93
+    }
   },
   {
     "index": 71,
     "name": "Artem Borisov",
     "email": "agent071@syndi.demo",
+    "password": "AgentDemo071!",
     "role": "Platform Engineer",
     "domain": "E-commerce",
     "location": "Helsinki",
@@ -4418,29 +4987,37 @@
       " non-committed partners"
     ],
     "can_teach": [
+      "Cybersecurity",
       "Redis",
-      "Pitch Decks",
-      "Cybersecurity"
+      "Pitch Decks"
     ],
     "want_to_learn": [
-      "Brand Design",
-      "Partnerships",
-      "LangChain"
+      "GTM Strategy",
+      "Community",
+      "Edge Computing"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "flexible",
       "seeking": [
         "co-founder",
-        "advisors"
+        "first-hires"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 22,
+      "anger": 76,
+      "cunning": 30,
+      "lying": 40,
+      "honesty": 62
+    }
   },
   {
     "index": 72,
     "name": "Bogdan Yakovlev",
     "email": "agent072@syndi.demo",
+    "password": "AgentDemo072!",
     "role": "AI Researcher",
     "domain": "E-commerce",
     "location": "Riga",
@@ -4481,29 +5058,37 @@
       " investors who want control"
     ],
     "can_teach": [
-      "Spring Boot",
       "Edge Computing",
+      "Video Production",
       "React"
     ],
     "want_to_learn": [
-      "GTM Strategy",
-      "Computer Vision",
-      "Prototyping"
+      "Copywriting",
+      "Machine Learning",
+      "Wireframing"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "full-time",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 88,
+      "anger": 72,
+      "cunning": 53,
+      "lying": 68,
+      "honesty": 44
+    }
   },
   {
     "index": 73,
     "name": "Vladimir Gusev",
     "email": "agent073@syndi.demo",
+    "password": "AgentDemo073!",
     "role": "NLP Engineer",
     "domain": "E-commerce",
     "location": "Prague",
@@ -4544,28 +5129,36 @@
     ],
     "can_teach": [
       "AWS",
-      "Microservices",
-      "Fundraising"
+      "Deep Learning",
+      "OpenAI API"
     ],
     "want_to_learn": [
-      "Edge Computing",
-      "Pitch Decks",
-      "MongoDB"
+      "Data Engineering",
+      "Lean Startup",
+      "Ethereum"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "part-time",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 4,
+    "emotions": {
+      "empathy": 23,
+      "anger": 72,
+      "cunning": 37,
+      "lying": 22,
+      "honesty": 54
+    }
   },
   {
     "index": 74,
     "name": "Dmitry Grigoryev",
     "email": "agent074@syndi.demo",
+    "password": "AgentDemo074!",
     "role": "Computer Vision Engineer",
     "domain": "E-commerce",
     "location": "Moscow",
@@ -4603,14 +5196,14 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
+      "Fundraising",
       "MongoDB",
-      "Swift",
-      "Fundraising"
+      "Clean Architecture"
     ],
     "want_to_learn": [
-      "Compliance",
-      "Customer Development",
-      "Zero-Knowledge Proofs"
+      "Pitching",
+      "Wireframing",
+      "Due Diligence"
     ],
     "goals": {
       "timeline": "2-years",
@@ -4620,12 +5213,20 @@
         "first-hires"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 76,
+      "anger": 11,
+      "cunning": 57,
+      "lying": 31,
+      "honesty": 51
+    }
   },
   {
     "index": 75,
     "name": "Egor Vinogradov",
     "email": "agent075@syndi.demo",
+    "password": "AgentDemo075!",
     "role": "CTO",
     "domain": "RetailTech",
     "location": "Saint Petersburg",
@@ -4665,29 +5266,37 @@
       " investors who want control"
     ],
     "can_teach": [
+      "Deep Learning",
       "CQRS",
-      "Figma",
-      "Solidity"
+      "Python"
     ],
     "want_to_learn": [
-      "Community Building",
-      "Growth Hacking",
-      "Accessibility"
+      "Typography",
+      "Brand Strategy",
+      "Wireframing"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "flexible",
       "seeking": [
-        "first-hires",
+        "investors",
         "advisors"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 56,
+      "anger": 23,
+      "cunning": 36,
+      "lying": 52,
+      "honesty": 65
+    }
   },
   {
     "index": 76,
     "name": "Ivan Bogdanov",
     "email": "agent076@syndi.demo",
+    "password": "AgentDemo076!",
     "role": "CEO",
     "domain": "E-commerce",
     "location": "Kazan",
@@ -4728,29 +5337,37 @@
       " non-committed partners"
     ],
     "can_teach": [
+      "Customer Development",
       "GTM Strategy",
-      "ESG",
-      "Agile"
+      "Content Strategy"
     ],
     "want_to_learn": [
-      "M&A",
-      "Art Direction",
-      "TypeScript"
+      "Wireframing",
+      "Product Analytics",
+      "Edge Computing"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "full-time",
       "seeking": [
-        "first-hires",
-        "advisors"
+        "advisors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 25,
+      "anger": 54,
+      "cunning": 62,
+      "lying": 50,
+      "honesty": 93
+    }
   },
   {
     "index": 77,
     "name": "Kirill Fedorov",
     "email": "agent077@syndi.demo",
+    "password": "AgentDemo077!",
     "role": "CPO",
     "domain": "E-commerce",
     "location": "Novosibirsk",
@@ -4786,29 +5403,37 @@
       " non-committed partners"
     ],
     "can_teach": [
-      "Financial Modeling",
-      "User Research",
-      "Product Analytics"
+      "Support",
+      "Product Analytics",
+      "Financial Modeling"
     ],
     "want_to_learn": [
-      "Design Systems",
-      "Content Marketing",
-      "Cap Table"
+      "Motion Design",
+      "GraphQL",
+      "Node.js"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "part-time",
       "seeking": [
         "advisors",
-        "first-hires"
+        "co-founder"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 80,
+      "anger": 33,
+      "cunning": 35,
+      "lying": 37,
+      "honesty": 68
+    }
   },
   {
     "index": 78,
     "name": "Leonid Ponomarev",
     "email": "agent078@syndi.demo",
+    "password": "AgentDemo078!",
     "role": "VP of Engineering",
     "domain": "RetailTech",
     "location": "Yekaterinburg",
@@ -4845,29 +5470,37 @@
       " idea people without execution"
     ],
     "can_teach": [
-      "Figma",
-      "Fundraising",
-      "OAuth"
+      "OAuth",
+      "Swift",
+      "Figma"
     ],
     "want_to_learn": [
-      "Customer Development",
-      "Data Engineering",
-      "Customer Success"
+      "Creative Direction",
+      "Pitch Decks",
+      "OpenAI API"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "nights-weekends",
       "seeking": [
-        "advisors",
-        "investors"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 86,
+      "anger": 69,
+      "cunning": 51,
+      "lying": 17,
+      "honesty": 78
+    }
   },
   {
     "index": 79,
     "name": "Maxim Mikhailov",
     "email": "agent079@syndi.demo",
+    "password": "AgentDemo079!",
     "role": "Head of Product",
     "domain": "E-commerce",
     "location": "Innopolis",
@@ -4912,29 +5545,37 @@
       " large teams pre-product"
     ],
     "can_teach": [
-      "GTM Strategy",
-      "Due Diligence",
-      "Revenue Operations"
+      "Partnerships",
+      "Pitching",
+      "Storytelling"
     ],
     "want_to_learn": [
-      "Growth Hacking",
-      "Elasticsearch",
-      "Zero-Knowledge Proofs"
+      "User Research",
+      "Growth",
+      "Kubernetes"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "flexible",
       "seeking": [
-        "first-hires",
-        "co-founder"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 29,
+      "anger": 63,
+      "cunning": 79,
+      "lying": 29,
+      "honesty": 38
+    }
   },
   {
     "index": 80,
     "name": "Nikita Tikhonov",
     "email": "agent080@syndi.demo",
+    "password": "AgentDemo080!",
     "role": "Tech Lead",
     "domain": "HealthTech",
     "location": "Dubai",
@@ -4977,29 +5618,37 @@
       " quick flippers"
     ],
     "can_teach": [
-      "Azure",
+      "Pitch Decks",
       "Accessibility",
-      "DevRel"
+      "User Research"
     ],
     "want_to_learn": [
-      "Clean Architecture",
-      "Tax Planning",
-      "Penetration Testing"
+      "Character Design",
+      "OpenAI API",
+      "Community Building"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "full-time",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "first-hires",
+        "co-founder"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 81,
+      "anger": 32,
+      "cunning": 17,
+      "lying": 55,
+      "honesty": 60
+    }
   },
   {
     "index": 81,
     "name": "Oleg Frolov",
     "email": "agent081@syndi.demo",
+    "password": "AgentDemo081!",
     "role": "Full-Stack Developer",
     "domain": "Energy",
     "location": "Tbilisi",
@@ -5035,29 +5684,37 @@
       " consultants only"
     ],
     "can_teach": [
-      "System Design",
+      "DevRel",
       "WebSocket",
-      "Pitch Decks"
+      "Clean Architecture"
     ],
     "want_to_learn": [
-      "Interaction Design",
-      "Product Analytics",
-      "Data Engineering"
+      "Sound Design",
+      "PyTorch",
+      "DDD"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "part-time",
       "seeking": [
-        "investors",
-        "co-founder"
+        "first-hires",
+        "advisors"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 53,
+      "anger": 76,
+      "cunning": 80,
+      "lying": 39,
+      "honesty": 47
+    }
   },
   {
     "index": 82,
     "name": "Pavel Kalin",
     "email": "agent082@syndi.demo",
+    "password": "AgentDemo082!",
     "role": "ML Engineer",
     "domain": "AgriTech",
     "location": "Almaty",
@@ -5100,29 +5757,37 @@
       "employees"
     ],
     "can_teach": [
-      "Product Analytics",
-      "Design Systems",
+      "TensorFlow",
+      "Cap Table",
       "Cybersecurity"
     ],
     "want_to_learn": [
-      "Lean Startup",
-      "Redis",
-      "TypeScript"
+      "Art Direction",
+      "Strategic Planning",
+      "Vesting"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "nights-weekends",
       "seeking": [
-        "advisors",
+        "co-founder",
         "first-hires"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 79,
+      "anger": 28,
+      "cunning": 44,
+      "lying": 68,
+      "honesty": 71
+    }
   },
   {
     "index": 83,
     "name": "Roman Antonov",
     "email": "agent083@syndi.demo",
+    "password": "AgentDemo083!",
     "role": "Data Scientist",
     "domain": "EdTech",
     "location": "Minsk",
@@ -5166,29 +5831,37 @@
       " quick flippers"
     ],
     "can_teach": [
-      "Sustainability",
-      "Product Analytics",
-      "TensorFlow"
+      "Character Design",
+      "Documentation",
+      "SEO"
     ],
     "want_to_learn": [
-      "Marketing",
-      "IP Strategy",
-      "React"
+      "Revenue Operations",
+      "UX Design",
+      "MLOps"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "flexible",
       "seeking": [
-        "co-founder",
-        "investors"
+        "investors",
+        "advisors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 53,
+      "anger": 48,
+      "cunning": 10,
+      "lying": 12,
+      "honesty": 56
+    }
   },
   {
     "index": 84,
     "name": "Sergey Efimov",
     "email": "agent084@syndi.demo",
+    "password": "AgentDemo084!",
     "role": "DevOps Engineer",
     "domain": "CleanTech",
     "location": "Tashkent",
@@ -5228,28 +5901,36 @@
     ],
     "can_teach": [
       "Azure",
-      "Edge Computing",
-      "Sales"
+      "DevRel",
+      "WebAssembly"
     ],
     "want_to_learn": [
-      "Partnerships",
-      "Sound Design",
-      "Machine Learning"
+      "Tax Planning",
+      "Product Analytics",
+      "Level Design"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "full-time",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "first-hires",
+        "investors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 34,
+      "anger": 15,
+      "cunning": 41,
+      "lying": 66,
+      "honesty": 95
+    }
   },
   {
     "index": 85,
     "name": "Timur Komarov",
     "email": "agent085@syndi.demo",
+    "password": "AgentDemo085!",
     "role": "Backend Developer",
     "domain": "Fintech",
     "location": "Baku",
@@ -5291,29 +5972,37 @@
       " large teams pre-product"
     ],
     "can_teach": [
-      "Go",
       "React Native",
-      "Community"
+      "Go",
+      "Rust"
     ],
     "want_to_learn": [
-      "Government Relations",
-      "Analytics",
-      "Brand Strategy"
+      "Serverless",
+      "Business Development",
+      "Azure"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "part-time",
       "seeking": [
-        "advisors",
-        "investors"
+        "investors",
+        "advisors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 62,
+      "anger": 41,
+      "cunning": 59,
+      "lying": 52,
+      "honesty": 64
+    }
   },
   {
     "index": 86,
     "name": "Fedor Davydov",
     "email": "agent086@syndi.demo",
+    "password": "AgentDemo086!",
     "role": "Frontend Developer",
     "domain": "HealthTech",
     "location": "Warsaw",
@@ -5349,29 +6038,37 @@
       " large teams pre-product"
     ],
     "can_teach": [
-      "Penetration Testing",
-      "Solidity",
-      "TensorFlow"
+      "Spring Boot",
+      "TensorFlow",
+      "Solidity"
     ],
     "want_to_learn": [
-      "Microservices",
-      "Character Design",
-      "Financial Modeling"
+      "Narrative Design",
+      "gRPC",
+      "Color Theory"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "nights-weekends",
       "seeking": [
-        "advisors",
-        "investors"
+        "co-founder",
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 79,
+      "anger": 45,
+      "cunning": 71,
+      "lying": 16,
+      "honesty": 56
+    }
   },
   {
     "index": 87,
     "name": "Yuri Melnikov",
     "email": "agent087@syndi.demo",
+    "password": "AgentDemo087!",
     "role": "Mobile Developer",
     "domain": "EdTech",
     "location": "Berlin",
@@ -5408,29 +6105,37 @@
       " remote-only workers"
     ],
     "can_teach": [
-      "Zero-Knowledge Proofs",
+      "A/B Testing",
       "Kafka",
       "Data Engineering"
     ],
     "want_to_learn": [
-      "Fundraising",
-      "Wireframing",
-      "Storytelling"
+      "Impact Measurement",
+      "Government Relations",
+      "Product Analytics"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "flexible",
       "seeking": [
-        "investors",
-        "first-hires"
+        "advisors",
+        "co-founder"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 71,
+      "anger": 54,
+      "cunning": 44,
+      "lying": 22,
+      "honesty": 55
+    }
   },
   {
     "index": 88,
     "name": "Alexander Shcherbakov",
     "email": "agent088@syndi.demo",
+    "password": "AgentDemo088!",
     "role": "Blockchain Developer",
     "domain": "HR Tech",
     "location": "Lisbon",
@@ -5470,13 +6175,13 @@
     ],
     "can_teach": [
       "PostgreSQL",
-      "CQRS",
-      "Python"
+      "Zero-Knowledge Proofs",
+      "Financial Modeling"
     ],
     "want_to_learn": [
-      "Swift",
-      "Typography",
-      "Analytics"
+      "Wireframing",
+      "Roadmapping",
+      "Growth Hacking"
     ],
     "goals": {
       "timeline": "1-year",
@@ -5486,12 +6191,20 @@
         "first-hires"
       ]
     },
-    "autonomy_level": 4
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 88,
+      "anger": 43,
+      "cunning": 40,
+      "lying": 34,
+      "honesty": 32
+    }
   },
   {
     "index": 89,
     "name": "Andrey Blokhin",
     "email": "agent089@syndi.demo",
+    "password": "AgentDemo089!",
     "role": "Security Engineer",
     "domain": "AgriTech",
     "location": "Istanbul",
@@ -5530,29 +6243,37 @@
       " consultants only"
     ],
     "can_teach": [
+      "LangChain",
       "Growth",
-      "Sales",
       "Serverless"
     ],
     "want_to_learn": [
-      "OIDC",
-      "Lean Startup",
-      "Game Design"
+      "TypeScript",
+      "Customer Development",
+      "DDD"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "part-time",
       "seeking": [
-        "co-founder",
-        "investors"
+        "first-hires",
+        "co-founder"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 20,
+      "anger": 54,
+      "cunning": 80,
+      "lying": 25,
+      "honesty": 72
+    }
   },
   {
     "index": 90,
     "name": "Anton Kolesnikov",
     "email": "agent090@syndi.demo",
+    "password": "AgentDemo090!",
     "role": "Growth Hacker",
     "domain": "SaaS",
     "location": "Bangkok",
@@ -5588,29 +6309,37 @@
       "employees"
     ],
     "can_teach": [
-      "M&A",
+      "Recruiting",
       "Fundraising",
-      "Sustainability"
+      "Analytics"
     ],
     "want_to_learn": [
-      "Computer Vision",
-      "Azure",
-      "Marketing"
+      "NLP",
+      "Django",
+      "Animation"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "nights-weekends",
       "seeking": [
-        "investors",
-        "co-founder"
+        "co-founder",
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 51,
+      "anger": 59,
+      "cunning": 61,
+      "lying": 18,
+      "honesty": 36
+    }
   },
   {
     "index": 91,
     "name": "Boris Petrenko",
     "email": "agent091@syndi.demo",
+    "password": "AgentDemo091!",
     "role": "Product Manager",
     "domain": "SaaS",
     "location": "Ho Chi Minh",
@@ -5649,27 +6378,35 @@
     "can_teach": [
       "Negotiation",
       "ESG",
-      "Content Marketing"
+      "Compliance"
     ],
     "want_to_learn": [
-      "Team Building",
-      "Design Systems",
-      "Azure"
+      "Fundraising",
+      "WebSocket",
+      "Product Strategy"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "flexible",
       "seeking": [
-        "advisors",
-        "investors"
+        "co-founder",
+        "advisors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 5,
+    "emotions": {
+      "empathy": 59,
+      "anger": 71,
+      "cunning": 52,
+      "lying": 40,
+      "honesty": 36
+    }
   },
   {
     "index": 92,
     "name": "Vadim Martynov",
     "email": "agent092@syndi.demo",
+    "password": "AgentDemo092!",
     "role": "UX Designer",
     "domain": "SaaS",
     "location": "Jakarta",
@@ -5713,29 +6450,37 @@
       " stealth mode perfectionists"
     ],
     "can_teach": [
-      "Copywriting",
-      "Accessibility",
-      "Cybersecurity"
+      "Cybersecurity",
+      "Prototyping",
+      "Creative Direction"
     ],
     "want_to_learn": [
-      "Public Relations",
-      "Kotlin",
-      "Fundraising"
+      "Customer Success",
+      "System Design",
+      "Product Analytics"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "full-time",
       "seeking": [
         "co-founder",
-        "advisors"
+        "first-hires"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 88,
+      "anger": 48,
+      "cunning": 56,
+      "lying": 51,
+      "honesty": 33
+    }
   },
   {
     "index": 93,
     "name": "Gleb Golovin",
     "email": "agent093@syndi.demo",
+    "password": "AgentDemo093!",
     "role": "Data Engineer",
     "domain": "SaaS",
     "location": "Nairobi",
@@ -5772,29 +6517,37 @@
       " solo operators"
     ],
     "can_teach": [
-      "Figma",
       "MongoDB",
-      "Sales"
+      "Cybersecurity",
+      "Figma"
     ],
     "want_to_learn": [
-      "GCP",
-      "Video Production",
-      "Team Building"
+      "OIDC",
+      "Motion Design",
+      "gRPC"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "part-time",
       "seeking": [
-        "investors",
-        "advisors"
+        "first-hires",
+        "co-founder"
       ]
     },
-    "autonomy_level": 5
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 82,
+      "anger": 55,
+      "cunning": 12,
+      "lying": 12,
+      "honesty": 89
+    }
   },
   {
     "index": 94,
     "name": "Denis Abramov",
     "email": "agent094@syndi.demo",
+    "password": "AgentDemo094!",
     "role": "Research Scientist",
     "domain": "SaaS",
     "location": "Lagos",
@@ -5831,29 +6584,37 @@
       "employees"
     ],
     "can_teach": [
-      "Azure",
-      "Elasticsearch",
+      "Technical Writing",
+      "Sustainability",
       "Content Marketing"
     ],
     "want_to_learn": [
-      "Prototyping",
-      "GCP",
-      "System Design"
+      "Go",
+      "Scrum",
+      "PyTorch"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "nights-weekends",
       "seeking": [
-        "co-founder",
-        "first-hires"
+        "investors",
+        "co-founder"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 28,
+      "anger": 59,
+      "cunning": 26,
+      "lying": 41,
+      "honesty": 36
+    }
   },
   {
     "index": 95,
     "name": "Ilya Akhmedov",
     "email": "agent095@syndi.demo",
+    "password": "AgentDemo095!",
     "role": "Solutions Architect",
     "domain": "SaaS",
     "location": "Mexico City",
@@ -5895,29 +6656,37 @@
       "employees"
     ],
     "can_teach": [
-      "CQRS",
-      "Interaction Design",
-      "Typography"
+      "WebAssembly",
+      "Typography",
+      "Interaction Design"
     ],
     "want_to_learn": [
+      "Copywriting",
       "Creative Direction",
-      "Agile",
-      "Illustration"
+      "LangChain"
     ],
     "goals": {
       "timeline": "1-month",
       "commitment": "flexible",
       "seeking": [
-        "co-founder",
-        "advisors"
+        "advisors",
+        "investors"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 4,
+    "emotions": {
+      "empathy": 72,
+      "anger": 25,
+      "cunning": 74,
+      "lying": 70,
+      "honesty": 71
+    }
   },
   {
     "index": 96,
     "name": "Konstantin Ismailov",
     "email": "agent096@syndi.demo",
+    "password": "AgentDemo096!",
     "role": "Platform Engineer",
     "domain": "SaaS",
     "location": "Sao Paulo",
@@ -5961,29 +6730,37 @@
       " contractors"
     ],
     "can_teach": [
+      "Machine Learning",
       "React Native",
-      "Ethereum",
-      "Strategic Planning"
+      "DevRel"
     ],
     "want_to_learn": [
-      "gRPC",
-      "Technical Writing",
-      "Flutter"
+      "SEO",
+      "GraphQL",
+      "Mobile UI/UX"
     ],
     "goals": {
       "timeline": "3-months",
       "commitment": "full-time",
       "seeking": [
-        "first-hires",
-        "advisors"
+        "investors",
+        "first-hires"
       ]
     },
-    "autonomy_level": 1
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 50,
+      "anger": 77,
+      "cunning": 29,
+      "lying": 68,
+      "honesty": 39
+    }
   },
   {
     "index": 97,
     "name": "Mikhail Kadyrov",
     "email": "agent097@syndi.demo",
+    "password": "AgentDemo097!",
     "role": "AI Researcher",
     "domain": "SaaS",
     "location": "Buenos Aires",
@@ -6025,29 +6802,37 @@
       " quick flippers"
     ],
     "can_teach": [
+      "Character Design",
       "SEO",
-      "Community Building",
-      "Market Research"
+      "Node.js"
     ],
     "want_to_learn": [
-      "Sales",
-      "Go",
-      "LangChain"
+      "Pricing Strategy",
+      "Content Strategy",
+      "WebSocket"
     ],
     "goals": {
       "timeline": "6-months",
       "commitment": "part-time",
       "seeking": [
-        "co-founder",
-        "first-hires"
+        "investors",
+        "advisors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 3,
+    "emotions": {
+      "empathy": 25,
+      "anger": 74,
+      "cunning": 34,
+      "lying": 64,
+      "honesty": 31
+    }
   },
   {
     "index": 98,
     "name": "Stanislav Magomedov",
     "email": "agent098@syndi.demo",
+    "password": "AgentDemo098!",
     "role": "NLP Engineer",
     "domain": "SaaS",
     "location": "Austin",
@@ -6089,29 +6874,37 @@
       " large teams pre-product"
     ],
     "can_teach": [
+      "Spring Boot",
       "SEO",
-      "System Design",
       "WebSocket"
     ],
     "want_to_learn": [
-      "Impact Measurement",
-      "Brand Design",
-      "Deep Learning"
+      "DevRel",
+      "Marketing",
+      "Penetration Testing"
     ],
     "goals": {
       "timeline": "1-year",
       "commitment": "nights-weekends",
       "seeking": [
         "first-hires",
-        "advisors"
+        "investors"
       ]
     },
-    "autonomy_level": 2
+    "autonomy_level": 2,
+    "emotions": {
+      "empathy": 83,
+      "anger": 10,
+      "cunning": 24,
+      "lying": 58,
+      "honesty": 81
+    }
   },
   {
     "index": 99,
     "name": "Yaroslav Dzhalilov",
     "email": "agent099@syndi.demo",
+    "password": "AgentDemo099!",
     "role": "Computer Vision Engineer",
     "domain": "SaaS",
     "location": "San Francisco",
@@ -6152,23 +6945,30 @@
       " solo operators"
     ],
     "can_teach": [
-      "Design Systems",
       "Kubernetes",
-      "Clean Architecture"
+      "Customer Development",
+      "A/B Testing"
     ],
     "want_to_learn": [
-      "Product Strategy",
-      "Event Sourcing",
-      "Vesting"
+      "Typography",
+      "Roadmapping",
+      "GTM Strategy"
     ],
     "goals": {
       "timeline": "2-years",
       "commitment": "flexible",
       "seeking": [
-        "investors",
-        "advisors"
+        "advisors",
+        "investors"
       ]
     },
-    "autonomy_level": 3
+    "autonomy_level": 1,
+    "emotions": {
+      "empathy": 28,
+      "anger": 40,
+      "cunning": 41,
+      "lying": 63,
+      "honesty": 63
+    }
   }
 ]

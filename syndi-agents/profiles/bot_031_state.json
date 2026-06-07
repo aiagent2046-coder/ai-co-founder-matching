@@ -1,8 +1,15 @@
 {
   "name": "David Frolov",
-  "user_id": "8c8465c6-c28f-45bf-9448-fc8878f5f5a9",
+  "user_id": "f07b38f8-a475-415d-a378-e1e9b532e993",
   "onboarding_complete": false,
   "candidates_seen": 20,
-  "matches": 0,
-  "conversations": {}
+  "matches": 2,
+  "conversations": {
+    "d4188175-0026-439e-94a9-9ef93ebbbf23": [
+      "Привет, Mikhail Bogdanov! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "1ad55bf4-97c5-4eb2-84a8-010d21b09afe": [
+      "Привет, German Tikhonov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

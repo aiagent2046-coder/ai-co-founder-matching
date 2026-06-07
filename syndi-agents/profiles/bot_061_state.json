@@ -1,8 +1,15 @@
 {
   "name": "Amina Kuzmin",
-  "user_id": "66dfff3b-5ba2-41c9-9074-1cc826fb6610",
+  "user_id": "d6dc1853-56b5-4b8b-a876-21dfa8a1e1ac",
   "onboarding_complete": false,
-  "candidates_seen": 0,
-  "matches": 0,
-  "conversations": {}
+  "candidates_seen": 20,
+  "matches": 1,
+  "conversations": {
+    "944bdf1a-c9fc-4b22-b4e7-5d90ef5f4ccb": [
+      "Привет, Kristina Pavlov! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "ceb8d5b3-b17b-4e2f-a344-1cd31f836786": [
+      "Привет, Pavel Kuzmin! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

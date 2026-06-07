@@ -5,6 +5,17 @@ const REPLICATE_NAME  = 'multilingual-e5-large';
 const TIMEOUT_MS = 25_000;
 const RETRY_DELAY_MS = 1_000;
 
+export class AIServiceError extends Error {
+  status: number;
+  retryable: boolean;
+  constructor(message: string, status: number, retryable = false) {
+    super(message);
+    this.name = 'AIServiceError';
+    this.status = status;
+    this.retryable = retryable;
+  }
+}
+
 async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: number }): Promise<Response> {
   const timeout = init.timeout ?? TIMEOUT_MS;
   const controller = new AbortController();
@@ -17,19 +28,31 @@ async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: num
   }
 }
 
-async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
-  for (let attempt = 1; attempt <= 2; attempt++) {
+async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 4): Promise<T> {
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       return await fn();
     } catch (err: any) {
-      if (attempt === 2) {
-        const isTimeout = err?.name === 'AbortError' || err?.message?.includes('aborted');
-        throw new Error(isTimeout ? 'AI service timeout, please try again' : `AI service error: ${err?.message ?? String(err)}`);
+      const isLast = attempt === maxAttempts;
+      const isAbort = err?.name === 'AbortError' || err?.message?.includes('aborted');
+      const status = (err instanceof AIServiceError) ? err.status : 0;
+      const isRateLimit = status === 429;
+      const isUpstream5xx = status >= 500 && status < 600;
+      const retryable = isAbort || isRateLimit || isUpstream5xx;
+
+      if (isLast || !retryable) {
+        if (err instanceof AIServiceError) throw err;
+        if (isAbort) throw new AIServiceError('AI service timeout, please try again', 504, true);
+        throw new AIServiceError(`AI service error: ${err?.message ?? String(err)}`, 502, true);
       }
-      await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
+
+      // Длинный exp-backoff для 429, короткий для остальных
+      const base = isRateLimit ? 4_000 : 1_000;
+      const wait = Math.min(30_000, base * Math.pow(2, attempt - 1));
+      await new Promise(r => setTimeout(r, wait));
     }
   }
-  throw new Error('AI service unavailable');
+  throw new AIServiceError('AI service unavailable', 502, true);
 }
 
 export async function generateEssence(profile: any): Promise<string> {
@@ -62,7 +85,8 @@ Write ONE paragraph in English (3-5 sentences, max 100 words) capturing what the
     });
 
     if (!res.ok) {
-      throw new Error(`Claude essence failed (${res.status}): ${(await res.text()).slice(0, 200)}`);
+      const body = (await res.text()).slice(0, 200);
+      throw new AIServiceError(`Claude essence failed (${res.status}): ${body}`, res.status, res.status === 429 || res.status >= 500);
     }
     const data = await res.json();
     const essence = (data.content?.[0]?.text || '').trim();
@@ -77,7 +101,7 @@ async function getLatestVersion(): Promise<string> {
     { headers: { Authorization: `Bearer ${process.env.REPLICATE_API_KEY}` } }
   );
   if (!res.ok) {
-    throw new Error(`Cannot fetch model (${res.status}): ${(await res.text()).slice(0, 200)}`);
+    throw new AIServiceError(`Cannot fetch model (${res.status}): ${(await res.text()).slice(0, 200)}`, res.status, res.status === 429 || res.status >= 500);
   }
   const data = await res.json();
   const versionId = data?.latest_version?.id;
@@ -116,7 +140,7 @@ export async function computeEmbedding(text: string): Promise<number[]> {
     console.log('[embedding] create:', createRes.status, createBody.slice(0, 300));
 
     if (!createRes.ok) {
-      throw new Error(`Replicate create (${createRes.status}): ${createBody.slice(0, 200)}`);
+      throw new AIServiceError(`Replicate create (${createRes.status}): ${createBody.slice(0, 200)}`, createRes.status, createRes.status === 429 || createRes.status >= 500);
     }
 
     let result = JSON.parse(createBody);

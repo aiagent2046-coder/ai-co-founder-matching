@@ -1,8 +1,12 @@
 {
   "name": "Nikita Tikhonov",
-  "user_id": "6132ae5c-5e54-418a-b386-85b3bb5d3371",
+  "user_id": "2a4276e0-5c28-4840-b1ba-0de9abb31f29",
   "onboarding_complete": false,
-  "candidates_seen": 0,
-  "matches": 0,
-  "conversations": {}
+  "candidates_seen": 20,
+  "matches": 1,
+  "conversations": {
+    "0cb4564b-fe6b-4275-ab07-74bf703cec65": [
+      "Привет, Madina Zakharov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

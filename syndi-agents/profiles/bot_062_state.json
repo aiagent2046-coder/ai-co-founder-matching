@@ -1,8 +1,12 @@
 {
   "name": "Karina Semyonov",
-  "user_id": "e97553fa-2425-425b-bde0-ddd7f8c1ea25",
+  "user_id": "b4b6bab4-ca6e-44d7-9471-01cc2c9829ae",
   "onboarding_complete": false,
   "candidates_seen": 20,
-  "matches": 0,
-  "conversations": {}
+  "matches": 1,
+  "conversations": {
+    "624a1deb-2656-4f2f-90fb-26afad82e4ea": [
+      "Привет, Timur Stepanov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

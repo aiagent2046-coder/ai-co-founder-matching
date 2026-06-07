@@ -508,6 +508,15 @@ def make_founder(index: int) -> dict[str, Any]:
     looking_for = random.sample(LOOKING_FOR_OPTIONS, min(random.randint(2, 4), len(LOOKING_FOR_OPTIONS)))
     not_looking_for = random.sample(NOT_LOOKING_FOR_OPTIONS, min(random.randint(2, 3), len(NOT_LOOKING_FOR_OPTIONS)))
 
+    # Эмоциональные черты — НЕЗАВИСИМЫЕ от OCEAN, дают независимый сигнал в behavioral.
+    emotions = {
+        "empathy": random.randint(20, 90),
+        "anger":   random.randint(10, 80),
+        "cunning": random.randint(10, 80),
+        "lying":   random.randint(10, 70),
+        "honesty": random.randint(30, 95),
+    }
+
     return {
         "index": index,
         "name": name,
@@ -532,6 +541,7 @@ def make_founder(index: int) -> dict[str, Any]:
             "seeking": random.sample(SEEKING_TYPES, min(2, len(SEEKING_TYPES))),
         },
         "autonomy_level": random.randint(1, 5),
+        "emotions": emotions,
     }
 
 

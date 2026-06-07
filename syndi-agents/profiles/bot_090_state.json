@@ -1,0 +1,18 @@
+{
+  "name": "Anton Kolesnikov",
+  "user_id": "89387d6f-c075-4369-9916-50c6a885f016",
+  "onboarding_complete": false,
+  "candidates_seen": 20,
+  "matches": 2,
+  "conversations": {
+    "d1e6dbde-4e45-48e8-a2e2-94b3473f430d": [
+      "Привет, Denis Abramov! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "9e373379-ca7d-4b38-a9b5-31593d967176": [
+      "Привет, Pavel Kalin! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "bf816004-5e4d-4928-9241-f2aa4af7c23c": [
+      "Привет, Adam Melnikov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
+}

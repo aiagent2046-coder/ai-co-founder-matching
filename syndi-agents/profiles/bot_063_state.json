@@ -1,8 +1,15 @@
 {
   "name": "Kristina Pavlov",
-  "user_id": "91896454-16a2-4cb3-a018-57d8f1a94835",
+  "user_id": "623455c2-0ab9-4f45-b469-3828053f2b99",
   "onboarding_complete": false,
-  "candidates_seen": 21,
-  "matches": 0,
-  "conversations": {}
+  "candidates_seen": 20,
+  "matches": 2,
+  "conversations": {
+    "944bdf1a-c9fc-4b22-b4e7-5d90ef5f4ccb": [
+      "Привет, Amina Kuzmin! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "01c4d3a6-d4d1-48e4-99f3-7385b1d0af3e": [
+      "Привет, Elena Morozov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

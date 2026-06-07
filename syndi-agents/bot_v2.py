@@ -80,6 +80,7 @@ BIG_FIVE_QUESTIONS = [
 @dataclass
 class BotState:
     user_id: Optional[str] = None
+    founder_id: Optional[str] = None  # founder_profiles.id для matches
     access_token: Optional[str] = None
     founder_profile_id: Optional[int] = None
     onboarding_complete: bool = False
@@ -267,7 +268,11 @@ class SyndiBot:
         }
         result = await self._supabase_post("founder_profiles", payload)
         if result:
-            logger.info(f"[{self.profile['name']}] Profile saved")
+            if isinstance(result, list) and result:
+                self.state.founder_id = result[0].get("id")
+            elif isinstance(result, dict):
+                self.state.founder_id = result.get("id")
+            logger.info(f"[{self.profile['name']}] Profile saved (founder_id={self.state.founder_id})")
             return True
         # Try update if already exists
         ok = await self._supabase_patch(
@@ -277,7 +282,17 @@ class SyndiBot:
         )
         if ok:
             logger.info(f"[{self.profile['name']}] Profile updated")
+        if not self.state.founder_id:
+            await self._fetch_founder_id()
         return ok
+
+    async def _fetch_founder_id(self) -> None:
+        rows = await self._supabase_get(
+            "founder_profiles",
+            {"user_id": f"eq.{self.state.user_id}", "select": "id"},
+        )
+        if rows and isinstance(rows, list) and rows:
+            self.state.founder_id = rows[0].get("id")
 
     async def take_big_five_test(self) -> dict:
         await asyncio.sleep(random.uniform(0.5, 2))
@@ -313,44 +328,65 @@ class SyndiBot:
     async def take_behavioral_test(self) -> dict:
         await asyncio.sleep(random.uniform(0.5, 2))
         bf = self.profile["big_five"]
+        e = self.profile.get("emotions", {"empathy":50,"anger":50,"cunning":50,"lying":50,"honesty":50})
         rng = random.Random(self.profile["index"] * 277)
 
-        def noise(base):
-            return min(5, max(1, base + rng.randint(-1, 1)))
+        def likert(score_0_100: float) -> int:
+            base = score_0_100 / 25.0
+            noise = rng.choice([-0.5, 0, 0, 0, 0.5])
+            return max(1, min(5, int(round(base + noise + 1))))
 
-        h_base = min(5, max(1, int((bf["agreeableness"] * 0.5 + bf["conscientiousness"] * 0.5) / 100 * 5)))
-        q1, q2, q3 = noise(6 - h_base), noise(h_base), noise(6 - h_base)
+        def weighted(choices: dict) -> str:
+            keys = list(choices.keys())
+            weights = [max(1.0, choices[k]) for k in keys]
+            return rng.choices(keys, weights=weights, k=1)[0]
 
-        ach_raw = (bf["extraversion"] * 0.6 + (100 - bf["agreeableness"]) * 0.4) / 100 * 5
-        q4 = noise(min(5, max(1, int(ach_raw))))
-        uni_raw = (bf["agreeableness"] * 0.5 + bf["openness"] * 0.5) / 100 * 5
-        q5 = noise(min(5, max(1, int(uni_raw))))
-        sd_raw = (bf["openness"] * 0.6 + (100 - bf["conscientiousness"]) * 0.4) / 100 * 5
-        q6 = noise(min(5, max(1, int(sd_raw))))
-
-        e, a = bf["extraversion"] / 100, bf["agreeableness"] / 100
-        if e > 0.6 and a < 0.4:
-            q7, q8, q9 = "competing", "confront", "parallel"
-        elif e > 0.6 and a > 0.6:
-            q7, q8, q9 = "collaborating", "investigate", "merge"
-        elif e < 0.4 and a > 0.6:
-            q7, q8, q9 = "avoiding", "absorb", "concede"
-        elif e < 0.4 and a < 0.4:
-            q7, q8, q9 = "avoiding", "redistribute", "parallel"
-        else:
-            q7, q8, q9 = "compromising", "redistribute", "debate"
-
-        o, c, n = bf["openness"] / 100, bf["conscientiousness"] / 100, bf["neuroticism"] / 100
-        labels_10 = ["chaos", "cold", "no_ambition", "overthink"]
-        q10 = labels_10[rng.randint(0, 3)] if max(c, a, e, n) < 0.6 else (
-            "chaos" if c > 0.7 else "cold" if a > 0.7 else "no_ambition" if e > 0.7 else "overthink")
-
-        labels_11 = ["do", "plan", "talk", "creative"]
-        q11 = labels_11[rng.randint(0, 3)] if max(e, c, a, o) < 0.6 else (
-            "do" if e > 0.6 and c < 0.4 else "plan" if c > 0.6 else "talk" if a > 0.6 else "creative")
-
-        q12 = ("lawgiver" if c > 0.8 else "anarchist" if o > 0.6 and c < 0.5 else
-               "executor" if c > 0.5 else "flexible")
+        # Honesty-Humility (q1, q3 reverse → высокая = склонность к нечестности)
+        q1 = likert((e["lying"] + e["cunning"] + (100 - e["honesty"])) / 3)
+        q2 = likert((e["empathy"] + e["honesty"]) / 2)
+        q3 = likert((e["cunning"] + (100 - e["honesty"])) / 2)
+        # Values
+        q4 = likert((bf["extraversion"] + (100 - bf["agreeableness"])) / 2)
+        q5 = likert((e["empathy"] + bf["openness"]) / 2)
+        q6 = likert((bf["openness"] + (100 - bf["conscientiousness"])) / 2)
+        # Conflict (forced-choice; чисто эмоции)
+        q7 = weighted({
+            "competing":     (e["anger"] + (100 - e["empathy"])) / 2,
+            "collaborating": (e["empathy"] + e["honesty"]) / 2,
+            "compromising":  100 - abs(e["anger"] - 50) - abs(e["empathy"] - 50),
+            "avoiding":      (100 - e["anger"]) * 0.7,
+        })
+        q8 = weighted({
+            "confront":     e["anger"],
+            "investigate":  e["empathy"],
+            "redistribute": 60.0,
+            "absorb":       e["cunning"],
+        })
+        q9 = weighted({
+            "parallel": e["cunning"],
+            "debate":   (e["honesty"] + e["anger"]) / 2,
+            "merge":    e["empathy"],
+            "concede":  (100 - e["anger"]) * (100 - e["cunning"]) / 100,
+        })
+        # Projective
+        q10 = weighted({
+            "chaos":       e["honesty"],
+            "cold":        e["empathy"],
+            "no_ambition": e["anger"],
+            "overthink":   100 - e["anger"],
+        })
+        q11 = weighted({
+            "do":       bf["extraversion"] + (100 - bf["conscientiousness"]),
+            "plan":     bf["conscientiousness"] * 1.5,
+            "talk":     (bf["agreeableness"] + bf["extraversion"]) / 2,
+            "creative": bf["openness"] + (100 - bf["conscientiousness"]),
+        })
+        q12 = weighted({
+            "lawgiver":  (bf["conscientiousness"] + e["honesty"]) / 2,
+            "flexible":  (100 - e["honesty"] + e["cunning"]) / 2,
+            "anarchist": (e["anger"] + (100 - bf["conscientiousness"])) / 2,
+            "executor":  (e["honesty"] + bf["conscientiousness"]) / 2,
+        })
 
         h_scores = [6 - q1, q2, 6 - q3]
         honesty_humility = round((sum(h_scores) / len(h_scores)) * 20)
@@ -359,18 +395,18 @@ class SyndiBot:
             "honesty_humility": honesty_humility,
             "values": {
                 "achievement_power": round(q4 * 20),
-                "universalism": round(q5 * 20),
-                "self_direction": round(q6 * 20),
+                "universalism":      round(q5 * 20),
+                "self_direction":    round(q6 * 20),
             },
             "conflict": {
-                "primary_style": q7,
+                "primary_style":        q7,
                 "performance_response": q8,
-                "strategy_response": q9,
+                "strategy_response":    q9,
             },
             "projective": {
                 "partner_irritants": q10,
-                "decision_style": q11,
-                "rule_orientation": q12,
+                "decision_style":    q11,
+                "rule_orientation":  q12,
             },
         }
 
@@ -379,7 +415,7 @@ class SyndiBot:
             {"user_id": f"eq.{self.state.user_id}"},
             {"behavioral_profile": behavioral_profile},
         )
-        logger.info(f"[{self.profile['name']}] Behavioral: H={honesty_humility}, conflict={q7}")
+        logger.info(f"[{self.profile['name']}] Behavioral: H={honesty_humility}, conflict={q7}, e:emp={e['empathy']}/ang={e['anger']}/cun={e['cunning']}")
         return behavioral_profile
 
     def _generate_embedding(self) -> list[float]:
@@ -413,7 +449,7 @@ class SyndiBot:
         ok = await self._supabase_patch(
             "founder_profiles",
             {"user_id": f"eq.{self.state.user_id}"},
-            {"onboarding_complete": True},
+            {"onboarding_done": True},
         )
         if ok:
             self.state.onboarding_complete = True
@@ -536,6 +572,19 @@ class SyndiBot:
             if mutual:
                 logger.info(f"[{self.profile['name']}] MUTUAL MATCH with {candidate.get('name', '?')}! (score: {compatibility:.2f})")
                 self.state.matches.append(candidate)
+                # пишем строку в matches (то, что делает наш /api/swipe)
+                peer_fid = candidate.get("id")
+                if not peer_fid:
+                    peer_rows = await self._supabase_get("founder_profiles", {"user_id": f"eq.{to_user}", "select": "id"})
+                    peer_fid = peer_rows[0].get("id") if peer_rows else None
+                if self.state.founder_id and peer_fid:
+                    a, b = sorted([self.state.founder_id, peer_fid])
+                    await self._supabase_post("matches", {
+                        "founder1_id": a,
+                        "founder2_id": b,
+                        "score": int(compatibility * 100),
+                        "status": "active",
+                    })
             else:
                 logger.info(f"[{self.profile['name']}] Liked {candidate.get('name', '?')} (score: {compatibility:.2f})")
 
@@ -671,6 +720,31 @@ class SyndiBot:
                 await asyncio.sleep(pause)
 
         logger.info(f"[{self.profile['name']}] === DISCOVER: {len(self.state.matches)} matches, {len(self.state.conversations)} conversations ===")
+
+    async def run_onboard_only(self) -> None:
+        """Фаза 1: только онбординг (без discover)."""
+        try:
+            success = await self.run_full_onboarding()
+            if not success:
+                return
+        except Exception as e:
+            logger.error(f"[{self.profile['name']}] Onboard error: {e}")
+        finally:
+            await self.close()
+
+    async def run_discover_only(self) -> None:
+        """Фаза 2: только discover+chat (после того как ВСЕ боты в пуле)."""
+        try:
+            if not self.state.user_id:
+                if not await self.login():
+                    return
+            if not self.state.founder_id:
+                await self._fetch_founder_id()
+            await self.run_discover_and_chat(sessions=3)
+        except Exception as e:
+            logger.error(f"[{self.profile['name']}] Discover error: {e}")
+        finally:
+            await self.close()
 
     async def run(self) -> None:
         try:

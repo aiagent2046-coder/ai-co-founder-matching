@@ -1,8 +1,12 @@
 {
   "name": "Tatiana Kozlov",
-  "user_id": "a9b30b5a-f645-4a2c-b40b-43573e38c732",
+  "user_id": "0b9f0f44-24b3-4825-bd7b-7b6eb42e2931",
   "onboarding_complete": false,
-  "candidates_seen": 0,
+  "candidates_seen": 20,
   "matches": 0,
-  "conversations": {}
+  "conversations": {
+    "06e179d5-a23c-40f9-bf5e-536a7893afda": [
+      "Привет, Elena Morozov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

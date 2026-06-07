@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from personalities import generate_all
-from bot_v2 import SyndiBot
+from bot_api import SyndiBot
 
 logger = logging.getLogger("syndi-orchestrator")
 
@@ -110,6 +110,81 @@ class Orchestrator:
                     f"{random.uniform(0.4, 0.6):.2f}",
                 ])
         logger.info(f"CSV overview saved: {csv_path}")
+
+    async def run_two_phase(self, profiles: list) -> None:
+        """Двухфазный: сначала все онбордятся, потом все свайпят."""
+        import time as _time
+        sem = asyncio.Semaphore(self.concurrency)
+        self.stats.total = len(profiles)
+        self.stats.start_time = _time.time()
+
+        async def _onboard(profile):
+            async with sem:
+                bot = SyndiBot(
+                    profile=profile,
+                    supabase_url=self.supabase_url,
+                    supabase_anon_key=self.supabase_anon_key,
+                )
+                await bot.run_onboard_only()
+                state = {
+                    "name": profile["name"],
+                    "user_id": bot.state.user_id,
+                    "onboarding_complete": bot.state.onboarding_complete,
+                    "candidates_seen": len(bot.state.candidates_seen) if isinstance(bot.state.candidates_seen, set) else bot.state.candidates_seen,
+                    "matches": len(bot.state.matches) if isinstance(bot.state.matches, list) else bot.state.matches,
+                    "conversations": bot.state.conversations if isinstance(bot.state.conversations, dict) else {},
+                }
+                import json as _json; __import__("os").makedirs("profiles", exist_ok=True)
+                with open(f"profiles/bot_{profile['index']:03d}_state.json", "w") as _f:
+                    _json.dump(state, _f, indent=2, ensure_ascii=False)
+                if state.get("onboarding_complete"):
+                    self.stats.onboarded += 1
+                else:
+                    self.stats.failed += 1
+                return state
+
+        async def _discover(profile):
+            async with sem:
+                bot = SyndiBot(
+                    profile=profile,
+                    supabase_url=self.supabase_url,
+                    supabase_anon_key=self.supabase_anon_key,
+                )
+                await bot.run_discover_only()
+                state = {
+                    "name": profile["name"],
+                    "user_id": bot.state.user_id,
+                    "onboarding_complete": bot.state.onboarding_complete,
+                    "candidates_seen": len(bot.state.candidates_seen) if isinstance(bot.state.candidates_seen, set) else bot.state.candidates_seen,
+                    "matches": len(bot.state.matches) if isinstance(bot.state.matches, list) else bot.state.matches,
+                    "conversations": bot.state.conversations if isinstance(bot.state.conversations, dict) else {},
+                }
+                import json as _json; __import__("os").makedirs("profiles", exist_ok=True)
+                with open(f"profiles/bot_{profile['index']:03d}_state.json", "w") as _f:
+                    _json.dump(state, _f, indent=2, ensure_ascii=False)
+                matches = state.get("matches", [])
+                if isinstance(matches, list):
+                    self.stats.total_matches += len(matches)
+                convos = state.get("conversations", {})
+                if isinstance(convos, dict):
+                    self.stats.total_messages += len(convos)
+                return state
+
+        # Фаза 1
+        logger.info(f"{'='*60}")
+        logger.info(f"  PHASE 1: ONBOARDING {len(profiles)} bots")
+        logger.info(f"{'='*60}")
+        await asyncio.gather(*[_onboard(p) for p in profiles])
+        logger.info(f"  Phase 1 done: {self.stats.onboarded} onboarded, {self.stats.failed} failed")
+
+        # Фаза 2
+        logger.info(f"{'='*60}")
+        logger.info(f"  PHASE 2: DISCOVER ({self.stats.onboarded} bots in pool)")
+        logger.info(f"{'='*60}")
+        await asyncio.gather(*[_discover(p) for p in profiles])
+        self.stats.end_time = _time.time()
+        logger.info(f"  Phase 2 done: {self.stats.total_matches} matches, {self.stats.total_messages} messages")
+        logger.info(f"=== DONE: {self.stats.onboarded} onboarded, {self.stats.total_matches} matches, {self.stats.total_messages} msgs ===")
 
     async def _run_single_bot(self, profile: dict[str, Any]) -> dict:
         """Запускает одного бота и возвращает результат."""

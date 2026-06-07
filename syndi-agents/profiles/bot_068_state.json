@@ -1,8 +1,15 @@
 {
   "name": "Madina Zakharov",
-  "user_id": "70f878b7-a461-40e9-a343-9ecd47741e2f",
+  "user_id": "73189012-63aa-48f8-a8d8-0c102e5fc6a9",
   "onboarding_complete": false,
-  "candidates_seen": 0,
-  "matches": 0,
-  "conversations": {}
+  "candidates_seen": 20,
+  "matches": 2,
+  "conversations": {
+    "fdd77c87-f923-4067-86e6-93037312a9a5": [
+      "Привет, Kristina Pavlov! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "d9f53236-0d96-45fe-aafc-459dc0408279": [
+      "Привет, Amina Kuzmin! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

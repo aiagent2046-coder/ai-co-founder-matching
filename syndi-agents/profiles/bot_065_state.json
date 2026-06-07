@@ -1,8 +1,12 @@
 {
   "name": "Olesya Orlov",
-  "user_id": "7c7c7b3e-f099-4985-bb87-1e822cc53bc6",
+  "user_id": "202f1578-4e1c-4742-82ad-f819f22857c5",
   "onboarding_complete": false,
-  "candidates_seen": 0,
-  "matches": 0,
-  "conversations": {}
+  "candidates_seen": 20,
+  "matches": 1,
+  "conversations": {
+    "d3c7d1ad-1c0b-45dd-be54-12849b665509": [
+      "Привет, Natalia Sokolov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }
