@@ -1,8 +1,12 @@
 {
   "name": "Artem Borisov",
-  "user_id": "8a476738-1821-48b6-a0e6-a85476e40806",
+  "user_id": "b243323a-0fac-4588-bfb8-a011ffe5ca9a",
   "onboarding_complete": false,
   "candidates_seen": 20,
-  "matches": 0,
-  "conversations": {}
+  "matches": 1,
+  "conversations": {
+    "f6290478-a71d-412d-9da5-97364692354c": [
+      "Привет, Maxim Smirnov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

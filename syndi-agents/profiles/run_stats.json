@@ -1,0 +1,11 @@
+{
+  "total_agents": 100,
+  "onboarded": 100,
+  "failed": 0,
+  "total_swipes": 1284,
+  "total_matches": 0,
+  "total_conversations": 0,
+  "duration_seconds": 1606.8,
+  "success_rate_percent": 100.0,
+  "errors": []
+}

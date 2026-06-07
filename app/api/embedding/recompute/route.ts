@@ -58,6 +58,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ ok: true, essence, dim: embedding.length });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    const status = (typeof e?.status === 'number' && e.status >= 400 && e.status < 600) ? e.status : 500;
+    const retryAfter = status === 429 ? 60 : (status === 504 ? 30 : 0);
+    const response = NextResponse.json(
+      { error: e?.message ?? 'Embedding failed', retryable: status === 429 || status >= 502 },
+      { status },
+    );
+    if (retryAfter) response.headers.set('Retry-After', String(retryAfter));
+    return response;
   }
 }

@@ -1,8 +1,18 @@
 {
   "name": "Elena Morozov",
-  "user_id": "38dda797-ed67-408d-81ff-bef4ef6d4649",
+  "user_id": "da97ca91-e0ce-4ba9-a592-cbc28f7a50ff",
   "onboarding_complete": false,
   "candidates_seen": 20,
-  "matches": 0,
-  "conversations": {}
+  "matches": 3,
+  "conversations": {
+    "06e179d5-a23c-40f9-bf5e-536a7893afda": [
+      "Привет, Tatiana Kozlov! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "68c0fcf2-85cb-44fa-b7e9-d5b1e21f844d": [
+      "Привет, Daria Golovin! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "de4eb56b-543e-46f8-bce6-0421e4bdb8ae": [
+      "Привет, Anna Ismailov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

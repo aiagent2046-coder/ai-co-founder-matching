@@ -1,8 +1,12 @@
 {
   "name": "Mikhail Bogdanov",
-  "user_id": "a634367b-f3c9-4440-a162-9e13f6d7407d",
+  "user_id": "d4022496-9c22-4178-bed9-68cf87572657",
   "onboarding_complete": false,
   "candidates_seen": 20,
-  "matches": 0,
-  "conversations": {}
+  "matches": 1,
+  "conversations": {
+    "14092c44-cf32-4cd5-b7b2-88239a380d09": [
+      "Привет, Gleb Yakovlev! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

@@ -1,0 +1,18 @@
+{
+  "name": "Ilya Akhmedov",
+  "user_id": "86e65b71-8436-412e-a6e8-fe289f0ff443",
+  "onboarding_complete": false,
+  "candidates_seen": 20,
+  "matches": 3,
+  "conversations": {
+    "dcfdf8ae-4364-4691-97f9-0e81748ee460": [
+      "Привет, Amina Kuzmin! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "16eaf31e-5132-4cd8-99f0-226711a1b7ab": [
+      "Привет, Anton Zaytsev! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "8a708962-123a-46e3-aa99-17d68be7ecc6": [
+      "Привет, Gleb Yakovlev! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
+}

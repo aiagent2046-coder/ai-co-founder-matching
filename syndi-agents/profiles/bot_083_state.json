@@ -1,0 +1,15 @@
+{
+  "name": "Roman Antonov",
+  "user_id": "0fe6721a-61cb-4957-9737-0718fa7be358",
+  "onboarding_complete": false,
+  "candidates_seen": 20,
+  "matches": 2,
+  "conversations": {
+    "145a3f8c-149f-4074-bcd4-56a4384eab8e": [
+      "Привет, Artem Borisov! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "1d275e83-f2d0-44cf-8171-2e070de0c0f4": [
+      "Привет, David Frolov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
+}

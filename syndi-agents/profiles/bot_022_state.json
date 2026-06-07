@@ -1,8 +1,12 @@
 {
   "name": "Gleb Yakovlev",
-  "user_id": "8d7ed18e-c780-44cf-aa2e-a13cba0b497d",
+  "user_id": "462339c7-fd47-46f2-a0a4-bfe76946d998",
   "onboarding_complete": false,
-  "candidates_seen": 21,
+  "candidates_seen": 20,
   "matches": 0,
-  "conversations": {}
+  "conversations": {
+    "14092c44-cf32-4cd5-b7b2-88239a380d09": [
+      "Привет, Mikhail Bogdanov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

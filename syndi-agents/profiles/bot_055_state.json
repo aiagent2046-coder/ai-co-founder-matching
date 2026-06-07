@@ -1,8 +1,18 @@
 {
   "name": "Natalia Sokolov",
-  "user_id": "e2205e55-2c8a-46a6-9e3a-5243b2176c01",
+  "user_id": "24e6500a-539a-4c68-8a4d-9d5d82b7ecaa",
   "onboarding_complete": false,
   "candidates_seen": 20,
-  "matches": 0,
-  "conversations": {}
+  "matches": 3,
+  "conversations": {
+    "a914df03-9d94-48dc-829c-9060f850aa2c": [
+      "Привет, Irina Petrov! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "89fc0828-37b7-4ce5-924c-8fbca536f498": [
+      "Привет, Mikhail Bogdanov! Расскажи, на чём сейчас сфокусирован?"
+    ],
+    "3f7055ef-ff86-4b49-87a1-b39226085ea3": [
+      "Привет, German Tikhonov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }

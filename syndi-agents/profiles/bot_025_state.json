@@ -1,8 +1,12 @@
 {
   "name": "Konstantin Vinogradov",
-  "user_id": "731071b0-923d-465b-9a49-90eb958d1d82",
+  "user_id": "1db877a0-13dc-457f-bf33-1fbf266cd825",
   "onboarding_complete": false,
-  "candidates_seen": 21,
-  "matches": 0,
-  "conversations": {}
+  "candidates_seen": 20,
+  "matches": 1,
+  "conversations": {
+    "70090897-c3a0-4c2b-803e-7980e6c1c330": [
+      "Привет, Maxim Smirnov! Расскажи, на чём сейчас сфокусирован?"
+    ]
+  }
 }
