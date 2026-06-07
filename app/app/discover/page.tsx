@@ -18,6 +18,7 @@ type Candidate = {
   match: number;
   ocean_score?: number;
   vector_score?: number;
+  behavioral_score?: number;
 };
 
 const COLORS = ['#00d4aa', '#c77dff', '#ff6b9d', '#ff9f1c'];
@@ -273,10 +274,19 @@ function FounderCard({ c, delay = 0, expanded = false }: { c: Candidate; delay?:
           ))}
         </div>
 
-        {(c.vector_score !== undefined || c.ocean_score !== undefined) && (
-          <div style={{display:'flex',gap:12,marginBottom:8,fontSize:10,color:'#6b7280'}}>
+        {(c.vector_score !== undefined || c.ocean_score !== undefined || c.behavioral_score !== undefined) && (
+          <div style={{display:'flex',gap:12,marginBottom:8,fontSize:10,color:'#6b7280',flexWrap:'wrap'}}>
             {c.vector_score !== undefined && <span>🧠 semantic: {c.vector_score}</span>}
             {c.ocean_score !== undefined && <span>🎯 ocean: {c.ocean_score}</span>}
+            {c.behavioral_score !== undefined && (
+              <span style={{
+                color: c.behavioral_score >= 70 ? '#00d4aa'
+                     : c.behavioral_score >= 50 ? '#ff9f1c'
+                     : '#6b7280'
+              }}>
+                🤝 behavioral: {c.behavioral_score}
+              </span>
+            )}
           </div>
         )}
       </div>
