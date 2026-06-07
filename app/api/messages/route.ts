@@ -112,6 +112,7 @@ export async function POST(req: NextRequest) {
       sender_id: myProfile.id, // founder_profiles.id для FK, чтобы соответствовать FK в БД
       content: content.trim(),
       type: 'text',
+      is_ai_reply: false,
     })
     .select()
     .single();
@@ -195,6 +196,7 @@ export async function POST(req: NextRequest) {
               match_id: matchId,
               sender_id: recipientFounderId,
               content: aiReply,
+              type: 'text',
               is_ai_reply: true,
             });
           }
