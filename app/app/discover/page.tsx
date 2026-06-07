@@ -19,6 +19,25 @@ type Candidate = {
   ocean_score?: number;
   vector_score?: number;
   behavioral_score?: number;
+  behavioral_breakdown?: {
+    score: number;
+    honesty: number | null;
+    conflict: { self: string; other: string; score: number } | null;
+    red_flags: string[];
+  };
+};
+
+const STYLE_RU: Record<string, string> = {
+  competing: 'конкуренция',
+  collaborating: 'сотрудничество',
+  compromising: 'компромисс',
+  avoiding: 'избегание',
+};
+
+const FLAG_MSG: Record<string, string> = {
+  chaos_vs_do: 'Возможен конфликт: структура vs. быстрые решения',
+  overthink_vs_plan: 'Возможен конфликт: действие vs. долгое планирование',
+  low_ambition: 'Возможен дисбаланс по уровню амбиций',
 };
 
 const COLORS = ['#00d4aa', '#c77dff', '#ff6b9d', '#ff9f1c'];
@@ -259,7 +278,32 @@ function FounderCard({ c, delay = 0, expanded = false }: { c: Candidate; delay?:
         <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:16}}>
           {c.stage && <span className="badge badge-teal">{c.stage}</span>}
           {c.domain && <span className="badge badge-purple">{c.domain}</span>}
+          {c.behavioral_breakdown?.conflict && (() => {
+            const cf = c.behavioral_breakdown!.conflict!;
+            const same = cf.self === cf.other;
+            return (
+              <span style={{
+                fontSize:11,padding:'3px 10px',borderRadius:9999,
+                background:'rgba(255,255,255,0.04)',border:'1px solid #374151',color:'#9ca3af'
+              }}>
+                🤝 {same
+                  ? `оба — ${STYLE_RU[cf.self] ?? cf.self}`
+                  : `${STYLE_RU[cf.self] ?? cf.self} ↔ ${STYLE_RU[cf.other] ?? cf.other}`}
+              </span>
+            );
+          })()}
         </div>
+
+        {(c.behavioral_breakdown?.red_flags?.length ?? 0) > 0 && (
+          <div style={{
+            fontSize:11,padding:'8px 12px',marginBottom:12,borderRadius:8,
+            background:'rgba(255,159,28,0.08)',border:'1px solid rgba(255,159,28,0.3)',
+            color:'#ff9f1c',display:'flex',alignItems:'flex-start',gap:6,lineHeight:1.4
+          }}>
+            <span style={{flexShrink:0}}>⚠</span>
+            <span>{FLAG_MSG[c.behavioral_breakdown!.red_flags[0]] ?? 'Возможны различия в подходах'}</span>
+          </div>
+        )}
 
         {expanded && c.bio && (
           <p style={{fontSize:13,color:'#9ca3af',lineHeight:1.6,marginBottom:16}}>{c.bio}</p>
@@ -278,15 +322,27 @@ function FounderCard({ c, delay = 0, expanded = false }: { c: Candidate; delay?:
           <div style={{display:'flex',gap:12,marginBottom:8,fontSize:10,color:'#6b7280',flexWrap:'wrap'}}>
             {c.vector_score !== undefined && <span>🧠 semantic: {c.vector_score}</span>}
             {c.ocean_score !== undefined && <span>🎯 ocean: {c.ocean_score}</span>}
-            {c.behavioral_score !== undefined && (
-              <span style={{
-                color: c.behavioral_score >= 70 ? '#00d4aa'
-                     : c.behavioral_score >= 50 ? '#ff9f1c'
-                     : '#6b7280'
-              }}>
-                🤝 behavioral: {c.behavioral_score}
-              </span>
-            )}
+            {c.behavioral_score !== undefined && (() => {
+              const b = c.behavioral_breakdown;
+              const tip = b ? [
+                b.honesty !== null ? `honesty close: ${b.honesty}/100` : 'honesty: n/a',
+                b.conflict ? `conflict: ${STYLE_RU[b.conflict.self] ?? b.conflict.self} × ${STYLE_RU[b.conflict.other] ?? b.conflict.other} = ${b.conflict.score}/100` : 'conflict: n/a',
+                b.red_flags.length === 0 ? 'red flags: нет' : `red flags: ${b.red_flags.join(', ')}`,
+              ].join('\n') : undefined;
+              return (
+                <span
+                  title={tip}
+                  style={{
+                    color: c.behavioral_score! >= 70 ? '#00d4aa'
+                         : c.behavioral_score! >= 50 ? '#ff9f1c'
+                         : '#6b7280',
+                    cursor: tip ? 'help' : 'default'
+                  }}
+                >
+                  🤝 behavioral: {c.behavioral_score}
+                </span>
+              );
+            })()}
           </div>
         )}
       </div>

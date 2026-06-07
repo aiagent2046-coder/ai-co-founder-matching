@@ -26,8 +26,25 @@ function redFlagPenalty(a: any, b: any): number {
   return 0;
 }
 
-function behavioralCompat(a: any, b: any): number {
-  if (!a || !b) return 0.5; // нейтрально, если у кого-то нет behavioral
+type BehavioralBreakdown = {
+  score: number;
+  honesty: number | null;
+  conflict: { self: string; other: string; score: number } | null;
+  red_flags: string[];
+};
+
+function activeRedFlags(a: any, b: any): string[] {
+  const flags: string[] = [];
+  const irr = a?.projective?.partner_irritants;
+  const dec = b?.projective?.decision_style;
+  if (irr === 'chaos' && dec === 'do') flags.push('chaos_vs_do');
+  if (irr === 'overthink' && dec === 'plan') flags.push('overthink_vs_plan');
+  if (irr === 'no_ambition' && (b?.values?.achievement_power ?? 50) < 30) flags.push('low_ambition');
+  return flags;
+}
+
+function behavioralBreakdown(a: any, b: any): BehavioralBreakdown {
+  if (!a || !b) return { score: 50, honesty: null, conflict: null, red_flags: [] };
   const hA = a.honesty_humility ?? 50;
   const hB = b.honesty_humility ?? 50;
   const honestyScore = 1 - Math.abs(hA - hB) / 100;
@@ -35,11 +52,17 @@ function behavioralCompat(a: any, b: any): number {
   const styleB = b.conflict?.primary_style ?? 'compromising';
   const conflictScore = CONFLICT_MATRIX[styleA]?.[styleB] ?? 0.5;
   const penalty = redFlagPenalty(a, b);
-  return Math.max(0, Math.min(1,
+  const total = Math.max(0, Math.min(1,
     0.3 * honestyScore +
     0.5 * conflictScore +
     0.2 * (1 - penalty)
   ));
+  return {
+    score:     Math.round(total * 100),
+    honesty:   Math.round(honestyScore * 100),
+    conflict:  { self: styleA, other: styleB, score: Math.round(conflictScore * 100) },
+    red_flags: activeRedFlags(a, b),
+  };
 }
 
 // OCEAN complementarity — bell curve вокруг 40% разницы
@@ -108,16 +131,18 @@ export async function POST(req: NextRequest) {
   const ranked = (matches || []).map((m: any) => {
     const candidateBehavioral = m.behavioral_profile ?? behavioralMap.get(m.user_id) ?? null;
     const oceanScore = oceanComplement(me.big_five, m.big_five);
-    const behavScore = behavioralCompat((me as any).behavioral_profile, candidateBehavioral);
+    const breakdown = behavioralBreakdown((me as any).behavioral_profile, candidateBehavioral);
+    const behavScore = breakdown.score / 100;
     const hybridScore = BEHAVIORAL_ENABLED
       ? m.similarity * 0.4 + oceanScore * 0.4 + behavScore * 0.2
       : m.similarity * 0.6 + oceanScore * 0.4;
     return {
       ...m,
-      ocean_score:      Math.round(oceanScore * 100),
-      vector_score:     Math.round(m.similarity * 100),
-      behavioral_score: Math.round(behavScore * 100),  // всегда в ответе, удобно для debug/UI
-      match:            Math.round(hybridScore * 100),
+      ocean_score:          Math.round(oceanScore * 100),
+      vector_score:         Math.round(m.similarity * 100),
+      behavioral_score:     breakdown.score,
+      behavioral_breakdown: breakdown,  // {honesty, conflict, red_flags} для UI
+      match:                Math.round(hybridScore * 100),
     };
   }).sort((a: any, b: any) => b.match - a.match);
 
