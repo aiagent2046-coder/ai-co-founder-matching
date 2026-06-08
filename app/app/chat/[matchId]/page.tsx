@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { getSupabase, getAuthToken } from '@/lib/supabase';
+import posthog from 'posthog-js';
 
 type Msg = { id: string; role: 'me' | 'them' | 'avatar'; text: string; time: string };
 
@@ -141,6 +142,7 @@ export default function ChatPage() {
       });
       const data = await res.json();
       if (res.ok) {
+        try { posthog.capture('message_sent', { match_id: matchId, length: text.length }); } catch {}
         // Заменить оптимистичное сообщение на реальное
         setMessages(m => m.map(msg =>
           msg.id === optimisticId

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { OceanRadar } from '@/components/charts/OceanRadar';
 import { getAuthToken } from '@/lib/supabase';
+import posthog from 'posthog-js';
 
 type Mode = 'grid' | 'swipe';
 type Candidate = {
@@ -108,6 +109,19 @@ export default function DiscoverPage() {
       });
       if (res.ok) {
         const data = await res.json();
+        try {
+          posthog.capture('swipe', {
+            action,
+            candidate_user_id: candidate.user_id,
+            vector_score: candidate.vector_score,
+            ocean_score: candidate.ocean_score,
+            behavioral_score: candidate.behavioral_score,
+            match: candidate.match,
+          });
+          if (data.mutual === true) {
+            posthog.capture('mutual_match', { other_user_id: candidate.user_id });
+          }
+        } catch {}
         if (data.mutual === true) {
           window.alert('Mutual match! Найдён в Матчах.');
         }

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { getSupabase } from '@/lib/supabase';
+import posthog from 'posthog-js';
 
 const ICONS = {
   discover: (
@@ -56,13 +57,21 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     let active = true;
     getSupabase().auth.getSession().then(({ data }) => {
       if (!active) return;
-      if (!data.session) router.replace('/login');
-      else setChecking(false);
+      if (!data.session) {
+        router.replace('/login');
+      } else {
+        try {
+          const u = data.session.user;
+          posthog.identify(u.id, { email: u.email });
+        } catch {}
+        setChecking(false);
+      }
     });
     return () => { active = false; };
   }, [router]);
 
   const logout = async () => {
+    try { posthog.reset(); } catch {}
     await getSupabase().auth.signOut();
     router.push('/');
   };
