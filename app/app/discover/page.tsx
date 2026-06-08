@@ -40,6 +40,39 @@ const FLAG_MSG: Record<string, string> = {
   low_ambition: 'Возможен дисбаланс по уровню амбиций',
 };
 
+type Summary = { level: string; emoji: string; color: string; parts: string[] };
+
+function buildSummary(c: Candidate): Summary {
+  const match = c.match ?? 0;
+  let level: string, emoji: string, color: string;
+  if (match >= 75)      { level = 'Высокая совместимость'; emoji = '✨'; color = '#00d4aa'; }
+  else if (match >= 60) { level = 'Хорошая совместимость'; emoji = '👍'; color = '#00d4aa'; }
+  else if (match >= 45) { level = 'Средняя совместимость'; emoji = '🤔'; color = '#ff9f1c'; }
+  else                  { level = 'Слабая совместимость';  emoji = '🌧'; color = '#6b7280'; }
+
+  const parts: string[] = [];
+
+  const v = c.vector_score ?? 50;
+  if (v >= 75)      parts.push('близкие идеи');
+  else if (v >= 55) parts.push('пересекающиеся направления');
+  else              parts.push('разные направления');
+
+  const o = c.ocean_score ?? 50;
+  if (o >= 70)      parts.push('схожий темперамент');
+  else if (o >= 50) parts.push('дополняющий темперамент');
+  else              parts.push('контрастный темперамент');
+
+  const cf = c.behavioral_breakdown?.conflict;
+  if (cf && cf.score >= 75) {
+    if (cf.self === cf.other) parts.push(`оба — ${STYLE_RU[cf.self] ?? cf.self}`);
+    else parts.push('совместимые стили принятия решений');
+  } else if (cf && cf.score < 50) {
+    parts.push('разные стили принятия решений');
+  }
+
+  return { level, emoji, color, parts };
+}
+
 const COLORS = ['#00d4aa', '#c77dff', '#ff6b9d', '#ff9f1c'];
 
 function colorFor(name: string): string {
@@ -278,20 +311,6 @@ function FounderCard({ c, delay = 0, expanded = false }: { c: Candidate; delay?:
         <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:16}}>
           {c.stage && <span className="badge badge-teal">{c.stage}</span>}
           {c.domain && <span className="badge badge-purple">{c.domain}</span>}
-          {c.behavioral_breakdown?.conflict && (() => {
-            const cf = c.behavioral_breakdown!.conflict!;
-            const same = cf.self === cf.other;
-            return (
-              <span style={{
-                fontSize:11,padding:'3px 10px',borderRadius:9999,
-                background:'rgba(255,255,255,0.04)',border:'1px solid #374151',color:'#9ca3af'
-              }}>
-                🤝 {same
-                  ? `оба — ${STYLE_RU[cf.self] ?? cf.self}`
-                  : `${STYLE_RU[cf.self] ?? cf.self} ↔ ${STYLE_RU[cf.other] ?? cf.other}`}
-              </span>
-            );
-          })()}
         </div>
 
         {(c.behavioral_breakdown?.red_flags?.length ?? 0) > 0 && (
@@ -318,33 +337,32 @@ function FounderCard({ c, delay = 0, expanded = false }: { c: Candidate; delay?:
           ))}
         </div>
 
-        {(c.vector_score !== undefined || c.ocean_score !== undefined || c.behavioral_score !== undefined) && (
-          <div style={{display:'flex',gap:12,marginBottom:8,fontSize:10,color:'#6b7280',flexWrap:'wrap'}}>
-            {c.vector_score !== undefined && <span>🧠 semantic: {c.vector_score}</span>}
-            {c.ocean_score !== undefined && <span>🎯 ocean: {c.ocean_score}</span>}
-            {c.behavioral_score !== undefined && (() => {
-              const b = c.behavioral_breakdown;
-              const tip = b ? [
-                b.honesty !== null ? `honesty close: ${b.honesty}/100` : 'honesty: n/a',
-                b.conflict ? `conflict: ${STYLE_RU[b.conflict.self] ?? b.conflict.self} × ${STYLE_RU[b.conflict.other] ?? b.conflict.other} = ${b.conflict.score}/100` : 'conflict: n/a',
-                b.red_flags.length === 0 ? 'red flags: нет' : `red flags: ${b.red_flags.join(', ')}`,
-              ].join('\n') : undefined;
-              return (
-                <span
-                  title={tip}
-                  style={{
-                    color: c.behavioral_score! >= 70 ? '#00d4aa'
-                         : c.behavioral_score! >= 50 ? '#ff9f1c'
-                         : '#6b7280',
-                    cursor: tip ? 'help' : 'default'
-                  }}
-                >
-                  🤝 behavioral: {c.behavioral_score}
-                </span>
-              );
-            })()}
-          </div>
-        )}
+        {(() => {
+          const sum = buildSummary(c);
+          const dbgLines: string[] = [];
+          if (c.vector_score !== undefined) dbgLines.push(`semantic: ${c.vector_score}/100`);
+          if (c.ocean_score !== undefined) dbgLines.push(`ocean: ${c.ocean_score}/100`);
+          const b = c.behavioral_breakdown;
+          if (b) {
+            if (b.honesty !== null) dbgLines.push(`honesty close: ${b.honesty}/100`);
+            if (b.conflict) dbgLines.push(`conflict: ${STYLE_RU[b.conflict.self] ?? b.conflict.self} × ${STYLE_RU[b.conflict.other] ?? b.conflict.other} = ${b.conflict.score}/100`);
+            dbgLines.push(b.red_flags.length === 0 ? 'red flags: нет' : `red flags: ${b.red_flags.join(', ')}`);
+          }
+          const tip = dbgLines.length > 0 ? dbgLines.join('\n') : undefined;
+          return (
+            <div title={tip} style={{marginBottom:12,cursor:tip?'help':'default'}}>
+              <div style={{display:'flex',alignItems:'center',gap:6,fontSize:13,fontWeight:600,color:sum.color,marginBottom:4}}>
+                <span>{sum.emoji}</span>
+                <span>{sum.level}</span>
+              </div>
+              {sum.parts.length > 0 && (
+                <div style={{fontSize:12,color:'#9ca3af',lineHeight:1.4}}>
+                  {sum.parts.join(', ')}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       <div style={{height:1,background:'#374151',margin:'0 24px'}}/>
