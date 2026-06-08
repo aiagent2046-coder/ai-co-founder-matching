@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getSupabase } from '@/lib/supabase';
 import { Logo } from '@/components/brand/Logo';
 import { Stars } from '@/components/brand/Stars';
+import posthog from 'posthog-js';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
@@ -18,6 +19,13 @@ export default function RegisterPage() {
     setLoading(true); setError('');
     const { data, error: e } = await getSupabase().auth.signUp({ email, password });
     if (e) { setError(e.message); setLoading(false); return; }
+    // PostHog: связываем анонимные события с юзером + фиксируем регистрацию
+    if (data.user) {
+      try {
+        posthog.identify(data.user.id, { email });
+        posthog.capture('signup', { method: 'email' });
+      } catch {}
+    }
     // Подтверждение почты выключено → Supabase сразу вернёт session → в онбординг.
     // Включено → session нет → показываем экран "Проверь почту".
     if (data.session) { router.push('/onboarding/profile'); return; }
