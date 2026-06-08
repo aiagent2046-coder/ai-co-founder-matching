@@ -6,7 +6,7 @@ from collections import defaultdict
 from pathlib import Path
 import httpx
 
-APP_URL      = os.environ.get("SYNDI_APP_URL", "https://ai-co-founder-matching.vercel.app")
+APP_URL      = os.environ.get("SYNDI_APP_URL", "https://syndimatch.online")
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 ANON_KEY     = os.environ.get("SUPABASE_ANON_KEY")
 N_BOTS       = int(os.environ.get("N_BOTS", "10"))

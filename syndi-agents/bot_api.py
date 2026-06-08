@@ -12,7 +12,7 @@ import httpx
 
 logger = logging.getLogger("syndi-bot")
 
-DEFAULT_APP_URL = "https://ai-co-founder-matching.vercel.app"
+DEFAULT_APP_URL = "https://syndimatch.online"
 
 
 @dataclass
