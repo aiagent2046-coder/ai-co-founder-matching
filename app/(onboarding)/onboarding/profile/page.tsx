@@ -12,6 +12,8 @@ export default function ProfilePage() {
   const [bio, setBio] = useState('');
   const [location, setLocation] = useState('');
   const [stage, setStage] = useState('idea');
+  const [birthMonth, setBirthMonth] = useState<number | ''>('');
+  const [birthDay,   setBirthDay]   = useState<number | ''>('');
   const [skillsInput, setSkillsInput] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -31,6 +33,8 @@ export default function ProfilePage() {
       setLocation(data.location ?? '');
       setStage(data.stage ?? 'idea');
       setSkills(data.skills ?? []);
+      setBirthMonth(data.birth_month ?? '');
+      setBirthDay(data.birth_day ?? '');
     }
   })(); }, []);
 
@@ -51,7 +55,7 @@ export default function ProfilePage() {
       const res = await fetch('/api/onboarding/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
-        body: JSON.stringify({ name, role, domain, bio, location, stage, skills }),
+        body: JSON.stringify({ name, role, domain, bio, location, stage, skills, birthMonth: birthMonth || null, birthDay: birthDay || null }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -74,7 +78,7 @@ export default function ProfilePage() {
       <div style={{marginBottom:28}}>
         <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
           <span style={{width:8,height:8,borderRadius:'50%',background:'#00d4aa',boxShadow:'0 0 8px #00d4aa',animation:'twinkle 2s infinite'}}/>
-          <span style={{fontSize:11,fontWeight:600,color:'#00d4aa',letterSpacing:'0.12em',textTransform:'uppercase'}}>Шаг 1 из 4</span>
+          <span style={{fontSize:11,fontWeight:600,color:'#00d4aa',letterSpacing:'0.12em',textTransform:'uppercase'}}>Шаг 2 из 5</span>
         </div>
         <h1 className="font-display" style={{fontWeight:700,fontSize:32,letterSpacing:'-0.01em',marginBottom:8}}>
           Расскажи о <span className="gradient-text">себе</span>
@@ -135,6 +139,39 @@ export default function ProfilePage() {
               <option value="growth">Growth</option>
             </select>
           </div>
+        </div>
+
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:6}}>
+          <div>
+            <label className="field-label">Месяц рождения</label>
+            <select className="field-input" value={birthMonth} onChange={e=>setBirthMonth(e.target.value ? parseInt(e.target.value) : '')} style={{cursor:'pointer'}}>
+              <option value="">—</option>
+              <option value="1">Январь</option>
+              <option value="2">Февраль</option>
+              <option value="3">Март</option>
+              <option value="4">Апрель</option>
+              <option value="5">Май</option>
+              <option value="6">Июнь</option>
+              <option value="7">Июль</option>
+              <option value="8">Август</option>
+              <option value="9">Сентябрь</option>
+              <option value="10">Октябрь</option>
+              <option value="11">Ноябрь</option>
+              <option value="12">Декабрь</option>
+            </select>
+          </div>
+          <div>
+            <label className="field-label">День</label>
+            <select className="field-input" value={birthDay} onChange={e=>setBirthDay(e.target.value ? parseInt(e.target.value) : '')} style={{cursor:'pointer'}}>
+              <option value="">—</option>
+              {Array.from({length: 31}, (_, i) => i + 1).map(d => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        <div style={{fontSize:11,color:'#6b7280',marginBottom:20}}>
+          Год не запрашиваем — для расчёта биоритмов нужны только месяц и день.
         </div>
 
         <div>

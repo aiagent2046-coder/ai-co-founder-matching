@@ -28,7 +28,7 @@ export default function RegisterPage() {
     }
     // Подтверждение почты выключено → Supabase сразу вернёт session → в онбординг.
     // Включено → session нет → показываем экран "Проверь почту".
-    if (data.session) { router.push('/onboarding/profile'); return; }
+    if (data.session) { router.push('/onboarding/intent'); return; }
     setDone(true);
   };
 

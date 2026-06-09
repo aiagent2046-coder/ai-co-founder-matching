@@ -20,6 +20,8 @@ type Candidate = {
   ocean_score?: number;
   vector_score?: number;
   behavioral_score?: number;
+  intent?: string | null;
+  intent_compat?: number;
   behavioral_breakdown?: {
     score: number;
     honesty: number | null;
@@ -39,6 +41,12 @@ const FLAG_MSG: Record<string, string> = {
   chaos_vs_do: 'Возможен конфликт: структура vs. быстрые решения',
   overthink_vs_plan: 'Возможен конфликт: действие vs. долгое планирование',
   low_ambition: 'Возможен дисбаланс по уровню амбиций',
+};
+
+const INTENT_LABEL: Record<string, { label: string; color: string }> = {
+  has_idea:        { label: '💡 с идеей',      color: '#fbbf24' },
+  looking_to_join: { label: '🚀 в команду',    color: '#00d4aa' },
+  flexible:        { label: '🔄 гибко',        color: '#a78bfa' },
 };
 
 type Summary = { level: string; emoji: string; color: string; parts: string[] };
@@ -325,6 +333,16 @@ function FounderCard({ c, delay = 0, expanded = false }: { c: Candidate; delay?:
         <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:16}}>
           {c.stage && <span className="badge badge-teal">{c.stage}</span>}
           {c.domain && <span className="badge badge-purple">{c.domain}</span>}
+          {c.intent && INTENT_LABEL[c.intent] && (
+            <span style={{
+              fontSize:11,padding:'3px 10px',borderRadius:9999,
+              background:'rgba(255,255,255,0.04)',
+              border:`1px solid ${INTENT_LABEL[c.intent].color}66`,
+              color: INTENT_LABEL[c.intent].color
+            }}>
+              {INTENT_LABEL[c.intent].label}
+            </span>
+          )}
         </div>
 
         {(c.behavioral_breakdown?.red_flags?.length ?? 0) > 0 && (
