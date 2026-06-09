@@ -33,6 +33,18 @@ type BehavioralBreakdown = {
   red_flags: string[];
 };
 
+const INTENT_MATRIX: Record<string, Record<string, number>> = {
+  has_idea:        { has_idea: 0.55, looking_to_join: 1.00, flexible: 0.90 },
+  looking_to_join: { has_idea: 1.00, looking_to_join: 0.15, flexible: 0.85 },
+  flexible:        { has_idea: 0.90, looking_to_join: 0.85, flexible: 0.75 },
+};
+
+function intentCompat(a: string | null | undefined, b: string | null | undefined): number {
+  const ia = a ?? 'has_idea'; // дефолт для старых юзеров
+  const ib = b ?? 'has_idea';
+  return INTENT_MATRIX[ia]?.[ib] ?? 0.5;
+}
+
 function activeRedFlags(a: any, b: any): string[] {
   const flags: string[] = [];
   const irr = a?.projective?.partner_irritants;
@@ -96,7 +108,7 @@ export async function POST(req: NextRequest) {
 
   const { data: me } = await supabase
     .from('founder_profiles')
-    .select('embedding, big_five, behavioral_profile')
+    .select('embedding, big_five, behavioral_profile, intent')
     .eq('user_id', userId)
     .single();
 
@@ -118,13 +130,15 @@ export async function POST(req: NextRequest) {
   // match_founders RPC не возвращает behavioral_profile — подтягиваем отдельным запросом
   const matchedIds = (matches || []).map((m: any) => m.user_id).filter(Boolean);
   const behavioralMap = new Map<string, any>();
+  const intentMap = new Map<string, string | null>();
   if (matchedIds.length > 0) {
-    const { data: bps } = await supabase
+    const { data: extra } = await supabase
       .from('founder_profiles')
-      .select('user_id, behavioral_profile')
+      .select('user_id, behavioral_profile, intent')
       .in('user_id', matchedIds);
-    for (const row of bps || []) {
+    for (const row of extra || []) {
       behavioralMap.set(row.user_id, row.behavioral_profile);
+      intentMap.set(row.user_id, row.intent);
     }
   }
 
@@ -133,18 +147,28 @@ export async function POST(req: NextRequest) {
     const oceanScore = oceanComplement(me.big_five, m.big_five);
     const breakdown = behavioralBreakdown((me as any).behavioral_profile, candidateBehavioral);
     const behavScore = breakdown.score / 100;
-    const hybridScore = BEHAVIORAL_ENABLED
+    const candidateIntent = m.intent ?? intentMap.get(m.user_id) ?? null;
+    const intCompat = intentCompat((me as any).intent, candidateIntent);
+
+    // Хард-фильтр: два looking_to_join (или другие крайне несовместимые пары) не показываем
+    if (intCompat < 0.2) return null;
+
+    const baseHybrid = BEHAVIORAL_ENABLED
       ? m.similarity * 0.4 + oceanScore * 0.4 + behavScore * 0.2
       : m.similarity * 0.6 + oceanScore * 0.4;
+    const hybridScore = baseHybrid * intCompat; // intent работает как множитель уверенности
+
     return {
       ...m,
       ocean_score:          Math.round(oceanScore * 100),
       vector_score:         Math.round(m.similarity * 100),
       behavioral_score:     breakdown.score,
-      behavioral_breakdown: breakdown,  // {honesty, conflict, red_flags} для UI
+      behavioral_breakdown: breakdown,
+      intent:               candidateIntent,
+      intent_compat:        Math.round(intCompat * 100),
       match:                Math.round(hybridScore * 100),
     };
-  }).sort((a: any, b: any) => b.match - a.match);
+  }).filter(Boolean).sort((a: any, b: any) => b.match - a.match);
 
   return NextResponse.json({ candidates: ranked });
 }
