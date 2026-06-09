@@ -1,78 +1,97 @@
 <div align="center">
 
-# 🤝 SyndiMatch
+# SyndiMatch
 
-### AI-платформа для поиска идеального ко-фаундера
+### Find your perfect co-founder with AI
 
-**Найди партнёра, который дополняет тебя — по навыкам, стилю работы и стратегическому видению**
+**SyndiMatch uses Claude AI to match startup founders by skills, work style, and vision — not just keywords**
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-syndimatch.online-6366f1?style=for-the-badge)](https://www.syndimatch.online/)
-[![Stars](https://img.shields.io/github/stars/aiagent2046-coder/ai-co-founder-matching?style=for-the-badge&color=yellow)](https://github.com/aiagent2046-coder/ai-co-founder-matching/stargazers)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Next.js](https://img.shields.io/badge/Next.js_16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-[![Powered by Claude](https://img.shields.io/badge/Powered_by-Claude_AI-orange?style=for-the-badge)](https://anthropic.com)
+[![🌐 Live](https://img.shields.io/badge/🌐_Live-syndimatch.online-6366f1?style=for-the-badge&logoColor=white)](https://www.syndimatch.online/)
+[![⭐ Stars](https://img.shields.io/github/stars/aiagent2046-coder/ai-co-founder-matching?style=for-the-badge&color=yellow&logo=github)](https://github.com/aiagent2046-coder/ai-co-founder-matching/stargazers)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
+[![Next.js 16](https://img.shields.io/badge/Next.js_16-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Claude AI](https://img.shields.io/badge/Claude_AI-d97706?style=for-the-badge)](https://anthropic.com)
+[![Supabase](https://img.shields.io/badge/Supabase-3ecf8e?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 
 </div>
 
 ---
 
-## 🚀 Что такое SyndiMatch?
+## The problem
 
-**SyndiMatch** — это AI-платформа, которая решает одну из главных проблем основателей стартапов: **найти правильного ко-фаундера**.
+Finding the right co-founder is one of the hardest parts of building a startup. Most founders rely on random networking events or LinkedIn cold outreach — which is slow, noisy, and mostly luck.
 
-Вместо случайных знакомств на конференциях, Claude AI анализирует твой профиль, навыки, стиль работы и стратегическое видение — и подбирает партнёров с максимальной совместимостью.
-
-> 💡 **Попробуй прямо сейчас → [syndimatch.online](https://www.syndimatch.online/)**
+**SyndiMatch fixes this.**
 
 ---
 
-## ✨ Ключевые возможности
+## How it works
 
-- 🧠 **AI-анализ профиля** — Claude AI строит векторную модель твоих компетенций и личностных паттернов
-- 🔍 **Умный матчинг** — алгоритм находит ко-фаундеров, которые дополняют, а не дублируют тебя
-- 💬 **Real-time коммуникация** — встроенный чат для первого контакта без внешних мессенджеров
-- 🔐 **Безопасная аутентификация** — Supabase Auth с поддержкой OAuth
-- ⚡ **Мгновенные рекомендации** — Upstash Redis обеспечивает отклик < 100ms
+```
+1. Create your founder profile
+   Tell us your skills, domain expertise, working style, and startup vision
 
----
+2. AI builds your compatibility model
+   Claude analyzes your profile and constructs a multi-dimensional vector of founder traits
 
-## 🛠 Технологический стек
+3. Get matched
+   Our algorithm surfaces founders who complement — not duplicate — you
 
-| Слой | Технология | Назначение |
-|------|-----------|-----------|
-| Frontend | Next.js 16 (App Router) | SSR, routing, UI |
-| Backend | Next.js API Routes / Server Actions | Бизнес-логика |
-| База данных | Supabase (PostgreSQL) | Хранение профилей |
-| Кеширование | Upstash Redis | Очереди, сессии |
-| AI | Anthropic Claude | Матчинг и анализ |
-| ML-модели | Replicate API | Дополнительные AI-сервисы |
-| Деплой | Vercel | CI/CD, edge network |
-| Аналитика | PostHog | Product analytics |
+4. Connect and build
+   Real-time chat, no middlemen, no gatekeeping
+```
 
 ---
 
-## 🏗 Архитектура
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 🧠 **AI Profile Analysis** | Claude builds a semantic model of your strengths and gaps |
+| 🔍 **Complementary Matching** | Pairs you with founders who cover your blind spots |
+| 💬 **Real-time Chat** | Instant messaging powered by Supabase Realtime |
+| ⚡ **Fast Recommendations** | Upstash Redis keeps responses under 100ms |
+| 🔐 **Secure Auth** | Supabase Auth with OAuth (GitHub, Google) |
+| 📊 **Analytics** | PostHog for product insights and funnel tracking |
+
+---
+
+## 🛠 Tech Stack
+
+```
+Frontend    Next.js 16 (App Router) + TypeScript + Tailwind CSS
+Backend     Next.js API Routes + Server Actions
+Database    Supabase (PostgreSQL) — profiles, matches, messages
+Cache       Upstash Redis — session management, rate limiting
+AI Core     Anthropic Claude — matching engine + analysis
+ML Models   Replicate API — additional AI capabilities
+Auth        Supabase Auth (OAuth + magic link)
+Deploy      Vercel — edge network, preview deployments
+Analytics   PostHog — events, funnels, session recording
+```
+
+---
+
+## 🏗 Architecture
 
 ```
 ai-co-founder-matching/
-├── app/                  # Next.js App Router (pages, layouts, API routes)
-├── components/           # React UI-компоненты
-├── lib/                  # Утилиты, хелперы, AI-клиенты
-├── syndi-agents/         # AI-агенты для матчинга
-├── supabase/             # Миграции и конфигурация БД
-└── public/               # Статические ресурсы
+├── app/                  # Next.js App Router
+│   ├── (auth)/           # Auth pages (login, signup)
+│   ├── (dashboard)/      # Protected app routes
+│   └── api/              # API endpoints
+├── components/           # Shared React components
+├── lib/                  # Utilities, AI clients, DB helpers
+├── syndi-agents/         # AI matching agents
+├── supabase/             # DB migrations & seed data
+└── public/               # Static assets
 ```
 
 ---
 
-## ⚡ Быстрый старт
+## ⚡ Quick Start
 
-### Требования
-
-- Node.js 18+
-- Аккаунты: [Supabase](https://supabase.com), [Upstash](https://upstash.com), [Anthropic](https://anthropic.com)
-
-### Установка
+**Prerequisites:** Node.js 18+, accounts on [Supabase](https://supabase.com), [Upstash](https://upstash.com), [Anthropic](https://anthropic.com)
 
 ```bash
 git clone https://github.com/aiagent2046-coder/ai-co-founder-matching.git
@@ -80,9 +99,7 @@ cd ai-co-founder-matching
 npm install
 ```
 
-### Настройка окружения
-
-Создай `.env.local` в корне:
+Create `.env.local`:
 
 ```env
 # Supabase
@@ -98,48 +115,53 @@ UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_token
 ANTHROPIC_API_KEY=your_anthropic_api_key
 REPLICATE_API_KEY=your_replicate_api_key
 
-# Application
+# App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-### Запуск
-
 ```bash
 npm run dev
+# → http://localhost:3000
 ```
-
-Открой [http://localhost:3000](http://localhost:3000) 🎉
 
 ---
 
-## 🚢 Деплой на Vercel
+## 🚢 Deploy to Vercel
+
+The repo includes a ready `vercel.json`. One command:
 
 ```bash
-# Один клик — проект уже содержит vercel.json
 vercel --prod
 ```
 
-Или через [Vercel Dashboard](https://vercel.com):
-1. Import Git Repository → выбери этот репо
-2. Добавь переменные окружения
-3. Deploy → готово
+Or import directly on [vercel.com](https://vercel.com/new) — it auto-detects Next.js and deploys in ~2 minutes.
+
+---
+
+## 🗺 Roadmap
+
+- [ ] Founder compatibility score visualization
+- [ ] Video intro cards
+- [ ] Startup idea board (post ideas, find co-founder for them)
+- [ ] Verified GitHub/LinkedIn profile integration
+- [ ] Mobile app (React Native)
 
 ---
 
 ## 🤝 Contributing
 
-Вклад приветствуется! Особенно интересны:
+Contributions welcome! Good first issues:
 
-- 🐛 Баг-репорты и фиксы
-- 💡 Идеи по алгоритму матчинга
-- 🌍 Локализация (EN/RU/других языков)
-- ⚡ Оптимизации производительности
+- 🐛 Bug fixes and edge case handling
+- 💡 Improvements to matching algorithm prompts
+- 🌍 i18n (EN/RU/other languages)
+- ⚡ Performance optimizations
 
-Открой [Issue](https://github.com/aiagent2046-coder/ai-co-founder-matching/issues) или отправь PR.
+Open an [Issue](https://github.com/aiagent2046-coder/ai-co-founder-matching/issues) or submit a PR.
 
 ---
 
-## 📄 Лицензия
+## 📄 License
 
 MIT © [SyndiMatch](https://www.syndimatch.online/)
 
@@ -147,8 +169,8 @@ MIT © [SyndiMatch](https://www.syndimatch.online/)
 
 <div align="center">
 
-**Если проект оказался полезным — поставь ⭐ звезду, это помогает другим найти его!**
+If SyndiMatch helped you — drop a ⭐ star. It helps others discover the project.
 
-[🌐 Демо](https://www.syndimatch.online/) · [🐛 Сообщить о баге](https://github.com/aiagent2046-coder/ai-co-founder-matching/issues) · [💡 Предложить фичу](https://github.com/aiagent2046-coder/ai-co-founder-matching/issues)
+[🌐 Live Demo](https://www.syndimatch.online/) · [🐛 Report Bug](https://github.com/aiagent2046-coder/ai-co-founder-matching/issues) · [💡 Request Feature](https://github.com/aiagent2046-coder/ai-co-founder-matching/issues)
 
 </div>
