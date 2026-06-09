@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/e89a9677-8166-434d-b68e-13fb56e08bce.png" alt="SyndiMatch Logo" width="120" />
+
 # SyndiMatch
 
 ### Find your perfect co-founder with AI
@@ -22,6 +24,10 @@
 Finding the right co-founder is one of the hardest parts of building a startup. Most founders rely on random networking events or LinkedIn cold outreach — which is slow, noisy, and mostly luck.
 
 **SyndiMatch fixes this.**
+
+<div align="center">
+<img src="https://user-gen-media-assets.s3.amazonaws.com/gpt4o_images/d42c646b-244c-40dd-a8bb-0c20d02718d6.png" alt="SyndiMatch App Screenshot" width="800" />
+</div>
 
 ---
 
@@ -128,13 +134,11 @@ npm run dev
 
 ## 🚢 Deploy to Vercel
 
-The repo includes a ready `vercel.json`. One command:
-
 ```bash
 vercel --prod
 ```
 
-Or import directly on [vercel.com](https://vercel.com/new) — it auto-detects Next.js and deploys in ~2 minutes.
+Or import directly on [vercel.com](https://vercel.com/new) — auto-detects Next.js and deploys in ~2 minutes.
 
 ---
 
