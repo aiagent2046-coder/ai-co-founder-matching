@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getSupabase } from '@/lib/supabase';
 import { Logo } from '@/components/brand/Logo';
 import { Stars } from '@/components/brand/Stars';
+import posthog from 'posthog-js';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -15,8 +16,17 @@ export default function LoginPage() {
 
   const submit = async () => {
     setLoading(true); setError('');
-    const { error: e } = await getSupabase().auth.signInWithPassword({ email, password });
-    if (e) { setError(e.message); setLoading(false); return; }
+    const { data, error: e } = await getSupabase().auth.signInWithPassword({ email, password });
+    if (e) {
+      posthog.captureException(e);
+      setError(e.message); setLoading(false); return;
+    }
+    if (data.user) {
+      try {
+        posthog.identify(data.user.id, { email });
+        posthog.capture('login', { method: 'email' });
+      } catch {}
+    }
     router.push('/app/discover');
   };
 

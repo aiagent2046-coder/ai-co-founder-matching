@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { getPostHogClient } from '@/lib/posthog-server';
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
@@ -19,6 +20,14 @@ export async function POST(req: NextRequest) {
       .from('founder_profiles')
       .update({ onboarding_done: true })
       .eq('user_id', user.id);
+
+    const distinctId = req.headers.get('x-posthog-distinct-id') ?? user.id;
+    const posthog = getPostHogClient();
+    posthog.capture({
+      distinctId,
+      event: 'onboarding_completed',
+      properties: { user_id: user.id },
+    });
   } catch {
     // Не блокируем редирект если ошибка
   }
