@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuthToken } from '@/lib/supabase';
 import { OceanRadar } from '@/components/charts/OceanRadar';
+import posthog from 'posthog-js';
 
 const QUESTIONS = [
   // Открытость
@@ -91,6 +92,15 @@ export function BigFiveTest() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
         body: JSON.stringify({ scores }),
       });
+      try {
+        posthog.capture('big_five_test_completed', {
+          openness: scores.openness,
+          conscientiousness: scores.conscientiousness,
+          extraversion: scores.extraversion,
+          agreeableness: scores.agreeableness,
+          neuroticism: scores.neuroticism,
+        });
+      } catch {}
       router.push('/onboarding/behavioral');
     } catch {
       setSaving(false);

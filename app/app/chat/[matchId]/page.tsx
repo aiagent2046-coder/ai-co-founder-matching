@@ -290,7 +290,10 @@ export default function ChatPage() {
             </div>
             <div style={{ fontSize: 13, color: '#f9fafb', lineHeight: 1.5, marginBottom: 12 }}>{suggestion}</div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => { setInput(suggestion); setSuggestion(null); }} className="btn-primary" style={{ padding: '6px 14px', fontSize: 12 }}>
+              <button onClick={() => {
+                try { posthog.capture('avatar_suggestion_used', { match_id: matchId }); } catch {}
+                setInput(suggestion); setSuggestion(null);
+              }} className="btn-primary" style={{ padding: '6px 14px', fontSize: 12 }}>
                 Использовать
               </button>
               <button onClick={() => setSuggestion(null)} className="btn-ghost" style={{ padding: '6px 14px', fontSize: 12 }}>

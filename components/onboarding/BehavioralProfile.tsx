@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuthToken } from '@/lib/supabase';
+import posthog from 'posthog-js';
 
 type LikertItem = {
   id: string; type: 'likert'; block: 'honesty' | 'values';
@@ -151,6 +152,12 @@ export function BehavioralProfile() {
         const err = await resp.json().catch(() => ({}));
         throw new Error(err?.error || `HTTP ${resp.status}`);
       }
+      try {
+        posthog.capture('behavioral_profile_completed', {
+          conflict_style: profile.conflict.primary_style,
+          honesty_humility: profile.honesty_humility,
+        });
+      } catch {}
       router.push('/onboarding/avatar');
     } catch (e: any) {
       setError(e?.message || String(e));

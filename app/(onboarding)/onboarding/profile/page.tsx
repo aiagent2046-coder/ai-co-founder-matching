@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabase, getAuthToken } from '@/lib/supabase';
+import posthog from 'posthog-js';
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -58,6 +59,9 @@ export default function ProfilePage() {
         setLoading(false);
         return;
       }
+      try {
+        posthog.capture('onboarding_profile_completed', { role, domain, stage, skills_count: skills.length });
+      } catch {}
       router.push('/onboarding/big-five');
     } catch (e: any) {
       setError(e.message);
