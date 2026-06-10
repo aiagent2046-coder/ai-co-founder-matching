@@ -126,9 +126,12 @@ export async function POST(req: NextRequest) {
     }, { status: 400 });
   }
 
+  const rawLimit = parseInt(req.nextUrl.searchParams.get('limit') ?? '20', 10);
+  const matchCount = Number.isFinite(rawLimit) ? Math.min(100, Math.max(1, rawLimit)) : 20;
+
   const { data: matches, error } = await supabase.rpc('match_founders', {
     query_embedding: me.embedding,
-    match_count:     20,
+    match_count:     matchCount,
     exclude_user_id: userId,
   });
 
