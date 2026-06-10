@@ -34,8 +34,14 @@ type BehavioralBreakdown = {
   red_flags: string[];
 };
 
+function soulLevelOf(score: number): string {
+  return score >= 75 ? 'Глубокий резонанс'
+       : score >= 60 ? 'Созвучие'
+       : score >= 45 ? 'Нейтральный фон' : 'Разные волны';
+}
+
 const INTENT_MATRIX: Record<string, Record<string, number>> = {
-  has_idea:        { has_idea: 0.55, looking_to_join: 1.00, flexible: 0.90 },
+  has_idea:        { has_idea: 0.75, looking_to_join: 1.00, flexible: 0.90 },
   looking_to_join: { has_idea: 1.00, looking_to_join: 0.15, flexible: 0.85 },
   flexible:        { has_idea: 0.90, looking_to_join: 0.85, flexible: 0.75 },
 };
@@ -189,8 +195,8 @@ export async function POST(req: NextRequest) {
       behavioral_breakdown: breakdown,
       intent:               candidateIntent,
       intent_compat:        Math.round(intCompat * 100),
-      soul_score:           soul ? soul.score : undefined,
-      soul_level:           soul ? soul.level : undefined,
+      soul_score:           soul ? Math.round(hybridScore * 100) : undefined,
+      soul_level:           soul ? soulLevelOf(Math.round(hybridScore * 100)) : undefined,
       soul_phrase:          soul ? soul.phrase : undefined,
       soul_components:      soul ? soul.components : undefined,
       match:                Math.round(hybridScore * 100),
