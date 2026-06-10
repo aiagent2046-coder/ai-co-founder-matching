@@ -170,8 +170,8 @@ export default function DiscoverPage() {
   };
 
   return (
-    <div style={{padding:'24px clamp(16px, 5vw, 48px)'}}>
-      <div style={{display:'flex',gap:8,marginBottom:20}}>
+    <div style={{padding:'16px clamp(16px, 5vw, 48px) 8px',height:'100%',display:'flex',flexDirection:'column'}}>
+      <div style={{display:'flex',gap:8,marginBottom:12,flexShrink:0}}>
         {([['psycho', '🧬 Психометрика'], ['soul', '🌙 Матрица души']] as const).map(([key, label]) => (
           <button
             key={key}
@@ -192,9 +192,9 @@ export default function DiscoverPage() {
           </button>
         ))}
       </div>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:32}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:14,flexShrink:0}}>
         <div>
-          <h1 className="font-display" style={{fontWeight:700,fontSize:32,letterSpacing:'-0.01em',marginBottom:4}}>
+          <h1 className="font-display" style={{fontWeight:700,fontSize:'clamp(22px, 5vw, 30px)',letterSpacing:'-0.01em',marginBottom:4}}>
             Найди <span className="gradient-text">своего</span>
           </h1>
           <p style={{fontSize:14,color:'#9ca3af'}}>
@@ -243,11 +243,13 @@ export default function DiscoverPage() {
       )}
 
       {!loading && !error && (
-        <div style={{display:'flex',justifyContent:'center',alignItems:'flex-start',padding:'16px 0'}}>
+        <div style={{flex:1,minHeight:0,display:'flex',justifyContent:'center',alignItems:'stretch',padding:'4px 0'}}>
           {candidates[idx] ? (
-            <div style={{width:'100%',maxWidth:420}}>
-              <FounderCard c={candidates[idx]} expanded />
-              <div style={{display:'flex',justifyContent:'center',gap:16,marginTop:24}}>
+            <div style={{width:'100%',maxWidth:420,display:'flex',flexDirection:'column',minHeight:0}}>
+              <div style={{overflowY:'auto',minHeight:0,flex:'0 1 auto',borderRadius:16}}>
+                <FounderCard c={candidates[idx]} expanded />
+              </div>
+              <div style={{display:'flex',justifyContent:'center',gap:16,marginTop:12,flexShrink:0,paddingBottom:4}}>
                 <button onClick={()=>swipe('pass')} style={{
                   width:64,height:64,borderRadius:'50%',
                   background:'rgba(31,41,55,0.8)',border:'1px solid #374151',color:'#9ca3af',
