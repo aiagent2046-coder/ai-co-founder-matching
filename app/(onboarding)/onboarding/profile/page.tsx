@@ -14,6 +14,7 @@ export default function ProfilePage() {
   const [stage, setStage] = useState('idea');
   const [birthMonth, setBirthMonth] = useState<number | ''>('');
   const [birthDay,   setBirthDay]   = useState<number | ''>('');
+  const [birthYear,  setBirthYear]  = useState<number | ''>('');
   const [skillsInput, setSkillsInput] = useState('');
   const [skills, setSkills] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -35,6 +36,7 @@ export default function ProfilePage() {
       setSkills(data.skills ?? []);
       setBirthMonth(data.birth_month ?? '');
       setBirthDay(data.birth_day ?? '');
+      setBirthYear(data.birth_year ?? '');
     }
   })(); }, []);
 
@@ -55,7 +57,7 @@ export default function ProfilePage() {
       const res = await fetch('/api/onboarding/profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
-        body: JSON.stringify({ name, role, domain, bio, location, stage, skills, birthMonth: birthMonth || null, birthDay: birthDay || null }),
+        body: JSON.stringify({ name, role, domain, bio, location, stage, skills, birthMonth: birthMonth || null, birthDay: birthDay || null, birthYear: birthYear || null }),
       });
       if (!res.ok) {
         const data = await res.json();
@@ -141,7 +143,7 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:16,marginBottom:6}}>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:16,marginBottom:6}}>
           <div>
             <label className="field-label">Месяц рождения</label>
             <select className="field-input" value={birthMonth} onChange={e=>setBirthMonth(e.target.value ? parseInt(e.target.value) : '')} style={{cursor:'pointer'}}>
@@ -169,9 +171,18 @@ export default function ProfilePage() {
               ))}
             </select>
           </div>
+          <div>
+            <label className="field-label">Год</label>
+            <select className="field-input" value={birthYear} onChange={e=>setBirthYear(e.target.value ? parseInt(e.target.value) : '')} style={{cursor:'pointer'}}>
+              <option value="">—</option>
+              {Array.from({length: 2008 - 1940 + 1}, (_, i) => 2008 - i).map(y => (
+                <option key={y} value={y}>{y}</option>
+              ))}
+            </select>
+          </div>
         </div>
         <div style={{fontSize:11,color:'#6b7280',marginBottom:20}}>
-          Год не запрашиваем — для расчёта биоритмов нужны только месяц и день.
+          Дата рождения участвует в расчёте совместимости. Неточная дата снижает качество подбора партнёра.
         </div>
 
         <div>
