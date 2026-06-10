@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { soulCompat } from '@/lib/soul-matrix';
 import { checkLimit } from '@/lib/rate-limit';
 
 export const maxDuration = 30;
@@ -108,7 +109,7 @@ export async function POST(req: NextRequest) {
 
   const { data: me } = await supabase
     .from('founder_profiles')
-    .select('embedding, big_five, behavioral_profile, intent')
+    .select('embedding, big_five, behavioral_profile, intent, birth_year, birth_month, birth_day')
     .eq('user_id', userId)
     .single();
 
@@ -127,18 +128,22 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  const engine = req.nextUrl.searchParams.get('engine') === 'soul' ? 'soul' : 'psycho';
+
   // match_founders RPC не возвращает behavioral_profile — подтягиваем отдельным запросом
   const matchedIds = (matches || []).map((m: any) => m.user_id).filter(Boolean);
   const behavioralMap = new Map<string, any>();
   const intentMap = new Map<string, string | null>();
+  const birthMap = new Map<string, { birth_year: number | null; birth_month: number | null; birth_day: number | null }>();
   if (matchedIds.length > 0) {
     const { data: extra } = await supabase
       .from('founder_profiles')
-      .select('user_id, behavioral_profile, intent')
+      .select('user_id, behavioral_profile, intent, birth_year, birth_month, birth_day')
       .in('user_id', matchedIds);
     for (const row of extra || []) {
       behavioralMap.set(row.user_id, row.behavioral_profile);
       intentMap.set(row.user_id, row.intent);
+      birthMap.set(row.user_id, { birth_year: row.birth_year, birth_month: row.birth_month, birth_day: row.birth_day });
     }
   }
 
@@ -156,7 +161,25 @@ export async function POST(req: NextRequest) {
     const baseHybrid = BEHAVIORAL_ENABLED
       ? m.similarity * 0.4 + oceanScore * 0.4 + behavScore * 0.2
       : m.similarity * 0.6 + oceanScore * 0.4;
-    const hybridScore = baseHybrid * intCompat; // intent работает как множитель уверенности
+    const soul = engine === 'soul'
+      ? soulCompat(
+          {
+            big_five: (me as any).big_five,
+            behavioral_profile: (me as any).behavioral_profile,
+            birth_year: (me as any).birth_year,
+            birth_month: (me as any).birth_month,
+            birth_day: (me as any).birth_day,
+          },
+          {
+            big_five: m.big_five,
+            behavioral_profile: candidateBehavioral,
+            ...(birthMap.get(m.user_id) ?? { birth_year: null, birth_month: null, birth_day: null }),
+          },
+        )
+      : null;
+    const hybridScore = soul
+      ? (soul.score / 100) * intCompat   // движок Матрицы: soul-композит × intent
+      : baseHybrid * intCompat;          // психометрика: как раньше
 
     return {
       ...m,
@@ -166,6 +189,10 @@ export async function POST(req: NextRequest) {
       behavioral_breakdown: breakdown,
       intent:               candidateIntent,
       intent_compat:        Math.round(intCompat * 100),
+      soul_score:           soul ? soul.score : undefined,
+      soul_level:           soul ? soul.level : undefined,
+      soul_phrase:          soul ? soul.phrase : undefined,
+      soul_components:      soul ? soul.components : undefined,
       match:                Math.round(hybridScore * 100),
     };
   }).filter(Boolean).sort((a: any, b: any) => b.match - a.match);
