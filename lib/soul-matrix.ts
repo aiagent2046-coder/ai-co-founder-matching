@@ -162,9 +162,13 @@ export function soulCompat(a: SoulProfile, b: SoulProfile, today = new Date()): 
     score >= 65 ? 'Созвучие' :
     score >= 50 ? 'Нейтральный фон' : 'Разные волны';
 
+  // Биоритм — самое «живое» сообщение (меняется ежедневно), приоритет ему при ≥70.
+  // Иначе — сильнейший слой.
   const comp: [string, number][] = [['mbti', mbti], ['ennea', ennea], ['element', element]];
   if (bio) comp.push(['bio', bio.avg]);
-  const strongest = comp.sort((x, y) => y[1] - x[1])[0][0];
+  const strongest = bio && bio.avg >= 70
+    ? 'bio'
+    : comp.sort((x, y) => y[1] - x[1])[0][0];
   const DETAIL: Record<string, string> = {
     mbti: 'схожее восприятие мира',
     ennea: 'взаимодополняющие внутренние мотивации',
