@@ -4,7 +4,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest run"
   },
   "dependencies": {
     "@supabase/ssr": "^0.3.0",
@@ -24,6 +25,7 @@
     "@types/node": "^20.0.0",
     "@types/react": "^18.3.0",
     "postcss": "^8.4.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.8"
   }
 }
