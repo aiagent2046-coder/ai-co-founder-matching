@@ -5,7 +5,6 @@ import { OceanRadar } from '@/components/charts/OceanRadar';
 import { getAuthToken } from '@/lib/supabase';
 import posthog from 'posthog-js';
 
-type Mode = 'grid' | 'swipe';
 type Candidate = {
   user_id: string;
   name: string;
@@ -101,7 +100,6 @@ function initialsFor(name: string): string {
 }
 
 export default function DiscoverPage() {
-  const [mode, setMode] = useState<Mode>('grid');
   const [engine, setEngine] = useState<'psycho' | 'soul'>('psycho');
   const [idx, setIdx] = useState(0);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
@@ -172,7 +170,7 @@ export default function DiscoverPage() {
   };
 
   return (
-    <div style={{padding:'32px 48px'}}>
+    <div style={{padding:'24px clamp(16px, 5vw, 48px)'}}>
       <div style={{display:'flex',gap:8,marginBottom:20}}>
         {([['psycho', '🧬 Психометрика'], ['soul', '🌙 Матрица души']] as const).map(([key, label]) => (
           <button
@@ -204,25 +202,6 @@ export default function DiscoverPage() {
           </p>
         </div>
 
-        <div style={{display:'flex',background:'#1f2937',border:'1px solid #374151',borderRadius:8,padding:4,gap:4}}>
-          {(['grid','swipe'] as Mode[]).map(m => (
-            <button key={m} onClick={()=>setMode(m)} style={{
-              padding:'8px 16px',borderRadius:6,
-              background: mode===m ? 'linear-gradient(135deg,#00d4aa,#2ec4b6)' : 'transparent',
-              color: mode===m ? '#0a0e17' : '#9ca3af',
-              border:'none',cursor:'pointer',fontSize:13,fontWeight:600,
-              fontFamily:'"Inter",sans-serif',transition:'all 0.2s',
-              display:'flex',alignItems:'center',gap:6
-            }}>
-              {m === 'grid' ? (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-              ) : (
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="4" y="6" width="16" height="12" rx="2"/></svg>
-              )}
-              {m === 'grid' ? 'Сетка' : 'Свайп'}
-            </button>
-          ))}
-        </div>
       </div>
 
       {loading && (
@@ -263,18 +242,10 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      {!loading && !error && candidates.length > 0 && mode === 'grid' && (
-        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(320px,1fr))',gap:20}}>
-          {candidates.map((c, i) => (
-            <FounderCard key={c.user_id} c={c} delay={i*0.05} />
-          ))}
-        </div>
-      )}
-
-      {!loading && !error && mode === 'swipe' && (
-        <div style={{display:'flex',justifyContent:'center',alignItems:'flex-start',padding:'40px 0'}}>
+      {!loading && !error && (
+        <div style={{display:'flex',justifyContent:'center',alignItems:'flex-start',padding:'16px 0'}}>
           {candidates[idx] ? (
-            <div style={{width:380}}>
+            <div style={{width:'100%',maxWidth:420}}>
               <FounderCard c={candidates[idx]} expanded />
               <div style={{display:'flex',justifyContent:'center',gap:16,marginTop:24}}>
                 <button onClick={()=>swipe('pass')} style={{

@@ -51,6 +51,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const [checking, setChecking] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const apply = () => setIsMobile(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
 
   // Гард приватной зоны: нет сессии → на логин.
   useEffect(() => {
@@ -79,7 +88,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (checking) return null;
 
   return (
-    <div style={{display:'flex',height:'100vh',overflow:'hidden',position:'relative'}}>
+    <div style={{display:'flex',flexDirection:isMobile?'column':'row',height:'100vh',overflow:'hidden',position:'relative'}}>
+      {!isMobile && (
       <aside style={{
         width:220, flexShrink:0,
         background:'rgba(17,24,39,0.6)',
@@ -135,10 +145,61 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           Выйти
         </button>
       </aside>
+      )}
+
+      {isMobile && (
+        <div style={{
+          display:'flex',alignItems:'center',justifyContent:'space-between',
+          padding:'10px 16px',flexShrink:0,
+          borderBottom:'1px solid #374151',
+          background:'rgba(17,24,39,0.8)',backdropFilter:'blur(16px)',zIndex:10
+        }}>
+          <Link href="/" style={{display:'flex',alignItems:'center',gap:8,textDecoration:'none'}}>
+            <div style={{
+              width:26,height:26,borderRadius:7,
+              background:'linear-gradient(135deg,#00d4aa,#2ec4b6)',
+              display:'flex',alignItems:'center',justifyContent:'center',
+              fontFamily:'"Space Grotesk",sans-serif',fontWeight:700,fontSize:15,color:'#0a0e17'
+            }}>✦</div>
+            <span className="font-display gradient-text" style={{fontWeight:700,fontSize:15}}>Syndi AI</span>
+          </Link>
+          <button onClick={logout} style={{
+            background:'transparent',border:'none',color:'#6b7280',cursor:'pointer',padding:6
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+            </svg>
+          </button>
+        </div>
+      )}
 
       <main style={{flex:1,overflow:'auto',position:'relative',zIndex:5}}>
         {children}
       </main>
+
+      {isMobile && (
+        <nav style={{
+          display:'flex',justifyContent:'space-around',alignItems:'center',
+          padding:'6px 4px calc(6px + env(safe-area-inset-bottom))',flexShrink:0,
+          borderTop:'1px solid #374151',
+          background:'rgba(17,24,39,0.92)',backdropFilter:'blur(16px)',zIndex:10
+        }}>
+          {nav.map(n => {
+            const active = path?.startsWith(n.href);
+            return (
+              <Link key={n.href} href={n.href} style={{
+                display:'flex',flexDirection:'column',alignItems:'center',gap:2,
+                color: active ? '#00d4aa' : '#9ca3af',
+                textDecoration:'none',fontSize:9,fontWeight:500,
+                padding:'4px 6px',minWidth:44
+              }}>
+                {n.icon}
+                <span>{n.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      )}
     </div>
   );
 }
