@@ -22,6 +22,9 @@ type Candidate = {
   behavioral_score?: number;
   intent?: string | null;
   intent_compat?: number;
+  soul_score?: number;
+  soul_level?: string;
+  soul_phrase?: string;
   behavioral_breakdown?: {
     score: number;
     honesty: number | null;
@@ -99,6 +102,7 @@ function initialsFor(name: string): string {
 
 export default function DiscoverPage() {
   const [mode, setMode] = useState<Mode>('grid');
+  const [engine, setEngine] = useState<'psycho' | 'soul'>('psycho');
   const [idx, setIdx] = useState(0);
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
@@ -124,6 +128,8 @@ export default function DiscoverPage() {
             vector_score: candidate.vector_score,
             ocean_score: candidate.ocean_score,
             behavioral_score: candidate.behavioral_score,
+            engine: candidate.soul_level ? 'soul' : 'psycho',
+            soul_score: candidate.soul_score,
             match: candidate.match,
           });
           if (data.mutual === true) {
@@ -141,13 +147,13 @@ export default function DiscoverPage() {
     setIdx(i => i + 1);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { setIdx(0); load(); }, [engine]);
 
   const load = async () => {
     setLoading(true); setError(null);
     try {
       const token = await getAuthToken();
-      const res = await fetch('/api/discover/match', {
+      const res = await fetch(`/api/discover/match${engine === 'soul' ? '?engine=soul' : ''}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
       });
@@ -167,6 +173,27 @@ export default function DiscoverPage() {
 
   return (
     <div style={{padding:'32px 48px'}}>
+      <div style={{display:'flex',gap:8,marginBottom:20}}>
+        {([['psycho', '🧬 Психометрика'], ['soul', '🌙 Матрица души']] as const).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setEngine(key)}
+            style={{
+              padding:'8px 18px',
+              borderRadius:9999,
+              fontSize:13,
+              fontWeight:600,
+              cursor:'pointer',
+              transition:'all 0.15s',
+              background: engine === key ? (key === 'soul' ? 'rgba(167,139,250,0.15)' : 'rgba(0,212,170,0.12)') : 'rgba(255,255,255,0.03)',
+              border: engine === key ? `1px solid ${key === 'soul' ? '#a78bfa' : '#00d4aa'}` : '1px solid #374151',
+              color: engine === key ? (key === 'soul' ? '#a78bfa' : '#00d4aa') : '#9ca3af',
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:32}}>
         <div>
           <h1 className="font-display" style={{fontWeight:700,fontSize:32,letterSpacing:'-0.01em',marginBottom:4}}>
@@ -370,6 +397,21 @@ function FounderCard({ c, delay = 0, expanded = false }: { c: Candidate; delay?:
         </div>
 
         {(() => {
+          if (c.soul_level) {
+            const sc = c.soul_score ?? 0;
+            const soulColor = sc >= 80 ? '#a78bfa' : sc >= 65 ? '#00d4aa' : sc >= 50 ? '#ff9f1c' : '#6b7280';
+            return (
+              <div style={{marginBottom:12}}>
+                <div style={{display:'flex',alignItems:'center',gap:6,fontSize:13,fontWeight:600,color:soulColor,marginBottom:4}}>
+                  <span>🌙</span>
+                  <span>{c.soul_level}</span>
+                </div>
+                {c.soul_phrase && (
+                  <div style={{fontSize:12,color:'#9ca3af',lineHeight:1.4}}>{c.soul_phrase}</div>
+                )}
+              </div>
+            );
+          }
           const sum = buildSummary(c);
           const dbgLines: string[] = [];
           if (c.vector_score !== undefined) dbgLines.push(`semantic: ${c.vector_score}/100`);
