@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     github_url:      body.githubUrl ?? null,
     birth_month:     body.birthMonth ?? null,
     birth_day:       body.birthDay ?? null,
+    birth_year:      body.birthYear ?? null,
     onboarding_done: false,
   }, { onConflict: 'user_id' });
 
