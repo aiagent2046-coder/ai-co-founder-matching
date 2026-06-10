@@ -33,8 +33,10 @@ def login(email, password):
     j = r.json()
     return j.get("access_token"), (j.get("user") or {}).get("id")
 
-def discover(token, engine=None):
-    url = f"{APP}/api/discover/match" + ("?engine=soul" if engine == "soul" else "")
+def discover(token, engine=None, limit=80):
+    params = [f"limit={limit}"]
+    if engine == "soul": params.append("engine=soul")
+    url = f"{APP}/api/discover/match?" + "&".join(params)
     r = H.post(url, headers={"Authorization": f"Bearer {token}"})
     return (r.json().get("candidates") or []) if r.status_code == 200 else []
 
@@ -119,8 +121,10 @@ def phase_cluster():
     print(f"Рёбер: психометрика {len(ep)}, матрица {len(es)}")
 
     def avg_internal(team, edges):
-        vals = [edges.get(pair_key(a, b), 50) for a, b in itertools.combinations(team, 2)]
-        return statistics.mean(vals)
+        vals = [edges[pair_key(a, b)] for a, b in itertools.combinations(team, 2)
+                if pair_key(a, b) in edges]
+        total = len(list(itertools.combinations(team, 2)))
+        return (statistics.mean(vals) if vals else 0), f"{len(vals)}/{total}"
 
     def greedy(edges, available):
         if len(available) < TEAM_N: sys.exit("мало ботов в пуле")
@@ -149,8 +153,10 @@ def phase_cluster():
     print("\n══ Составы команд ══")
     for label, team in (("P (психометрика)", team_p), ("S (матрица души)", team_s), ("R (контроль)", team_r)):
         names = ", ".join(bots[u]["name"] for u in team)
+        ap, cp = avg_internal(team, ep)
+        as_, cs = avg_internal(team, es)
         print(f"  {label}: {names}")
-        print(f"      avg psycho={avg_internal(team, ep):.1f}  avg soul={avg_internal(team, es):.1f}")
+        print(f"      avg psycho={ap:.1f} (покрытие {cp})  avg soul={as_:.1f} (покрытие {cs})")
 
 # ─────────────────────────── PHASE: match ───────────────────────────
 def phase_match():
