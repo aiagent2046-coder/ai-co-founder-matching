@@ -1,6 +1,7 @@
 import { checkLimit } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { parseBody, bigfiveSchema } from '@/lib/validation';
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
@@ -19,10 +20,9 @@ export async function POST(req: NextRequest) {
   if (!allowed) {
     return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });
   }
-
-  // Парсим тело запроса
-  const body = await req.json();
-  const scores = body.scores;
+    // Парсим и валидируем тело запроса через Zod
+  const body = await parseBody(bigfiveSchema, req);
+  const scores = body.scores;  
 
   const { error } = await supabase
     .from('founder_profiles')
