@@ -25,6 +25,9 @@ export const onboardingProfileSchema = z.object({
   location: z.string().max(200).optional(),
   linkedinUrl: z.string().url('Некорректный URL').optional().nullable(),
   githubUrl: z.string().url('Некорректный URL').optional().nullable(),
+  birthMonth: z.number().int().min(1).max(12).optional().nullable(),
+  birthDay: z.number().int().min(1).max(31).optional().nullable(),
+  birthYear: z.number().int().min(1920).max(2012).optional().nullable(),
 });
 
 // POST /api/onboarding/bigfive — тело: { scores: { …OCEAN… } }
