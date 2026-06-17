@@ -83,15 +83,6 @@ export default function HomePage() {
             </Link>
             <button className="btn-ghost" style={{padding:'16px 28px',fontSize:16}}>Узнать больше</button>
           </div>
-
-          <div className="animate-fade-up delay-5" style={{display:'flex',gap:40}}>
-            
-              <div key={l}>
-                <div className="font-display gradient-text" style={{fontWeight:700,fontSize:28}}>{n}</div>
-                <div style={{fontSize:12,fontWeight:500,color:'#6b7280',letterSpacing:'0.06em',textTransform:'uppercase',marginTop:4}}>{l}</div>
-              </div>
-            ))}
-          </div>
         </div>
 
         {/* Right — floating avatars */}
@@ -218,26 +209,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* SOCIAL PROOF */}
-      <div style={{
-        display:'flex',alignItems:'center',justifyContent:'space-around',
-        padding:'32px 48px',
-        background:'rgba(31,41,55,0.4)',
-        borderTop:'1px solid #374151',
-        borderBottom:'1px solid #374151',
-        margin:'32px 0 0',
-        position:'relative',zIndex:1
-      }}>
-        <div style={{textAlign:'center'}}>
-          <div className="font-display gradient-text" style={{fontWeight:700,fontSize:32}}>247</div>
-          <div style={{fontSize:13,color:'#9ca3af',letterSpacing:'0.04em'}}>Команд собрано</div>
-        </div>
-        <div style={{fontSize:13,color:'#6b7280',textTransform:'uppercase',letterSpacing:'0.1em'}}>Featured in</div>
-        
-          
-        
-      </div>
-
       {/* CTA */}
       <section style={{position:'relative',zIndex:1,padding:'80px 48px'}}>
         <div style={{
@@ -251,7 +222,7 @@ export default function HomePage() {
             Твоя команда мечты<br/><span className="gradient-text-full">уже ждёт тебя</span>
           </h2>
           <p style={{fontSize:16,color:'#9ca3af',marginBottom:32,position:'relative',zIndex:1}}>
-            Присоединяйся к 2,800+ фаундерам которые ищут именно тебя
+            Начни поиск идеального сооснователя уже сегодня
           </p>
           <Link href="/register" className="btn-primary btn-primary-lg" style={{position:'relative',zIndex:1}}>
             Начать бесплатно

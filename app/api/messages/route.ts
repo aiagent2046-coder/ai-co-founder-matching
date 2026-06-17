@@ -1,8 +1,8 @@
-import { checkLimit } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { parseBody, messagesSchema } from '@/lib/validation';
 import { buildSystemPrompt, DEFAULT_IDENTITY, type AvatarIdentity } from '@/lib/avatar/identity';
+import { checkLimit } from '@/lib/rate-limit';
 
 export async function GET(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
@@ -15,11 +15,6 @@ export async function GET(req: NextRequest) {
 
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-    // Проверка rate limit: 20 сообщений в минуту
-  const allowed = await checkLimit(`messages:${user.id}`, 20, "60 s");
-  if (!allowed) {
-    return NextResponse.json({ error: 'Too many messages. Please slow down.' }, { status: 429 });
-  }
 
   const matchId = req.nextUrl.searchParams.get('matchId');
   if (!matchId) return NextResponse.json({ error: 'matchId is required' }, { status: 400 });
@@ -56,7 +51,7 @@ export async function GET(req: NextRequest) {
     .eq('match_id', matchId)
     .order('created_at', { ascending: true });
 
-    if (msgsErr) {
+  if (msgsErr) {
     return NextResponse.json({ error: msgsErr.message }, { status: 500 });
   }
 
@@ -68,37 +63,23 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ messages: messagesWithFlags });
 }
-  
+
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  // 1. Сначала создаем клиент Supabase
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
-  // 2. Получаем пользователя
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
 
-  // 3. Проверяем rate limit (20 сообщений в минуту)
+  // Проверка rate limit: 20 сообщений в минуту
   const allowed = await checkLimit(`messages:${user.id}`, 20, "60 s");
   if (!allowed) {
     return NextResponse.json({ error: 'Too many messages. Please slow down.' }, { status: 429 });
-  }
-
-  // 4. Парсим тело запроса
-  let parsed;
-  try {
-    parsed = await parseBody(messagesSchema, req);
-  } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'Bad request' }, { status: 400 });
-  }
-  const { matchId, content } = parsed;
-  if (!matchId || !content?.trim()) {
-    return NextResponse.json({ error: 'matchId and content are required' }, { status: 400 });
   }
 
   let parsed;
@@ -141,7 +122,7 @@ export async function POST(req: NextRequest) {
     .from('messages')
     .insert({
       match_id: matchId,
-      sender_id: myProfile.id, // founder_profiles.id для FK, чтобы соответствовать FK в БД
+      sender_id: myProfile.id, 
       content: content.trim(),
       type: 'text',
       is_ai_reply: false,
@@ -242,8 +223,3 @@ export async function POST(req: NextRequest) {
   // Добавляем is_me: true, так как это только что отправленное сообщение пользователя
   return NextResponse.json({ message: { ...message, is_me: true } }, { status: 201 });
 }
-    
-  
-
-  
-
