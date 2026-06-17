@@ -20,6 +20,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });
   }
 
+  // Парсим тело запроса
+  const body = await req.json();
+  const scores = body.scores;
+
   const { error } = await supabase
     .from('founder_profiles')
     .update({ big_five: scores })

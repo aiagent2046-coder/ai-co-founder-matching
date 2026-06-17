@@ -23,20 +23,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Too many swipes. Please slow down.' }, { status: 429 });
   }
 
-  // 1. Auth
-  const token = req.headers.get('authorization')?.replace('Bearer ', '');
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  // 2. Create service-role client
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  );
-
-  // 3. Server-side verify the JWT via supabase.auth
-  const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
-  if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   const userId = user.id;
+
+  // Парсим тело запроса (получаем to_user и action)
+  let parsed;
+  try {
+    parsed = await parseBody(swipeSchema, req);
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : 'Bad request' }, { status: 400 });
+  }
+  const { to_user, action } = parsed;
 
   // 4. Look up the current user's founder profile id
   const { data: myProfile } = await supabase
