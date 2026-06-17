@@ -6,14 +6,18 @@ import { parseBody, swipeSchema } from '@/lib/validation';
 export const maxDuration = 30;
 
 export async function POST(req: NextRequest) {
-  let parsed;
-  try {
-    parsed = await parseBody(swipeSchema, req);
-  } catch (e) {
-    return NextResponse.json({ error: e instanceof Error ? e.message : 'Bad request' }, { status: 400 });
-  }
-  const { to_user, action } = parsed;
-    // 60 свайпов в минуту
+  const token = req.headers.get('authorization')?.replace('Bearer ', '');
+  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+
+  const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
+  if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+
+  // Проверка rate limit: 60 свайпов в минуту
   const allowed = await checkLimit(`swipe:${user.id}`, 60, "60 s");
   if (!allowed) {
     return NextResponse.json({ error: 'Too many swipes. Please slow down.' }, { status: 429 });
