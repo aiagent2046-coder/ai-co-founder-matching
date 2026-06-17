@@ -72,21 +72,34 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
-  // Проверка rate limit: 20 сообщений в минуту
-  const allowed = await checkLimit(`messages:${user.id}`, 20, "60 s");
-  if (!allowed) {
-    return NextResponse.json({ error: 'Too many messages. Please slow down.' }, { status: 429 });
-  }
 
-if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+  // 1. Сначала создаем клиент Supabase
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
+  // 2. Получаем пользователя
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+
+  // 3. Проверяем rate limit (20 сообщений в минуту)
+  const allowed = await checkLimit(`messages:${user.id}`, 20, "60 s");
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many messages. Please slow down.' }, { status: 429 });
+  }
+
+  // 4. Парсим тело запроса
+  let parsed;
+  try {
+    parsed = await parseBody(messagesSchema, req);
+  } catch (e) {
+    return NextResponse.json({ error: e instanceof Error ? e.message : 'Bad request' }, { status: 400 });
+  }
+  const { matchId, content } = parsed;
+  if (!matchId || !content?.trim()) {
+    return NextResponse.json({ error: 'matchId and content are required' }, { status: 400 });
+  }
 
   let parsed;
   try {
