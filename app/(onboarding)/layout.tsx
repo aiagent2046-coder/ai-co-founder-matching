@@ -3,14 +3,19 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const STEPS = [
-  { n: 1, label: 'Профиль',  path: '/onboarding/profile'  },
-  { n: 2, label: 'Big Five', path: '/onboarding/big-five' },
-  { n: 3, label: 'Аватар',   path: '/onboarding/avatar'   },
+  { n: 1, label: 'Intent',    path: '/onboarding/intent' },
+  { n: 2, label: 'Профиль',   path: '/onboarding/profile' },
+  { n: 3, label: 'Big Five',  path: '/onboarding/big-five' },
+  { n: 4, label: 'Behavioral',path: '/onboarding/behavioral' },
+  { n: 5, label: 'Аватар',    path: '/onboarding/avatar' },
 ];
 
 function currentStep(p: string) {
-  if (p.includes('big-five')) return 2;
-  if (p.includes('avatar'))   return 3;
+  if (p.includes('intent'))     return 1;
+  if (p.includes('profile'))    return 2;
+  if (p.includes('big-five'))   return 3;
+  if (p.includes('behavioral')) return 4;
+  if (p.includes('avatar'))     return 5;
   return 1;
 }
 
@@ -39,7 +44,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
           <span className="font-display gradient-text" style={{fontWeight:700,fontSize:18}}>Syndi AI</span>
         </Link>
 
-        <nav style={{display:'flex',alignItems:'center',gap:8}}>
+        <nav style={{display:'flex',alignItems:'center',gap:8, flexWrap:'wrap'}}>
           {STEPS.map((step, i) => {
             const done   = step.n < cur;
             const active = step.n === cur;

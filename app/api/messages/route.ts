@@ -1,3 +1,4 @@
+import { checkLimit } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { parseBody, messagesSchema } from '@/lib/validation';
@@ -14,6 +15,11 @@ export async function GET(req: NextRequest) {
 
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+    // Проверка rate limit: 20 сообщений в минуту
+  const allowed = await checkLimit(`messages:${user.id}`, 20, "60 s");
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many messages. Please slow down.' }, { status: 429 });
+  }
 
   const matchId = req.nextUrl.searchParams.get('matchId');
   if (!matchId) return NextResponse.json({ error: 'matchId is required' }, { status: 400 });
@@ -50,17 +56,30 @@ export async function GET(req: NextRequest) {
     .eq('match_id', matchId)
     .order('created_at', { ascending: true });
 
-  if (msgsErr) {
+    if (msgsErr) {
     return NextResponse.json({ error: msgsErr.message }, { status: 500 });
   }
 
-  return NextResponse.json({ messages });
-}
+  // Добавляем флаг is_me, чтобы клиент точно знал, чье это сообщение
+  const messagesWithFlags = (messages || []).map(m => ({
+    ...m,
+    is_me: m.sender_id === myProfile.id,
+  }));
 
+  return NextResponse.json({ messages: messagesWithFlags });
+}
+  
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
+  // Проверка rate limit: 20 сообщений в минуту
+  const allowed = await checkLimit(`messages:${user.id}`, 20, "60 s");
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many messages. Please slow down.' }, { status: 429 });
+  }
 
+if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -207,5 +226,11 @@ export async function POST(req: NextRequest) {
     console.error('L2 auto-reply failed:', e);
   }
 
-  return NextResponse.json({ message }, { status: 201 });
+  // Добавляем is_me: true, так как это только что отправленное сообщение пользователя
+  return NextResponse.json({ message: { ...message, is_me: true } }, { status: 201 });
 }
+    
+  
+
+  
+

@@ -6,17 +6,20 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN!,
 });
 
-// 10 запросов в минуту на КЛЮЧ. Ключ = "роут:userId" → у каждого роута своё ведро.
-const ratelimit = new Ratelimit({
-  redis,
-  limiter: Ratelimit.slidingWindow(10, "60 s"),
-  analytics: true,
-});
-
 // Fail-open: если Redis недоступен — НЕ блокируем (true), чтобы хиккап
 // инфраструктуры не ронял рабочие роуты в ошибку.
-export async function checkLimit(key: string): Promise<boolean> {
+export async function checkLimit(
+  key: string, 
+  maxRequests: number = 10, 
+  window: string = "60 s"
+): Promise<boolean> {
   try {
+    const ratelimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(maxRequests, window),
+      analytics: true,
+    });
+    
     const { success } = await ratelimit.limit(key);
     return success;
   } catch (err) {

@@ -12,6 +12,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: e instanceof Error ? e.message : 'Bad request' }, { status: 400 });
   }
   const { to_user, action } = parsed;
+    // 60 свайпов в минуту
+  const allowed = await checkLimit(`swipe:${user.id}`, 60, "60 s");
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many swipes. Please slow down.' }, { status: 429 });
+  }
 
   // 1. Auth
   const token = req.headers.get('authorization')?.replace('Bearer ', '');

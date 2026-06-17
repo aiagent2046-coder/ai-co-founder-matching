@@ -1,12 +1,35 @@
+# Зависимости
 node_modules/
-.next/
-.env.local
-.env.*.local
-dist/
-*.log
-tsconfig.tsbuildinfo
-build-log.txt
+.pnp
+.pnp.js
 
-# git artifacts that shouldn't be tracked
-FETCH_HEAD
-ORIG_HEAD
+# Тестирование
+coverage/
+
+# Next.js
+.next/
+out/
+build/
+tsconfig.tsbuildinfo
+
+# Производственное окружение
+.env*.local
+.vercel/
+
+# Python (для ботов и скриптов)
+venv/
+__pycache__/
+*.pyc
+
+# Боты: профили, пароли и стейт-файлы
+syndi-agents/profiles/*.json
+syndi-agents/experiment_state.json
+
+# Разное
+.DS_Store
+*.pem
+
+# Logs and Bot Secrets (Global)
+**/fleet.log
+**/all_profiles.json
+**/experiment_state.json

@@ -1,4 +1,3 @@
-"use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuthToken } from '@/lib/supabase';
@@ -170,7 +169,7 @@ export function BehavioralProfile() {
       <div style={{marginBottom:28}}>
         <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
           <span style={{width:8,height:8,borderRadius:'50%',background:'#ff9f1c',boxShadow:'0 0 8px #ff9f1c'}}/>
-          <span style={{fontSize:11,fontWeight:600,color:'#ff9f1c',letterSpacing:'0.12em',textTransform:'uppercase'}}>Шаг 3 из 4</span>
+          <span style={{fontSize:11,fontWeight:600,color:'#ff9f1c',letterSpacing:'0.12em',textTransform:'uppercase'}}>Шаг 4 из 5</span>
         </div>
         <h1 className="font-display" style={{fontWeight:700,fontSize:32,letterSpacing:'-0.01em',marginBottom:8}}>
           <span className="gradient-text">Поведенческий</span> слепок

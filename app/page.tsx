@@ -85,7 +85,7 @@ export default function HomePage() {
           </div>
 
           <div className="animate-fade-up delay-5" style={{display:'flex',gap:40}}>
-            {[['2,847','Фаундеров'],['247','Команды собраны'],['94%','Точность match']].map(([n,l])=>(
+            
               <div key={l}>
                 <div className="font-display gradient-text" style={{fontWeight:700,fontSize:28}}>{n}</div>
                 <div style={{fontSize:12,fontWeight:500,color:'#6b7280',letterSpacing:'0.06em',textTransform:'uppercase',marginTop:4}}>{l}</div>
@@ -233,9 +233,9 @@ export default function HomePage() {
           <div style={{fontSize:13,color:'#9ca3af',letterSpacing:'0.04em'}}>Команд собрано</div>
         </div>
         <div style={{fontSize:13,color:'#6b7280',textTransform:'uppercase',letterSpacing:'0.1em'}}>Featured in</div>
-        {['Y Combinator','Techstars','500 Global'].map(p=>(
-          <div key={p} className="font-display" style={{fontWeight:700,fontSize:18,color:'#6b7280'}}>{p}</div>
-        ))}
+        
+          
+        
       </div>
 
       {/* CTA */}

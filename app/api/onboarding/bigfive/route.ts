@@ -5,6 +5,11 @@ export async function POST(req: NextRequest) {
   const { scores } = await req.json();
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // 10 запросов в минуту (дефолт)
+  const allowed = await checkLimit(`onboarding-bigfive:${user.id}`);
+  if (!allowed) {
+    return NextResponse.json({ error: 'Too many requests.' }, { status: 429 });
+  }
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

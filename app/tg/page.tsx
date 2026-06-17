@@ -53,7 +53,7 @@ export default function TelegramEntryPage() {
         if (setErr) throw setErr;
         if (cancelled) return;
         setPhase('done');
-        router.replace('/onboarding/profile');
+        router.replace('/onboarding/intent');
       } catch (e: any) {
         if (!cancelled) setError(e?.message || String(e));
       }

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { getSupabase, getAuthToken } from '@/lib/supabase';
+import { getAuthToken } from '@/lib/supabase';
 import posthog from 'posthog-js';
 
 type Msg = { id: string; role: 'me' | 'them' | 'avatar'; text: string; time: string };
@@ -46,11 +46,8 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
-
-  useEffect(() => {
+    useEffect(() => {
     if (!matchId) return;
-    let currentUserId: string | undefined;
     let pollTimer: ReturnType<typeof setInterval> | null = null;
 
     (async () => {
@@ -58,9 +55,6 @@ export default function ChatPage() {
         setLoading(true);
         const token = await getAuthToken();
         const headers = { Authorization: `Bearer ${token ?? ''}` };
-
-        const { data: { session } } = await getSupabase().auth.getSession();
-        currentUserId = session?.user?.id;
 
         // Загрузить peer info из /api/matches/list
         const mlRes = await fetch('/api/matches/list', { headers });
@@ -84,7 +78,7 @@ export default function ChatPage() {
         if (msgRes.ok) {
           const msgs: Msg[] = (msgData.messages ?? []).map((m: any) => ({
             id: m.id,
-            role: m.sender_id === currentUserId ? 'me' : 'them',
+            role: m.is_me ? 'me' : 'them', // Используем флаг с сервера
             text: m.content,
             time: formatTime(m.created_at),
           }));
@@ -108,7 +102,7 @@ export default function ChatPage() {
           const data = await res.json();
           const msgs: Msg[] = (data.messages ?? []).map((m: any) => ({
             id: m.id,
-            role: m.sender_id === currentUserId ? 'me' : 'them',
+            role: m.is_me ? 'me' : 'them', // Используем флаг с сервера
             text: m.content,
             time: formatTime(m.created_at),
           }));
