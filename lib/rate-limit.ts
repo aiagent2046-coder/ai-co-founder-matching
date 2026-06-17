@@ -11,7 +11,7 @@ const redis = new Redis({
 export async function checkLimit(
   key: string, 
   maxRequests: number = 10, 
-  window: string = "60 s"
+  window: `${number} s` | `${number} m` = "60 s" // Строгая типизация для TypeScript
 ): Promise<boolean> {
   try {
     const ratelimit = new Ratelimit({
@@ -27,5 +27,3 @@ export async function checkLimit(
     return true;
   }
 }
-
-export default ratelimit;
