@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { parseBody, messagesSchema } from '@/lib/validation';
 import { buildSystemPrompt, DEFAULT_IDENTITY, type AvatarIdentity } from '@/lib/avatar/identity';
@@ -135,90 +135,93 @@ export async function POST(req: NextRequest) {
   }
 
   // --- L2 Auto-Reply (первое сообщение, если у получателя autonomy >= 2) ---
-  try {
-    // a) Проверить, что это первое сообщение в матче
-    const { count } = await supabase
-      .from('messages')
-      .select('*', { count: 'exact', head: true })
-      .eq('match_id', matchId);
+  // Выносим в фон, чтобы ответ пользователю улетел мгновенно
+  after(async () => {
+    try {
+      // a) Проверить, что это первое сообщение в матче
+      const { count } = await supabase
+        .from('messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('match_id', matchId);
 
-    if (count !== null && count <= 1) {
-      // b) Определить recipient founder_id
-      const recipientFounderId =
-        match.founder1_id === myProfile.id ? match.founder2_id : match.founder1_id;
+      if (count !== null && count <= 1) {
+        // b) Определить recipient founder_id
+        const recipientFounderId =
+          match.founder1_id === myProfile.id ? match.founder2_id : match.founder1_id;
 
-      // c) Загрузить recipient profile
-      const { data: recipient } = await supabase
-        .from('founder_profiles')
-        .select('*')
-        .eq('id', recipientFounderId)
-        .single();
+        // c) Загрузить recipient profile
+        const { data: recipient } = await supabase
+          .from('founder_profiles')
+          .select('*')
+          .eq('id', recipientFounderId)
+          .single();
 
-      // d) Проверить autonomy_level >= 2
-      if (recipient && (recipient.autonomy_level ?? 0) >= 2) {
-        // e) Собрать AvatarIdentity
-        const identity: AvatarIdentity = {
-          name:          recipient.name           ?? DEFAULT_IDENTITY.name,
-          role:          recipient.role           ?? DEFAULT_IDENTITY.role,
-          domain:        recipient.domain         ?? DEFAULT_IDENTITY.domain,
-          bio:           recipient.bio            ?? '',
-          location:      recipient.location       ?? '',
-          stage:         recipient.stage          ?? 'idea',
-          skills:        recipient.skills         ?? [],
-          ocean:         recipient.big_five       ?? DEFAULT_IDENTITY.ocean,
-          canTeach:      recipient.can_teach      ?? [],
-          wantToLearn:   recipient.want_to_learn  ?? [],
-          lookingFor:    recipient.looking_for    ?? [],
-          notLookingFor: recipient.not_looking_for?? [],
-          goals:         recipient.goals          ?? DEFAULT_IDENTITY.goals,
-          autonomyLevel: recipient.autonomy_level ?? 1,
-        };
+        // d) Проверить autonomy_level >= 2
+        if (recipient && (recipient.autonomy_level ?? 0) >= 2) {
+          // e) Собрать AvatarIdentity
+          const identity: AvatarIdentity = {
+            name:          recipient.name           ?? DEFAULT_IDENTITY.name,
+            role:          recipient.role           ?? DEFAULT_IDENTITY.role,
+            domain:        recipient.domain         ?? DEFAULT_IDENTITY.domain,
+            bio:           recipient.bio            ?? '',
+            location:      recipient.location       ?? '',
+            stage:         recipient.stage          ?? 'idea',
+            skills:        recipient.skills         ?? [],
+            ocean:         recipient.big_five       ?? DEFAULT_IDENTITY.ocean,
+            canTeach:      recipient.can_teach      ?? [],
+            wantToLearn:   recipient.want_to_learn  ?? [],
+            lookingFor:    recipient.looking_for    ?? [],
+            notLookingFor: recipient.not_looking_for?? [],
+            goals:         recipient.goals          ?? DEFAULT_IDENTITY.goals,
+            autonomyLevel: recipient.autonomy_level ?? 1,
+          };
 
-        // f) Сгенерировать system prompt
-        const systemPrompt = buildSystemPrompt(identity, 'autoreply');
+          // f) Сгенерировать system prompt
+          const systemPrompt = buildSystemPrompt(identity, 'autoreply');
 
-        // g) Вызвать Claude API
-        const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 10_000);
+          // g) Вызвать Claude API
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 10_000);
 
-        const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-api-key': process.env.ANTHROPIC_API_KEY!,
-            'anthropic-version': '2023-06-01',
-          },
-          body: JSON.stringify({
-            model: 'claude-sonnet-4-5-20250929',
-            max_tokens: 400,
-            system: systemPrompt,
-            messages: [{ role: 'user', content: content.trim() }],
-          }),
-          signal: controller.signal,
-        });
+          const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'x-api-key': process.env.ANTHROPIC_API_KEY!,
+              'anthropic-version': '2023-06-01',
+            },
+            body: JSON.stringify({
+              model: 'claude-sonnet-4-5-20250929',
+              max_tokens: 400,
+              system: systemPrompt,
+              messages: [{ role: 'user', content: content.trim() }],
+            }),
+            signal: controller.signal,
+          });
 
-        clearTimeout(timer);
+          clearTimeout(timer);
 
-        if (claudeRes.ok) {
-          const data = await claudeRes.json();
-          const aiReply: string | null = data.content?.[0]?.text ?? null;
+          if (claudeRes.ok) {
+            const data = await claudeRes.json();
+            const aiReply: string | null = data.content?.[0]?.text ?? null;
 
-          // i) Если ответ не пустой — сохранить как AI-ответ
-          if (aiReply) {
-            await supabase.from('messages').insert({
-              match_id: matchId,
-              sender_id: recipientFounderId,
-              content: aiReply,
-              type: 'text',
-              is_ai_reply: true,
-            });
+            // i) Если ответ не пустой — сохранить как AI-ответ
+            if (aiReply) {
+              await supabase.from('messages').insert({
+                match_id: matchId,
+                sender_id: recipientFounderId,
+                content: aiReply,
+                type: 'text',
+                is_ai_reply: true,
+              });
+            }
           }
         }
       }
+    } catch (e) {
+      console.error('L2 auto-reply failed:', e);
     }
-  } catch (e) {
-    console.error('L2 auto-reply failed:', e);
-  }
+  });
 
   // Добавляем is_me: true, так как это только что отправленное сообщение пользователя
   return NextResponse.json({ message: { ...message, is_me: true } }, { status: 201 });
