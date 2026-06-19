@@ -1,15 +1,13 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
-  // Создаем ответ, который мы вернем клиенту
+export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
 
-  // Создаем Supabase клиент для сервера (middleware)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -28,17 +26,14 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Безопасная проверка пользователя
   let user = null;
   try {
     const { data } = await supabase.auth.getUser();
     user = data.user;
   } catch (e) {
-    console.error('Middleware auth error:', e);
-    // Если Supabase недоступен, не вешаем сайт, просто пускаем дальше
+    console.error('Proxy auth error:', e);
   }
 
-  // Если пользователь не авторизован и пытается зайти на защищенную страницу /app/*
   if (!user && request.nextUrl.pathname.startsWith('/app')) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
@@ -46,11 +41,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Возвращаем ответ с обновленными куками
   return response;
 }
 
-// Указываем, на какие роуты middleware должен реагировать
 export const config = {
   matcher: [
     '/((?!_next/static|_next/image|favicon.ico|api|ingest|robots.txt|sitemap.xml).*)',
