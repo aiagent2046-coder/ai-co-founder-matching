@@ -19,7 +19,6 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-          // Устанавливаем куки и на запрос, и на ответ, чтобы они сохранялись в браузере
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value);
             response.cookies.set(name, value, options);
@@ -29,10 +28,15 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Проверяем, есть ли сессия у пользователя
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Безопасная проверка пользователя
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (e) {
+    console.error('Middleware auth error:', e);
+    // Если Supabase недоступен, не вешаем сайт, просто пускаем дальше
+  }
 
   // Если пользователь не авторизован и пытается зайти на защищенную страницу /app/*
   if (!user && request.nextUrl.pathname.startsWith('/app')) {
