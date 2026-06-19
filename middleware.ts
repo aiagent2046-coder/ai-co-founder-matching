@@ -2,6 +2,13 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  // Создаем ответ, который мы вернем клиенту
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  });
+
   // Создаем Supabase клиент для сервера (middleware)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,8 +19,10 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-          cookiesToSet.forEach(({ name, value }) => {
+          // Устанавливаем куки и на запрос, и на ответ, чтобы они сохранялись в браузере
+          cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value);
+            response.cookies.set(name, value, options);
           });
         },
       },
@@ -33,11 +42,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
+  // Возвращаем ответ с обновленными куками
+  return response;
 }
 
 // Указываем, на какие роуты middleware должен реагировать
