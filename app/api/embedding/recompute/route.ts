@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
 import { generateEssence, computeEmbedding } from '@/lib/avatar/essence';
 
-export const maxDuration = 60;
+export const maxDuration = 10;
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
