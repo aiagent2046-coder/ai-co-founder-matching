@@ -9,7 +9,15 @@ export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // Клиент с правами пользователя (RLS работает)
   const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+  );
+
+  // Админ-клиент для проверки чужих свайпов и создания мэтчей
+  const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
@@ -45,15 +53,15 @@ export async function POST(req: NextRequest) {
 
   const myFounderId = myProfile.id;
 
-  // 5. Look up the peer's founder profile id
-  const { data: otherProfile } = await supabase
+  // 5. Look up the peer's founder profile id (используем admin, т.к. профиль может быть не публичным в будущем)
+  const { data: otherProfile } = await supabaseAdmin
     .from('founder_profiles')
     .select('id')
     .eq('user_id', to_user)
     .single();
   const otherFounderId = otherProfile?.id;
 
-  // 6. Idempotent swipe insert
+  // 6. Idempotent swipe insert (используем пользовательский клиент, RLS это разрешит)
   const { error: swipeError } = await supabase
     .from('swipes')
     .insert({ from_user: userId, to_user, action });
@@ -68,7 +76,8 @@ export async function POST(req: NextRequest) {
 
   // 7. Mutual match detection (only for likes)
   if (action === 'like') {
-    const { data: otherLikes, error: checkError } = await supabase
+    // Используем admin для чтения чужих свайпов
+    const { data: otherLikes, error: checkError } = await supabaseAdmin
       .from('swipes')
       .select('id')
       .eq('from_user', to_user)
@@ -85,10 +94,10 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ ok: true, mutual: false });
       }
 
-      // Symmetric like exists — create a match
+      // Symmetric like exists — create a match (используем admin)
       const [a, b] = [myFounderId, otherFounderId].sort();
 
-      const { data: match, error: matchError } = await supabase
+      const { data: match, error: matchError } = await supabaseAdmin
         .from('matches')
         .upsert(
           {
@@ -108,7 +117,7 @@ export async function POST(req: NextRequest) {
 
       // L2: Auto-reply при взаимном мэтче (в фоне, не блокирует ответ)
       if (match?.id) {
-        generateAutoReply(supabase, match.id, myFounderId, to_user).catch(e =>
+        generateAutoReply(supabaseAdmin, match.id, myFounderId, to_user).catch(e =>
           console.error('auto_reply failed:', e)
         );
       }
@@ -129,15 +138,15 @@ export async function POST(req: NextRequest) {
  * через claude-haiku (быстро, дешево). Ошибки не ломают свайп.
  */
 async function generateAutoReply(
-  supabase: any,
+  supabaseAdmin: any,
   matchId: string,
   myFounderId: string,
   toUserId: string,
 ) {
-  // Загружаем имена, роли, домены обоих (исправленная версия)
+  // Загружаем имена, роли, домены обоих
   const [{ data: me }, { data: them }] = await Promise.all([
-    supabase.from('founder_profiles').select('name, role, domain').eq('id', myFounderId).single(),
-    supabase.from('founder_profiles').select('name, role, domain').eq('user_id', toUserId).single(),
+    supabaseAdmin.from('founder_profiles').select('name, role, domain').eq('id', myFounderId).single(),
+    supabaseAdmin.from('founder_profiles').select('name, role, domain').eq('user_id', toUserId).single(),
   ]);
 
   if (!me || !them) {
@@ -181,7 +190,7 @@ async function generateAutoReply(
       return;
     }
 
-    const { error: insErr } = await supabase.from('messages').insert({
+    const { error: insErr } = await supabaseAdmin.from('messages').insert({
       match_id: matchId,
       sender_id: myFounderId,
       content,

@@ -8,9 +8,11 @@ export async function GET(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // Клиент с правами пользователя (RLS работает)
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
   );
 
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
@@ -68,10 +70,18 @@ export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // Клиент с правами пользователя (RLS работает)
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
   );
+
+  // Админ-клиент для L2 авто-ответов (обходит RLS)
+  const supabaseAdmin = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );  
 
   const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
   if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
@@ -138,8 +148,8 @@ export async function POST(req: NextRequest) {
   // Выносим в фон, чтобы ответ пользователю улетел мгновенно
   after(async () => {
     try {
-      // a) Проверить, что это первое сообщение в матче
-      const { count } = await supabase
+      // a) Проверить, что это первое сообщение в матче (используем admin)
+      const { count } = await supabaseAdmin
         .from('messages')
         .select('*', { count: 'exact', head: true })
         .eq('match_id', matchId);
@@ -149,8 +159,8 @@ export async function POST(req: NextRequest) {
         const recipientFounderId =
           match.founder1_id === myProfile.id ? match.founder2_id : match.founder1_id;
 
-        // c) Загрузить recipient profile
-        const { data: recipient } = await supabase
+        // c) Загрузить recipient profile (используем admin)
+        const { data: recipient } = await supabaseAdmin
           .from('founder_profiles')
           .select('*')
           .eq('id', recipientFounderId)
@@ -205,9 +215,9 @@ export async function POST(req: NextRequest) {
             const data = await claudeRes.json();
             const aiReply: string | null = data.content?.[0]?.text ?? null;
 
-            // i) Если ответ не пустой — сохранить как AI-ответ
+            // i) Если ответ не пустой — сохранить как AI-ответ (используем admin)
             if (aiReply) {
-              await supabase.from('messages').insert({
+              await supabaseAdmin.from('messages').insert({
                 match_id: matchId,
                 sender_id: recipientFounderId,
                 content: aiReply,
