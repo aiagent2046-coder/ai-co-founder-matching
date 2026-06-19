@@ -11,8 +11,8 @@ export async function middleware(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
+        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
+          cookiesToSet.forEach(({ name, value }) => {
             request.cookies.set(name, value);
           });
         },
@@ -43,13 +43,6 @@ export async function middleware(request: NextRequest) {
 // Указываем, на какие роуты middleware должен реагировать
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - api (API routes)
-     */
     '/((?!_next/static|_next/image|favicon.ico|api|ingest|robots.txt|sitemap.xml).*)',
   ],
 };
