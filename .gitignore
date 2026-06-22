@@ -33,3 +33,10 @@ syndi-agents/experiment_state.json
 **/fleet.log
 **/all_profiles.json
 **/experiment_state.json
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
