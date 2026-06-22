@@ -1,14 +1,17 @@
 import { PostHog } from 'posthog-node';
 
-let posthogClient: PostHog | null = null;
+export const posthogServer = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
+  host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
+});
 
-export function getPostHogClient(): PostHog {
-  if (!posthogClient) {
-    posthogClient = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
-      host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-      flushAt: 1,
-      flushInterval: 0,
-    });
-  }
-  return posthogClient;
+// Функция для отправки ошибок с контекстом пользователя
+export async function captureServerError(error: Error, context: { user_id?: string; route?: string }) {
+  posthogServer.captureException(error, {
+    distinct_id: context.user_id || 'anonymous',
+    properties: {
+      route: context.route,
+    },
+  });
+  // Отправляем немедленно (не ждем батчинга)
+  await posthogServer.shutdown();
 }
