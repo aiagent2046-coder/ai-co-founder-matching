@@ -26,21 +26,17 @@ jobs:
       - name: Type check (tsc)
         run: npx tsc --noEmit
 
-      - name: Run tests
+      - name: Run unit tests
         run: npx vitest run
 
       - name: Build project
         run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps chromium
 
-      - name: Run Playwright tests
-        run: npx playwright test
-        env:
-          PLAYWRIGHT_BASE_URL: http://localhost:3000  
-        
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          # Добавьте другие env-переменные в Secrets GitHub, если они нужны для билда
+      - name: Run Playwright E2E tests
+        run: npm run test:e2e
