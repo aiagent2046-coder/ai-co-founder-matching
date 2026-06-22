@@ -57,14 +57,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: msgsErr.message }, { status: 500 });
   }
 
-  // Добавляем флаг is_me, чтобы клиент точно знал, чье это сообщение
+    // Добавляем флаг is_me, чтобы клиент точно знал, чье это сообщение
   const messagesWithFlags = (messages || []).map(m => ({
     ...m,
     is_me: m.sender_id === myProfile.id,
   }));
 
-  return NextResponse.json({ messages: messagesWithFlags });
+  return NextResponse.json({ messages: messagesWithFlags, myFounderId: myProfile.id });
 }
+
 
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');

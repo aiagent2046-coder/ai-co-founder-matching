@@ -46,9 +46,11 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
+      const [myFounderId, setMyFounderId] = useState<string | null>(null);
+
+  useEffect(() => {
     if (!matchId) return;
-    let pollTimer: ReturnType<typeof setInterval> | null = null;
+    let channel: any = null;
 
     (async () => {
       try {
@@ -56,7 +58,7 @@ export default function ChatPage() {
         const token = await getAuthToken();
         const headers = { Authorization: `Bearer ${token ?? ''}` };
 
-        // Загрузить peer info из /api/matches/list
+        // Загрузить peer info
         const mlRes = await fetch('/api/matches/list', { headers });
         const mlData = await mlRes.json();
         const match = (mlData.matches ?? []).find((m: any) => m.match_id === matchId);
@@ -78,11 +80,12 @@ export default function ChatPage() {
         if (msgRes.ok) {
           const msgs: Msg[] = (msgData.messages ?? []).map((m: any) => ({
             id: m.id,
-            role: m.is_me ? 'me' : 'them', // Используем флаг с сервера
+            role: m.is_me ? 'me' : 'them',
             text: m.content,
             time: formatTime(m.created_at),
           }));
           setMessages(msgs);
+          setMyFounderId(msgData.myFounderId); // Сохраняем ID профиля
         } else {
           setError(msgData.error ?? 'Failed to load messages');
         }
@@ -92,29 +95,35 @@ export default function ChatPage() {
         setLoading(false);
       }
 
-      // Polling: проверяем новые сообщения каждые 5 секунд
-      pollTimer = setInterval(async () => {
-        try {
-          const token = await getAuthToken();
-          const res = await fetch('/api/messages?matchId=' + matchId, {
-            headers: { Authorization: 'Bearer ' + token },
-          });
-          const data = await res.json();
-          const msgs: Msg[] = (data.messages ?? []).map((m: any) => ({
-            id: m.id,
-            role: m.is_me ? 'me' : 'them', // Используем флаг с сервера
-            text: m.content,
-            time: formatTime(m.created_at),
-          }));
-          setMessages(msgs);
-        } catch {}
-      }, 5000);
+      // Подписка на Realtime (вместо polling)
+      const supabase = getSupabase();
+      channel = supabase
+        .channel(`public:messages:match_id=eq.${matchId}`)
+        .on('postgres_changes', 
+          { event: 'INSERT', schema: 'public', table: 'messages', filter: `match_id=eq.${matchId}` }, 
+          (payload: any) => {
+            const newMsg = payload.new;
+            setMessages((prev) => {
+              // Защита от дублей (если пришло свое же оптимистичное сообщение)
+              if (prev.some(m => m.id === newMsg.id)) return prev;
+              return [...prev, {
+                id: newMsg.id,
+                role: newMsg.sender_id === myFounderId ? 'me' : 'them',
+                text: newMsg.content,
+                time: formatTime(newMsg.created_at)
+              }];
+            });
+          }
+        )
+        .subscribe();
     })();
 
     return () => {
-      if (pollTimer) clearInterval(pollTimer);
+      if (channel) {
+        getSupabase().removeChannel(channel);
+      }
     };
-  }, [matchId]);
+  }, [matchId, myFounderId]);
 
   const send = async () => {
     if (!input.trim()) return;
