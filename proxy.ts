@@ -16,7 +16,7 @@ export async function proxy(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value);
             response.cookies.set(name, value, options);
@@ -26,14 +26,10 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  let user = null;
-  try {
-    const { data } = await supabase.auth.getUser();
-    user = data.user;
-  } catch (e) {
-    console.error('Proxy auth error:', e);
-  }
+  // Важно: не запускаем никакую логику между createServerClient и getUser()
+  const { data: { user } } = await supabase.auth.getUser();
 
+  // Защищаем только роуты /app
   if (!user && request.nextUrl.pathname.startsWith('/app')) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
