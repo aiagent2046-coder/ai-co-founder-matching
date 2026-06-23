@@ -24,7 +24,7 @@ Component Breakdown
 
      Server Components: Used by default for profile views, dashboards, and SEO-critical pages. Fetch data directly from Supabase.
      Client Components: Isolated islands for interactivity (Chat UI, Onboarding wizards, Swiping deck).
-     Middleware (middleware.ts): Runs on the Edge. Intercepts all /app/* routes, verifies the Supabase JWT session from cookies, and redirects to /login if unauthenticated. This prevents protected UI from leaking to unauthorized users.
+     Proxy layer (proxy.ts): Implements the current edge/proxy logic for protected areas. It can perform lightweight routing and session-related checks, but ключевая аутентификация и авторизация всё равно выполняются внутри соответствующих API‑роутов (app/api/*). Документация исторически ссылалась на middleware.ts, но фактическая реализация опирается на proxy.ts как точку входа для edge‑логики, а не на классический Next.js middleware.
 
 2. Database (Supabase & PostgreSQL)
 
