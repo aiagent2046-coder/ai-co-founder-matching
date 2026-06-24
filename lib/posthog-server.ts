@@ -6,9 +6,12 @@ export const posthogServer = new PostHog(process.env.NEXT_PUBLIC_POSTHOG_KEY!, {
 
 // Функция для отправки ошибок с контекстом пользователя
 export async function captureServerError(error: Error, context: { user_id?: string; route?: string }) {
-  posthogServer.captureException(error, {
-    distinct_id: context.user_id || 'anonymous',
+  posthogServer.capture({
+    distinctId: context.user_id || 'anonymous',
+    event: 'server_error',
     properties: {
+      error_message: error.message,
+      error_stack: error.stack,
       route: context.route,
     },
   });
