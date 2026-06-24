@@ -46,11 +46,32 @@ export default function ChatPage() {
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-      const [myFounderId, setMyFounderId] = useState<string | null>(null);
+  const [myFounderId, setMyFounderId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!matchId) return;
-    let channel: any = null;
+    let active = true;
+
+    const loadMessages = async () => {
+      try {
+        const token = await getAuthToken();
+        const headers = { Authorization: `Bearer ${token ?? ''}` };
+        const msgRes = await fetch(`/api/messages?matchId=${matchId}`, { headers });
+        const msgData = await msgRes.json();
+        if (msgRes.ok && active) {
+          const msgs: Msg[] = (msgData.messages ?? []).map((m: any) => ({
+            id: m.id,
+            role: m.is_me ? 'me' : 'them',
+            text: m.content,
+            time: formatTime(m.created_at),
+          }));
+          setMessages(msgs);
+          setMyFounderId(msgData.myFounderId);
+        }
+      } catch {
+        // тихо — polling повторит
+      }
+    };
 
     (async () => {
       try {
@@ -58,7 +79,6 @@ export default function ChatPage() {
         const token = await getAuthToken();
         const headers = { Authorization: `Bearer ${token ?? ''}` };
 
-        // Загрузить peer info
         const mlRes = await fetch('/api/matches/list', { headers });
         const mlData = await mlRes.json();
         const match = (mlData.matches ?? []).find((m: any) => m.match_id === matchId);
@@ -74,56 +94,22 @@ export default function ChatPage() {
           setPeer({ name: 'Unknown', role: '—', domain: '', avatar_text: '?', score: 0 });
         }
 
-        // Загрузить сообщения
-        const msgRes = await fetch(`/api/messages?matchId=${matchId}`, { headers });
-        const msgData = await msgRes.json();
-        if (msgRes.ok) {
-          const msgs: Msg[] = (msgData.messages ?? []).map((m: any) => ({
-            id: m.id,
-            role: m.is_me ? 'me' : 'them',
-            text: m.content,
-            time: formatTime(m.created_at),
-          }));
-          setMessages(msgs);
-          setMyFounderId(msgData.myFounderId); // Сохраняем ID профиля
-        } else {
-          setError(msgData.error ?? 'Failed to load messages');
-        }
+        await loadMessages();
       } catch (e: any) {
-        setError(e.message);
+        if (active) setError(e.message);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
-
-      // Подписка на Realtime (вместо polling)
-      const supabase = getSupabase();
-      channel = supabase
-        .channel(`public:messages:match_id=eq.${matchId}`)
-        .on('postgres_changes', 
-          { event: 'INSERT', schema: 'public', table: 'messages', filter: `match_id=eq.${matchId}` }, 
-          (payload: any) => {
-            const newMsg = payload.new;
-            setMessages((prev) => {
-              // Защита от дублей (если пришло свое же оптимистичное сообщение)
-              if (prev.some(m => m.id === newMsg.id)) return prev;
-              return [...prev, {
-                id: newMsg.id,
-                role: newMsg.sender_id === myFounderId ? 'me' : 'them',
-                text: newMsg.content,
-                time: formatTime(newMsg.created_at)
-              }];
-            });
-          }
-        )
-        .subscribe();
     })();
 
+    // Polling каждые 5 секунд (Realtime WebSocket нестабилен — закрывается с кодом 1006)
+    const interval = setInterval(loadMessages, 5000);
+
     return () => {
-      if (channel) {
-        getSupabase().removeChannel(channel);
-      }
+      active = false;
+      clearInterval(interval);
     };
-  }, [matchId, myFounderId]);
+  }, [matchId]);
 
   const send = async () => {
     if (!input.trim()) return;
@@ -131,7 +117,6 @@ export default function ChatPage() {
     setInput('');
     setSuggestion(null);
 
-    // Optimistic update
     const time = new Date().toLocaleTimeString('ru', { hour: '2-digit', minute: '2-digit' });
     const optimisticId = 'opt-' + Date.now();
     setMessages(m => [...m, { id: optimisticId, role: 'me', text, time }]);
@@ -146,7 +131,6 @@ export default function ChatPage() {
       const data = await res.json();
       if (res.ok) {
         try { posthog.capture('message_sent', { match_id: matchId, length: text.length }); } catch {}
-        // Заменить оптимистичное сообщение на реальное
         setMessages(m => m.map(msg =>
           msg.id === optimisticId
             ? { ...msg, id: data.message.id, time: formatTime(data.message.created_at) }
