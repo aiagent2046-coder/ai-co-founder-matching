@@ -5,7 +5,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "start-server-and-test start http://localhost:3000 playwright test"
   },
   "dependencies": {
     "@supabase/ssr": "^0.3.0",
@@ -31,11 +32,5 @@
     "tailwindcss": "^3.4.4",
     "typescript": "^5.4.0",
     "vitest": "^1.6.0"
-  },
-    "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "test": "vitest run",
-    "test:e2e": "start-server-and-test start http://localhost:3000 playwright test"
+  }
 }
