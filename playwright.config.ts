@@ -71,11 +71,23 @@ export default defineConfig({
   ],
 
   /* Run the app before starting the tests. Playwright builds and serves it,
-     waits until the URL responds, then runs the suite. */
+     waits until the URL responds, then runs the suite.
+     Smoke-тесты проверяют только рендер UI (главная + /login) и не ходят
+     в реальный Supabase, поэтому серверу даём непустые dummy-значения env,
+     чтобы клиент Supabase не падал на старте. Реальные значения берутся
+     из окружения, если заданы. */
   webServer: {
     command: 'npm run build && npm run start',
     url: 'http://localhost:3000',
     timeout: 180_000,
     reuseExistingServer: !process.env.CI,
+    env: {
+      NEXT_PUBLIC_SUPABASE_URL:
+        process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY:
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy-anon-key',
+      SUPABASE_SERVICE_ROLE_KEY:
+        process.env.SUPABASE_SERVICE_ROLE_KEY || 'dummy-service-role-key',
+    },
   },
 });
