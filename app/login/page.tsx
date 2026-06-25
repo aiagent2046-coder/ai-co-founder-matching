@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getSupabase } from '@/lib/supabase';
 import { Logo } from '@/components/brand/Logo';
 import { Stars } from '@/components/brand/Stars';
 import posthog from 'posthog-js';
@@ -16,14 +15,20 @@ export default function LoginPage() {
 
   const submit = async () => {
     setLoading(true); setError('');
-    const { data, error: e } = await getSupabase().auth.signInWithPassword({ email, password });
-    if (e) {
-      posthog.captureException(e);
-      setError(e.message); setLoading(false); return;
+    // Авторизация через свой backend (сервер → Supabase), чтобы обойти блокировку прямых browser → supabase.co.
+    const resp = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const body = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      try { posthog.captureException(new Error(body?.error || 'login failed')); } catch {}
+      setError(body?.error || 'Не удалось войти'); setLoading(false); return;
     }
-    if (data.user) {
+    if (body.user?.id) {
       try {
-        posthog.identify(data.user.id, { email });
+        posthog.identify(body.user.id, { email });
         posthog.capture('login', { method: 'email' });
       } catch {}
     }

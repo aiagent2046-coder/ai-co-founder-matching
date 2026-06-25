@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabase, getAuthToken } from '@/lib/supabase';
+import { getAuthToken } from '@/lib/supabase';
 import posthog from 'posthog-js';
 
 export default function ProfilePage() {
@@ -22,10 +22,10 @@ export default function ProfilePage() {
 
   // Прелоад существующего профиля
   useEffect(() => { (async () => {
-    const sb = getSupabase();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return;
-    const { data } = await sb.from('founder_profiles').select('*').eq('user_id', user.id).single();
+    // Префилл через свой backend (cookie-сессия), а не прямым browser → supabase.co.
+    const resp = await fetch('/api/profile');
+    if (!resp.ok) return;
+    const { profile: data } = await resp.json();
     if (data) {
       setName(data.name ?? '');
       setRole(data.role ?? 'CEO');

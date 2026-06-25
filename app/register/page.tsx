@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getSupabase } from '@/lib/supabase';
 import { Logo } from '@/components/brand/Logo';
 import { Stars } from '@/components/brand/Stars';
 import posthog from 'posthog-js';
@@ -17,18 +16,24 @@ export default function RegisterPage() {
 
   const submit = async () => {
     setLoading(true); setError('');
-    const { data, error: e } = await getSupabase().auth.signUp({ email, password });
-    if (e) { setError(e.message); setLoading(false); return; }
+    // Регистрация через свой backend (сервер → Supabase), чтобы обойти блокировку прямых browser → supabase.co.
+    const resp = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    const body = await resp.json().catch(() => ({}));
+    if (!resp.ok) { setError(body?.error || 'Не удалось создать аккаунт'); setLoading(false); return; }
     // PostHog: связываем анонимные события с юзером + фиксируем регистрацию
-    if (data.user) {
+    if (body.user?.id) {
       try {
-        posthog.identify(data.user.id, { email });
+        posthog.identify(body.user.id, { email });
         posthog.capture('signup', { method: 'email' });
       } catch {}
     }
-    // Подтверждение почты выключено → Supabase сразу вернёт session → в онбординг.
-    // Включено → session нет → показываем экран "Проверь почту".
-    if (data.session) { router.push('/onboarding/intent'); return; }
+    // Подтверждение почты выключено → needsConfirmation=false → cookie-сессия стоит → в онбординг.
+    // Включено → needsConfirmation=true → экран "Проверь почту".
+    if (!body.needsConfirmation) { router.push('/onboarding/intent'); return; }
     setDone(true);
   };
 

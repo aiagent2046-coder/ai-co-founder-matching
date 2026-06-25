@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
-import { getSupabase } from '@/lib/supabase';
 
 declare global {
   interface Window {
@@ -48,9 +47,7 @@ export default function TelegramEntryPage() {
           const errBody = await resp.json().catch(() => ({}));
           throw new Error(errBody?.error || `HTTP ${resp.status}`);
         }
-        const { access_token, refresh_token } = await resp.json();
-        const { error: setErr } = await getSupabase().auth.setSession({ access_token, refresh_token });
-        if (setErr) throw setErr;
+        // cookie-сессия уже выставлена сервером в /api/auth/telegram — клиентский setSession не нужен.
         if (cancelled) return;
         setPhase('done');
         router.replace('/onboarding/intent');

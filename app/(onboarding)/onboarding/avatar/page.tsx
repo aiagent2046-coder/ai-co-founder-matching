@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { OceanRadar } from '@/components/charts/OceanRadar';
-import { getSupabase, getAuthToken } from '@/lib/supabase';
+import { getAuthToken } from '@/lib/supabase';
 
 export default function AvatarOnboardingPage() {
   const router = useRouter();
@@ -13,10 +13,10 @@ export default function AvatarOnboardingPage() {
   const [essence, setEssence] = useState<string | null>(null);
 
   useEffect(() => { (async () => {
-    const sb = getSupabase();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) { setLoading(false); return; }
-    const { data } = await sb.from('founder_profiles').select('*').eq('user_id', user.id).single();
+    // Профиль через свой backend (cookie-сессия), а не прямым browser → supabase.co.
+    const resp = await fetch('/api/profile');
+    if (!resp.ok) { setLoading(false); return; }
+    const { profile: data } = await resp.json();
     setProfile(data);
     setLoading(false);
   })(); }, []);
