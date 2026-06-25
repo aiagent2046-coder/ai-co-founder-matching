@@ -10,6 +10,9 @@ test('Сайт открывается и показывает главный з�
 
 test('Страница логина доступна', async ({ page }) => {
   await page.goto(`${BASE_URL}/login`);
-  // Проверяем, что есть кнопка входа или поле email
-  await expect(page.locator('input[type="email"], input[name="email"], text=Войти').first()).toBeVisible({ timeout: 10000 });
+  // Проверяем, что есть поле email или кнопка входа.
+  // CSS и текстовый движок нельзя смешивать в одном селекторе — используем .or().
+  const emailField = page.locator('input[type="email"], input[name="email"]').first();
+  const loginButton = page.getByRole('button', { name: 'Войти' });
+  await expect(emailField.or(loginButton).first()).toBeVisible({ timeout: 10000 });
 });
