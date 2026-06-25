@@ -1,6 +1,5 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { getSupabase } from '@/lib/supabase';
 import { OceanRadar } from '@/components/charts/OceanRadar';
 
 type Profile = {
@@ -28,15 +27,10 @@ export default function ProfilePage() {
   useEffect(() => {
     (async () => {
       try {
-        const supabase = getSupabase();
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user) { setLoading(false); return; }
-
-        const { data, error } = await supabase
-          .from('founder_profiles')
-          .select('name, role, domain, stage, location, bio, skills, looking_for, big_five')
-          .eq('user_id', session.user.id)
-          .single();
+        // Читаем профиль через свой backend (cookie-сессия), а не прямым browser → supabase.co.
+        const resp = await fetch('/api/profile');
+        if (!resp.ok) { setLoading(false); return; }
+        const { profile: data } = await resp.json();
 
         if (data) {
           setProfile({

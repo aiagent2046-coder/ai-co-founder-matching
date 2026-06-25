@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { getSupabase } from '@/lib/supabase';
 import posthog from 'posthog-js';
 
 const ICONS = {
@@ -50,7 +49,6 @@ const nav = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
-  const [checking, setChecking] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -61,31 +59,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return () => mq.removeEventListener('change', apply);
   }, []);
 
-  // Гард приватной зоны: нет сессии → на логин.
-  useEffect(() => {
-    let active = true;
-    getSupabase().auth.getSession().then(({ data }) => {
-      if (!active) return;
-      if (!data.session) {
-        router.replace('/login');
-      } else {
-        try {
-          const u = data.session.user;
-          posthog.identify(u.id, { email: u.email });
-        } catch {}
-        setChecking(false);
-      }
-    });
-    return () => { active = false; };
-  }, [router]);
-
+  // Гард приватной зоны живёт в middleware.ts (server-side): без cookie-сессии сюда не попасть.
+  // Клиентский getSession() убран — он вис/падал под ТСПУ и давал пустой экран.
   const logout = async () => {
     try { posthog.reset(); } catch {}
-    await getSupabase().auth.signOut();
+    await fetch('/api/auth/logout', { method: 'POST' });
     router.push('/');
   };
-
-  if (checking) return null;
 
   return (
     <div style={{display:'flex',flexDirection:isMobile?'column':'row',height:'100vh',overflow:'hidden',position:'relative'}}>

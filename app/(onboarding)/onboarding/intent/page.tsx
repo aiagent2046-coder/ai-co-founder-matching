@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getSupabase, getAuthToken } from '@/lib/supabase';
+import { getAuthToken } from '@/lib/supabase';
 import posthog from 'posthog-js';
 
 type Intent = 'has_idea' | 'looking_to_join' | 'flexible';
@@ -35,11 +35,11 @@ export default function IntentPage() {
 
   // Preload existing intent
   useEffect(() => { (async () => {
-    const sb = getSupabase();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) return;
-    const { data } = await sb.from('founder_profiles').select('intent').eq('user_id', user.id).single();
-    if (data?.intent) setSelected(data.intent as Intent);
+    // Префилл через свой backend (cookie-сессия), а не прямым browser → supabase.co.
+    const resp = await fetch('/api/profile');
+    if (!resp.ok) return;
+    const { profile } = await resp.json();
+    if (profile?.intent) setSelected(profile.intent as Intent);
   })(); }, []);
 
   const submit = async () => {

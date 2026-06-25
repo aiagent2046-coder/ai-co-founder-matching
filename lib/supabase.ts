@@ -13,7 +13,14 @@ export function getSupabase() {
 }
 
 export async function getAuthToken(): Promise<string | null> {
-  const supabase = getSupabase();
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.access_token ?? null;
+  // Берём токен с сервера (cookie-сессия), а не через прямой browser → supabase.co,
+  // который режет ТСПУ/RKN из РФ. Сам запрос идёт на свой домен.
+  try {
+    const resp = await fetch('/api/auth/token');
+    if (!resp.ok) return null;
+    const { access_token } = await resp.json();
+    return access_token ?? null;
+  } catch {
+    return null;
+  }
 }

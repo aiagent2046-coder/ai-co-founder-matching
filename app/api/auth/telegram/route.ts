@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
+import { getServerSupabase } from '@/lib/supabase-server';
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const AUTH_MAX_AGE_SEC = 24 * 60 * 60;
@@ -82,9 +83,12 @@ export async function POST(req: NextRequest) {
     })
     .eq('user_id', userId);
 
-  return NextResponse.json({
+  // Ставим cookie-сессию на сервере (вместо клиентского setSession, который бьёт в supabase.co).
+  const ssr = await getServerSupabase();
+  await ssr.auth.setSession({
     access_token: signIn.data.session!.access_token,
     refresh_token: signIn.data.session!.refresh_token,
-    user_id: userId,
   });
+
+  return NextResponse.json({ user_id: userId });
 }

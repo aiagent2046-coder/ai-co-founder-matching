@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { OceanRadar } from '@/components/charts/OceanRadar';
-import { getSupabase, getAuthToken } from '@/lib/supabase';
+import { getAuthToken } from '@/lib/supabase';
 
 type Identity = {
   name: string; role: string; domain: string; bio: string; location: string; stage: string;
@@ -35,10 +35,10 @@ export default function AvatarStudio() {
   useEffect(() => { load(); }, []);
 
   const load = async () => {
-    const sb = getSupabase();
-    const { data: { user } } = await sb.auth.getUser();
-    if (!user) { setLoading(false); return; }
-    const { data } = await sb.from('founder_profiles').select('*').eq('user_id', user.id).single();
+    // Профиль через свой backend (cookie-сессия), а не прямым browser → supabase.co.
+    const resp = await fetch('/api/profile');
+    if (!resp.ok) { setLoading(false); return; }
+    const { profile: data } = await resp.json();
     if (data) setId({ ...EMPTY, ...data });
     setLoading(false);
   };
