@@ -101,9 +101,12 @@ export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  // SERVICE_ROLE_KEY: чтение профилей кандидатов идёт на сервере, не зависит от RLS
+  // (RLS на founder_profiles ужесточена до SELECT auth.uid()=user_id — чужие профили
+  // больше не читаются ANON-ключом). getUser(token) верифицирует JWT по явному токену.
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
   // Server-side verify the JWT

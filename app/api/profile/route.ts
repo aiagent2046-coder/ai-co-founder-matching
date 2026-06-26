@@ -10,9 +10,12 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const supabase = await getServerSupabase();
+  // Явный whitelist полей, которые реально читает UI (profile/avatar/onboarding).
+  // Не отдаём наружу тяжёлый embedding и служебные/чувствительные поля
+  // (telegram_*, behavioral_profile, honesty_humility, user_id и т.д.).
   const { data, error } = await supabase
     .from('founder_profiles')
-    .select('*')
+    .select('name, role, domain, bio, location, stage, skills, looking_for, big_five, can_teach, want_to_learn, not_looking_for, goals, intent, birth_year, birth_month, birth_day')
     .eq('user_id', user.id)
     .single();
 
