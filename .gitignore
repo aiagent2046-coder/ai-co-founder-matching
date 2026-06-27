@@ -40,3 +40,5 @@ syndi-agents/experiment_state.json
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+.vercel
+.env*
