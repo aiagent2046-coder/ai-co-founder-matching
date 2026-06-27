@@ -3,7 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
 import { getAgentRole, buildAgentPrompt, type ProjectContext } from '@/lib/agents/roles';
 
-const TIMEOUT_MS = 25_000;
+export const maxDuration = 60;
+
+const TIMEOUT_MS = 55_000;
 const RETRY_DELAY_MS = 1_000;
 
 async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: number }): Promise<Response> {
@@ -22,9 +24,13 @@ async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
     try {
       return await fn();
     } catch (err: any) {
+      const isTimeout = err?.name === 'AbortError' || err?.message?.includes('aborted');
+      // Таймаут не повторяем: вторая попытка не уместится в maxDuration=60s.
+      if (isTimeout) {
+        throw new Error('AI service timeout, please try again');
+      }
       if (attempt === 2) {
-        const isTimeout = err?.name === 'AbortError' || err?.message?.includes('aborted');
-        throw new Error(isTimeout ? 'AI service timeout, please try again' : `AI service error: ${err?.message ?? String(err)}`);
+        throw new Error(`AI service error: ${err?.message ?? String(err)}`);
       }
       await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
     }
