@@ -101,8 +101,12 @@ export default function AgentsPage() {
       {/* Messages */}
       <div style={{ flex: 1, overflow: 'auto', padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {messages.length === 0 && (
-          <div style={{ textAlign: 'center', color: '#6b7280', fontSize: 13, padding: '40px 0' }}>
+          <div style={{ textAlign: 'center', color: '#6b7280', fontSize: 13, padding: '40px 0', lineHeight: 1.6 }}>
             Задай вопрос — {active.name} ответит с учётом контекста твоего проекта
+            <br />
+            <span style={{ fontSize: 12, color: '#4b5563' }}>
+              Подсказка: «запомни: …» сохранит факт о стартапе для всех агентов
+            </span>
           </div>
         )}
         {messages.map((m, i) => (
