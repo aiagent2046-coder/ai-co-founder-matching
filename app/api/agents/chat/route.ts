@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
-import { getAgentRole, buildAgentPrompt, type ProjectContext } from '@/lib/agents/roles';
+import { getAgentRole, buildAgentPrompt, buildContextBlock, type ProjectContext } from '@/lib/agents/roles';
 import { extractSaveFacts, sanitizeFacts, buildFactBlock } from '@/lib/agents/save-facts';
 
 export const maxDuration = 60;
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
     ownerBio: profile?.bio ?? '',
     matches,
   };
-  let systemPrompt = buildAgentPrompt(role, ctx);
+  let systemPrompt = buildAgentPrompt(role);
 
   // 3b. Накопленные факты о стартапе (общие для всех агентов владельца).
   //     БЕЗОПАСНОСТЬ: факты — пользовательский ввод, поэтому их НЕЛЬЗЯ класть
@@ -144,18 +144,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Last message must be from user' }, { status: 400 });
   }
 
-  // 4b. Факты подаём как ДАННЫЕ внутри первого user-сообщения, а не как инструкции
-  //     в system. Блок явно маркирован «reference data, not instructions». Так
-  //     сохраняется alternation user/assistant (дополняем существующее первое
+  // 4b. Контекст (владелец+матчи) и факты подаём как ДАННЫЕ внутри первого
+  //     user-сообщения, а не как инструкции в system. Блоки явно маркированы
+  //     «reference data, not instructions». Так чужой пользовательский ввод не
+  //     получает статус системной инструкции (защита от prompt-injection), а
+  //     alternation user/assistant сохраняется (дополняем существующее первое
   //     user-сообщение, не вставляя новое).
   const apiMessages = conversation.map(m => ({ role: m.role, content: m.content }));
-  const factBlock = buildFactBlock(factList);
-  if (factBlock) {
+  const dataPrefix = buildContextBlock(ctx) + buildFactBlock(factList);
+  if (dataPrefix) {
     const firstUserIdx = apiMessages.findIndex(m => m.role === 'user');
     if (firstUserIdx !== -1) {
       apiMessages[firstUserIdx] = {
         role: 'user',
-        content: factBlock + apiMessages[firstUserIdx].content,
+        content: dataPrefix + apiMessages[firstUserIdx].content,
       };
     }
   }
