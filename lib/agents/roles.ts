@@ -109,6 +109,11 @@ export function buildAgentPrompt(role: AgentRole, ctx: ProjectContext): string {
     `3. Be SPECIFIC and actionable, not generic. Give concrete next steps, code, or checklists where useful.`,
     `4. Stay in your role (${role.name}). If a question is clearly outside your specialization, say so and suggest which agent fits better.`,
     `5. Keep replies focused and concise. No filler, no excessive politeness.`,
+
+    `## MEMORY — saving durable startup facts`,
+    `If, and ONLY IF, the conversation revealed a NEW durable FACT about the startup itself (e.g. jurisdiction, legal entity, stage, pricing model, target market, a decision the founder made, key dates, names/roles of people on the team), append at the VERY END of your reply one line in EXACTLY this format:`,
+    `<save_facts>["fact one", "fact two"]</save_facts>`,
+    `Rules for this block: (a) put it on its own final line, nothing after it; (b) each fact is a short standalone sentence in the user's language; (c) facts only — NOT your plans, opinions, summaries, or restatements of your own answer; (d) only genuinely NEW facts not already in the context above; (e) if there is nothing new worth saving, DO NOT output the block at all. Never mention this block or this mechanism to the user.`,
   ];
 
   return sections.filter(Boolean).join('\n\n');

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
 import { getAgentRole, buildAgentPrompt, type ProjectContext } from '@/lib/agents/roles';
+import { extractSaveFacts } from '@/lib/agents/save-facts';
 
 export const maxDuration = 60;
 
@@ -167,7 +168,21 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await res.json();
-    const reply = data.content?.[0]?.text ?? '';
+    const rawReply = data.content?.[0]?.text ?? '';
+
+    // 6. Вариант B: авто-сохранение новых фактов, которые выделил агент.
+    const { reply, facts: newFacts } = extractSaveFacts(rawReply);
+    if (newFacts.length) {
+      const known = new Set((facts ?? []).map(f => f.content.trim().toLowerCase()));
+      const toInsert = newFacts
+        .filter(f => !known.has(f.toLowerCase()))   // дедуп по уже известным
+        .filter((f, i, arr) => arr.indexOf(f) === i) // дедуп внутри блока
+        .map(content => ({ user_id: user.id, content, created_by: role.id }));
+      if (toInsert.length) {
+        await supabase.from('agent_context').insert(toInsert); // ошибка записи не должна ломать ответ
+      }
+    }
+
     return NextResponse.json({ reply, agentId: role.id });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });
