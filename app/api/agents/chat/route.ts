@@ -183,6 +183,15 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // 7. Персист истории диалога (1a): сохраняем пару user + assistant для этого агента.
+    //    Сохраняем reply (без блока <save_facts>). Ошибка записи не должна ломать ответ.
+    if (lastUser?.content?.trim() && reply.trim()) {
+      await supabase.from('agent_messages').insert([
+        { user_id: user.id, agent_id: role.id, role: 'user', content: lastUser.content },
+        { user_id: user.id, agent_id: role.id, role: 'assistant', content: reply },
+      ]);
+    }
+
     return NextResponse.json({ reply, agentId: role.id });
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 500 });

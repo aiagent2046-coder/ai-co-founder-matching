@@ -11,6 +11,7 @@ export default function AgentsPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
+  const [loadingHistory, setLoadingHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -20,11 +21,27 @@ export default function AgentsPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, sending]);
 
-  function openAgent(id: AgentId) {
+  async function openAgent(id: AgentId) {
     setActiveId(id);
     setMessages([]);
     setInput('');
     setError(null);
+    // 1a: подгружаем историю диалога этого агента (переживает закрытие чата).
+    setLoadingHistory(true);
+    try {
+      const token = await getAuthToken();
+      const res = await fetch(`/api/agents/history?agentId=${id}`, {
+        headers: { Authorization: `Bearer ${token ?? ''}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.messages)) setMessages(data.messages);
+      }
+    } catch {
+      // не блокируем чат, если историю не удалось загрузить
+    } finally {
+      setLoadingHistory(false);
+    }
   }
 
   async function send() {
@@ -100,7 +117,12 @@ export default function AgentsPage() {
 
       {/* Messages */}
       <div style={{ flex: 1, overflow: 'auto', padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {messages.length === 0 && (
+        {loadingHistory && (
+          <div style={{ textAlign: 'center', color: '#6b7280', fontSize: 13, padding: '40px 0' }}>
+            Загружаю историю…
+          </div>
+        )}
+        {!loadingHistory && messages.length === 0 && (
           <div style={{ textAlign: 'center', color: '#6b7280', fontSize: 13, padding: '40px 0', lineHeight: 1.6 }}>
             Задай вопрос — {active.name} ответит с учётом контекста твоего проекта
             <br />
