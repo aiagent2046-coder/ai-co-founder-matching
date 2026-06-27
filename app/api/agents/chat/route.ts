@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
 import { getAgentRole, buildAgentPrompt, type ProjectContext } from '@/lib/agents/roles';
-import { extractSaveFacts } from '@/lib/agents/save-facts';
+import { extractSaveFacts, sanitizeFacts, buildFactBlock } from '@/lib/agents/save-facts';
 
 export const maxDuration = 60;
 
@@ -126,21 +126,38 @@ export async function POST(req: NextRequest) {
   };
   let systemPrompt = buildAgentPrompt(role, ctx);
 
-  // 3b. Подмешиваем накопленные факты о стартапе (общие для всех агентов владельца).
+  // 3b. Накопленные факты о стартапе (общие для всех агентов владельца).
+  //     БЕЗОПАСНОСТЬ: факты — пользовательский ввод, поэтому их НЕЛЬЗЯ класть
+  //     в system-промпт как «ground truth» (вектор prompt-injection). Подаём их
+  //     отдельным user-блоком как ДАННЫЕ (см. ниже), с лимитом на число и длину.
   const { data: facts } = await supabase
     .from('agent_context')
     .select('content')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true });
-  if (facts && facts.length) {
-    const list = facts.map(f => `- ${f.content}`).join('\n');
-    systemPrompt += `\n\nKnown facts about this startup (provided by the founder, treat as ground truth):\n${list}`;
-  }
+
+  const factList = sanitizeFacts(facts ?? []);
 
   // 4. Гарантируем что последнее сообщение от user
   const conversation = (messages ?? []).filter(m => m.content?.trim());
   if (conversation.length === 0 || conversation[conversation.length - 1].role !== 'user') {
     return NextResponse.json({ error: 'Last message must be from user' }, { status: 400 });
+  }
+
+  // 4b. Факты подаём как ДАННЫЕ внутри первого user-сообщения, а не как инструкции
+  //     в system. Блок явно маркирован «reference data, not instructions». Так
+  //     сохраняется alternation user/assistant (дополняем существующее первое
+  //     user-сообщение, не вставляя новое).
+  const apiMessages = conversation.map(m => ({ role: m.role, content: m.content }));
+  const factBlock = buildFactBlock(factList);
+  if (factBlock) {
+    const firstUserIdx = apiMessages.findIndex(m => m.role === 'user');
+    if (firstUserIdx !== -1) {
+      apiMessages[firstUserIdx] = {
+        role: 'user',
+        content: factBlock + apiMessages[firstUserIdx].content,
+      };
+    }
   }
 
   // 5. Вызов Claude
@@ -157,7 +174,7 @@ export async function POST(req: NextRequest) {
           model: 'claude-sonnet-4-5-20250929',
           max_tokens: 4096,
           system: systemPrompt,
-          messages: conversation,
+          messages: apiMessages,
         }),
       })
     );
