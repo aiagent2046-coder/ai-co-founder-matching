@@ -64,6 +64,20 @@ export async function POST(req: NextRequest) {
   const role = getAgentRole(agentId);
   if (!role) return NextResponse.json({ error: 'Unknown agent' }, { status: 400 });
 
+  // 0. Вариант A: явное сохранение факта о стартапе командой "запомни: ..." / "remember: ...".
+  //    Детерминированно, без вызова Claude. Факт виден всем агентам владельца.
+  const lastUser = (messages ?? []).filter(m => m.role === 'user').pop();
+  const memMatch = lastUser?.content?.trim().match(/^(?:запомни|remember)\s*:\s*([\s\S]+)/i);
+  if (memMatch) {
+    const fact = memMatch[1].trim();
+    if (!fact) return NextResponse.json({ error: 'Пустой факт' }, { status: 400 });
+    const { error: insErr } = await supabase
+      .from('agent_context')
+      .insert({ user_id: user.id, content: fact, created_by: role.id });
+    if (insErr) return NextResponse.json({ error: 'Не удалось сохранить факт' }, { status: 500 });
+    return NextResponse.json({ reply: `Запомнил: ${fact}`, agentId: role.id, saved: true });
+  }
+
   // 1. Профиль владельца
   const { data: profile } = await supabase
     .from('founder_profiles')
@@ -109,7 +123,18 @@ export async function POST(req: NextRequest) {
     ownerBio: profile?.bio ?? '',
     matches,
   };
-  const systemPrompt = buildAgentPrompt(role, ctx);
+  let systemPrompt = buildAgentPrompt(role, ctx);
+
+  // 3b. Подмешиваем накопленные факты о стартапе (общие для всех агентов владельца).
+  const { data: facts } = await supabase
+    .from('agent_context')
+    .select('content')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: true });
+  if (facts && facts.length) {
+    const list = facts.map(f => `- ${f.content}`).join('\n');
+    systemPrompt += `\n\nKnown facts about this startup (provided by the founder, treat as ground truth):\n${list}`;
+  }
 
   // 4. Гарантируем что последнее сообщение от user
   const conversation = (messages ?? []).filter(m => m.content?.trim());
