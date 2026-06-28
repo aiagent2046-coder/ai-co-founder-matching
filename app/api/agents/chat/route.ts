@@ -7,7 +7,7 @@ import { extractSaveFacts, sanitizeFacts, buildFactBlock } from '@/lib/agents/sa
 export const maxDuration = 60;
 
 const TIMEOUT_MS = 55_000;
-const RETRY_DELAY_MS = 1_000;
+const STREAM_START_TIMEOUT_MS = 30_000; // таймаут только на установление потока
 
 async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: number }): Promise<Response> {
   const timeout = init.timeout ?? TIMEOUT_MS;
@@ -18,25 +18,6 @@ async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: num
   } finally {
     clearTimeout(timer);
   }
-}
-
-async function withRetry<T>(fn: () => Promise<T>): Promise<T> {
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      return await fn();
-    } catch (err: any) {
-      const isTimeout = err?.name === 'AbortError' || err?.message?.includes('aborted');
-      // Таймаут не повторяем: вторая попытка не уместится в maxDuration=60s.
-      if (isTimeout) {
-        throw new Error('AI service timeout, please try again');
-      }
-      if (attempt === 2) {
-        throw new Error(`AI service error: ${err?.message ?? String(err)}`);
-      }
-      await new Promise(r => setTimeout(r, RETRY_DELAY_MS));
-    }
-  }
-  throw new Error('AI service unavailable');
 }
 
 export async function POST(req: NextRequest) {
@@ -67,6 +48,7 @@ export async function POST(req: NextRequest) {
 
   // 0. Вариант A: явное сохранение факта о стартапе командой "запомни: ..." / "remember: ...".
   //    Детерминированно, без вызова Claude. Факт виден всем агентам владельца.
+  //    Р4: этот путь остаётся JSON-ответом (не стрим) — фронт различает по Content-Type.
   const lastUser = (messages ?? []).filter(m => m.role === 'user').pop();
   const memMatch = lastUser?.content?.trim().match(/^(?:запомни|remember)\s*:\s*([\s\S]+)/i);
   if (memMatch) {
@@ -124,7 +106,7 @@ export async function POST(req: NextRequest) {
     ownerBio: profile?.bio ?? '',
     matches,
   };
-  let systemPrompt = buildAgentPrompt(role);
+  const systemPrompt = buildAgentPrompt(role);
 
   // 3b. Накопленные факты о стартапе (общие для всех агентов владельца).
   //     БЕЗОПАСНОСТЬ: факты — пользовательский ввод, поэтому их НЕЛЬЗЯ класть
@@ -162,57 +144,117 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // 5. Вызов Claude
+  // 5. Вызов Claude в режиме потоковой передачи (stream: true).
+  //    Р2b: сервер парсит Anthropic SSE и отдаёт фронту простой текстовый поток
+  //    (только текстовые дельты). Р3a: таймаут только на установление потока,
+  //    без ретрая (ретрай в стриме не имеет смысла — часть ответа уже ушла клиенту).
+  let claudeRes: Response;
   try {
-    const res = await withRetry(() =>
-      fetchWithTimeout('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY!,
-          'anthropic-version': '2023-06-01',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-5-20250929',
-          max_tokens: 4096,
-          system: systemPrompt,
-          messages: apiMessages,
-        }),
-      })
-    );
-
-    if (!res.ok) {
-      const err = await res.text();
-      return NextResponse.json({ error: 'Claude API error', detail: err }, { status: 500 });
-    }
-
-    const data = await res.json();
-    const rawReply = data.content?.[0]?.text ?? '';
-
-    // 6. Вариант B: авто-сохранение новых фактов, которые выделил агент.
-    const { reply, facts: newFacts } = extractSaveFacts(rawReply);
-    if (newFacts.length) {
-      const known = new Set((facts ?? []).map(f => f.content.trim().toLowerCase()));
-      const toInsert = newFacts
-        .filter(f => !known.has(f.toLowerCase()))   // дедуп по уже известным
-        .filter((f, i, arr) => arr.indexOf(f) === i) // дедуп внутри блока
-        .map(content => ({ user_id: user.id, content, created_by: role.id }));
-      if (toInsert.length) {
-        await supabase.from('agent_context').insert(toInsert); // ошибка записи не должна ломать ответ
-      }
-    }
-
-    // 7. Персист истории диалога (1a): сохраняем пару user + assistant для этого агента.
-    //    Сохраняем reply (без блока <save_facts>). Ошибка записи не должна ломать ответ.
-    if (lastUser?.content?.trim() && reply.trim()) {
-      await supabase.from('agent_messages').insert([
-        { user_id: user.id, agent_id: role.id, role: 'user', content: lastUser.content },
-        { user_id: user.id, agent_id: role.id, role: 'assistant', content: reply },
-      ]);
-    }
-
-    return NextResponse.json({ reply, agentId: role.id });
+    claudeRes = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      timeout: STREAM_START_TIMEOUT_MS,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: apiMessages,
+        stream: true,
+      }),
+    });
   } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    const isTimeout = e?.name === 'AbortError' || e?.message?.includes('aborted');
+    return NextResponse.json(
+      { error: isTimeout ? 'AI service timeout, please try again' : `AI service error: ${e?.message ?? String(e)}` },
+      { status: 504 },
+    );
   }
+
+  if (!claudeRes.ok || !claudeRes.body) {
+    const detail = claudeRes.body ? await claudeRes.text() : 'no response body';
+    return NextResponse.json({ error: 'Claude API error', detail }, { status: 500 });
+  }
+
+  // 6+7. Читаем upstream SSE, копим полный текст, отдаём дельты как plain text.
+  //      По завершении потока: извлекаем <save_facts> из полного буфера,
+  //      сохраняем новые факты (Вариант B) и историю диалога (1a). Любая ошибка
+  //      пост-обработки НЕ должна ломать уже отданный поток.
+  const upstream = claudeRes.body;
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  const knownFacts = new Set((facts ?? []).map(f => f.content.trim().toLowerCase()));
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const reader = upstream.getReader();
+      let buffer = '';
+      let fullText = '';
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          // Anthropic SSE: события разделены пустой строкой (\n\n).
+          let sep: number;
+          while ((sep = buffer.indexOf('\n\n')) !== -1) {
+            const rawEvent = buffer.slice(0, sep);
+            buffer = buffer.slice(sep + 2);
+            for (const line of rawEvent.split('\n')) {
+              const trimmed = line.trim();
+              if (!trimmed.startsWith('data:')) continue;
+              const payload = trimmed.slice(5).trim();
+              if (!payload || payload === '[DONE]') continue;
+              let evt: any;
+              try { evt = JSON.parse(payload); } catch { continue; }
+              if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+                const text: string = evt.delta.text ?? '';
+                if (text) {
+                  fullText += text;
+                  controller.enqueue(encoder.encode(text));
+                }
+              }
+            }
+          }
+        }
+      } catch {
+        // обрыв upstream — закрываем поток тем, что успели отдать
+      } finally {
+        // Пост-обработка по полному буферу (не ломает поток при ошибке).
+        try {
+          const { reply, facts: newFacts } = extractSaveFacts(fullText);
+          if (newFacts.length) {
+            const toInsert = newFacts
+              .filter(f => !knownFacts.has(f.toLowerCase()))   // дедуп по уже известным
+              .filter((f, i, arr) => arr.indexOf(f) === i)     // дедуп внутри блока
+              .map(content => ({ user_id: user.id, content, created_by: role.id }));
+            if (toInsert.length) {
+              await supabase.from('agent_context').insert(toInsert);
+            }
+          }
+          if (lastUser?.content?.trim() && reply.trim()) {
+            await supabase.from('agent_messages').insert([
+              { user_id: user.id, agent_id: role.id, role: 'user', content: lastUser.content },
+              { user_id: user.id, agent_id: role.id, role: 'assistant', content: reply },
+            ]);
+          }
+        } catch {
+          // ошибка сохранения фактов/истории не должна ломать ответ
+        }
+        controller.close();
+      }
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Cache-Control': 'no-cache, no-transform',
+      'X-Accel-Buffering': 'no',
+    },
+  });
 }
