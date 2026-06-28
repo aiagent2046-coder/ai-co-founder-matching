@@ -74,6 +74,21 @@ export function getAgentRole(id: string): AgentRole | undefined {
   return AGENT_ROLES.find(r => r.id === id);
 }
 
+// Обрезка сырой истории диалога до последних `max` сообщений перед отправкой
+// в Claude. Anthropic требует, чтобы messages начинались с user, поэтому если окно
+// начинается с assistant — сдвигаем на одно вперёд. Чистая функция (тестируемая).
+// Не трогает память проекта (agent_context) — только сырую переписку.
+export function clampHistory<T extends { role: 'user' | 'assistant' }>(
+  messages: T[],
+  max: number,
+): T[] {
+  let window = messages.slice(-max);
+  if (window.length && window[0].role !== 'user') {
+    window = window.slice(1);
+  }
+  return window;
+}
+
 // Minimal project context the agent is allowed to "understand".
 export type ProjectContext = {
   ownerName: string;
