@@ -6,6 +6,16 @@ import { AGENT_ROLES, type AgentId } from '@/lib/agents/roles';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
+// Р1c: блок <save_facts>[...]</save_facts> — служебный (сервер сохраняет факты
+// из полного буфера). При отображении его прячем, в т.ч. незакрытый хвост,
+// который может прийти во время стрима.
+function stripSaveFacts(text: string): string {
+  return text
+    .replace(/<save_facts>[\s\S]*?<\/save_facts>/gi, '')
+    .replace(/<save_facts>[\s\S]*$/i, '')
+    .trimEnd();
+}
+
 export default function AgentsPage() {
   const [activeId, setActiveId] = useState<AgentId | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -59,12 +69,39 @@ export default function AgentsPage() {
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
         body: JSON.stringify({ agentId: active.id, messages: next }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? 'Ошибка запроса');
+
+      const contentType = res.headers.get('content-type') ?? '';
+
+      // Р4: ответ на «запомни: …» приходит как JSON (не стрим). Различаем по Content-Type.
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        if (!res.ok) {
+          setError(data.error ?? 'Ошибка запроса');
+          return;
+        }
+        setMessages([...next, { role: 'assistant', content: data.reply ?? '' }]);
         return;
       }
-      setMessages([...next, { role: 'assistant', content: data.reply ?? '' }]);
+
+      // Ошибка до начала потока тоже может прийти как JSON; если нет тела — общий текст.
+      if (!res.ok || !res.body) {
+        let msg = 'Ошибка запроса';
+        try { msg = (await res.json()).error ?? msg; } catch { /* не JSON */ }
+        setError(msg);
+        return;
+      }
+
+      // Р1c/Р2b: читаем простой текстовый поток и дописываем ответ ассистента.
+      setMessages([...next, { role: 'assistant', content: '' }]);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let acc = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        acc += decoder.decode(value, { stream: true });
+        setMessages([...next, { role: 'assistant', content: acc }]);
+      }
     } catch (e: any) {
       setError(e?.message ?? 'Сетевая ошибка');
     } finally {
@@ -142,7 +179,7 @@ export default function AgentsPage() {
               color: m.role === 'user' ? '#0a0e17' : '#f9fafb',
               border: m.role === 'assistant' ? '1px solid #374151' : 'none',
               fontSize: 13, lineHeight: 1.5, whiteSpace: 'pre-wrap',
-            }}>{m.content}</div>
+            }}>{m.role === 'assistant' ? stripSaveFacts(m.content) : m.content}</div>
           </div>
         ))}
         {sending && (
