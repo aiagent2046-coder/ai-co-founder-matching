@@ -109,6 +109,51 @@ export default function AgentsPage() {
     }
   }
 
+  // Очистка истории диалога текущего агента (agent_messages). Память проекта не трогаем.
+  async function clearHistory() {
+    if (!active || sending) return;
+    if (!window.confirm(`Очистить историю диалога с ${active.name}? Это необратимо.`)) return;
+    setError(null);
+    try {
+      const token = await getAuthToken();
+      const res = await fetch(`/api/agents/history?agentId=${active.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token ?? ''}` },
+      });
+      if (!res.ok) {
+        let msg = 'Не удалось очистить историю';
+        try { msg = (await res.json()).error ?? msg; } catch { /* не JSON */ }
+        setError(msg);
+        return;
+      }
+      setMessages([]);
+    } catch (e: any) {
+      setError(e?.message ?? 'Сетевая ошибка');
+    }
+  }
+
+  // Очистка памяти проекта (agent_context) — факты, общие для всех агентов.
+  async function clearMemory() {
+    if (sending) return;
+    if (!window.confirm('Очистить память проекта? Будут удалены все сохранённые факты о стартапе (общие для всех агентов). Это необратимо.')) return;
+    setError(null);
+    try {
+      const token = await getAuthToken();
+      const res = await fetch('/api/agents/context', {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token ?? ''}` },
+      });
+      if (!res.ok) {
+        let msg = 'Не удалось очистить память';
+        try { msg = (await res.json()).error ?? msg; } catch { /* не JSON */ }
+        setError(msg);
+        return;
+      }
+    } catch (e: any) {
+      setError(e?.message ?? 'Сетевая ошибка');
+    }
+  }
+
   // --- Grid of agents ---
   if (!active) {
     return (
@@ -150,6 +195,14 @@ export default function AgentsPage() {
           <div className="font-display" style={{ fontWeight: 700, fontSize: 16 }}>{active.name}</div>
           <div style={{ fontSize: 12, color: '#9ca3af' }}>{active.tagline}</div>
         </div>
+        <button onClick={clearHistory} title="Очистить историю диалога с этим агентом"
+          style={{ color: '#9ca3af', background: 'none', border: '1px solid #374151', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '6px 10px' }}>
+          Очистить диалог
+        </button>
+        <button onClick={clearMemory} title="Удалить все сохранённые факты о проекте (общие для всех агентов)"
+          style={{ color: '#9ca3af', background: 'none', border: '1px solid #374151', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '6px 10px' }}>
+          Очистить память
+        </button>
       </div>
 
       {/* Messages */}
