@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse, after } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
 import { getAgentRole, buildAgentPrompt, buildContextBlock, clampHistory, type ProjectContext } from '@/lib/agents/roles';
-import { extractSaveFacts, sanitizeFacts, buildFactBlock, parseMemoryCommand, MEMORY_CLARIFY_REPLY } from '@/lib/agents/save-facts';
+import { extractSaveFacts, sanitizeFacts, buildFactBlock, parseMemoryCommand, MEMORY_CLARIFY_REPLY, buildSummarizePrompt, buildDialogBlock, MAX_SUMMARY_FACTS } from '@/lib/agents/save-facts';
 
 export const maxDuration = 60;
 
@@ -24,6 +24,87 @@ async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: num
   } finally {
     clearTimeout(timer);
   }
+}
+
+// Умная память (R1=C): извлечь durable-факты из диалога отдельным
+// не-стрим LLM-вызовом и сохранить в agent_context (с дедупом и лимитом).
+// Возвращает JSON-ответ (не стрим), как и остальные команды памяти.
+async function summarizeAndSave(args: {
+  supabase: SupabaseClient;
+  userId: string;
+  roleId: string;
+  messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+}): Promise<NextResponse> {
+  const { supabase, userId, roleId, messages } = args;
+
+  // Берём диалог БЕЗ последнего сообщения-команды («запомни беседу» —
+  // это инструкция, не факт), и обрезаем до последних MAX_HISTORY_MESSAGES.
+  const withoutCmd = messages.filter(m => m.content?.trim());
+  const dialog = clampHistory(withoutCmd.slice(0, -1), MAX_HISTORY_MESSAGES);
+  if (dialog.length === 0) {
+    return NextResponse.json({ reply: MEMORY_CLARIFY_REPLY, agentId: roleId, saved: false });
+  }
+
+  // Уже известные факты — для дедупа.
+  const { data: known } = await supabase
+    .from('agent_context')
+    .select('content')
+    .eq('user_id', userId);
+  const knownSet = new Set((known ?? []).map((f: { content: string | null }) => (f.content ?? '').trim().toLowerCase()));
+
+  // Отдельный не-стрим вызов: system = инструкция выжимки, user = диалог как ДАННЫЕ.
+  let res: Response;
+  try {
+    res = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      timeout: STREAM_START_TIMEOUT_MS,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY!,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5-20250929',
+        max_tokens: 1024,
+        system: buildSummarizePrompt(),
+        messages: [{ role: 'user', content: buildDialogBlock(dialog) }],
+      }),
+    });
+  } catch (e: any) {
+    const isTimeout = e?.name === 'AbortError' || e?.message?.includes('aborted');
+    return NextResponse.json(
+      { error: isTimeout ? 'AI service timeout, please try again' : `AI service error: ${e?.message ?? String(e)}` },
+      { status: 504 },
+    );
+  }
+  if (!res.ok) {
+    const detail = await res.text().catch(() => 'no body');
+    return NextResponse.json({ error: 'Claude API error', detail }, { status: 500 });
+  }
+
+  const data = await res.json().catch(() => null) as any;
+  const text: string = data?.content?.[0]?.text ?? '';
+  const { facts: extracted } = extractSaveFacts(text);
+
+  // Дедуп (по известным + внутри блока) и лимит ≤10 фактов.
+  const fresh = extracted
+    .map(f => f.trim())
+    .filter(Boolean)
+    .filter(f => !knownSet.has(f.toLowerCase()))
+    .filter((f, i, arr) => arr.indexOf(f) === i)
+    .slice(0, MAX_SUMMARY_FACTS);
+
+  if (fresh.length === 0) {
+    return NextResponse.json({ reply: 'Не нашёл новых фактов для сохранения — либо в беседе нет конкретных фактов о проекте, либо они уже в памяти.', agentId: roleId, saved: false });
+  }
+
+  const { error: insErr } = await supabase
+    .from('agent_context')
+    .insert(fresh.map(content => ({ user_id: userId, content, created_by: roleId })));
+  if (insErr) return NextResponse.json({ error: 'Не удалось сохранить факты' }, { status: 500 });
+
+  const list = fresh.map(f => `• ${f}`).join('\n');
+  return NextResponse.json({ reply: `Запомнил ${fresh.length} факт(ов) из беседы:\n${list}`, agentId: roleId, saved: true });
 }
 
 export async function POST(req: NextRequest) {
@@ -55,12 +136,15 @@ export async function POST(req: NextRequest) {
   // 0. Явное сохранение факта командой «запомни …» / «remember …» (решение R1=B).
   //    Детерминированно, без вызова Claude. Факт виден всем агентам владельца.
   //    Р4: этот путь остаётся JSON-ответом (не стрим) — фронт различает по Content-Type.
-  //    Распознаём форму с двоеточием и без. Если конкретного факта нет («запомни
-  //    контекст беседы») — НЕ врём, что сохранили (decision R2), а честно просим конкретику.
+  //    Распознаём форму с двоеточием и без. Если конкретный факт есть — сохраняем его.
+  //    Если факта нет («запомни контекст беседы») — умная память (R1=C):
+  //    извлекаем durable-факты из диалога отдельным LLM-вызовом (summarizeAndSave).
   const lastUser = (messages ?? []).filter(m => m.role === 'user').pop();
   const memCmd = parseMemoryCommand(lastUser?.content);
   if (memCmd?.kind === 'needs_clarification') {
-    return NextResponse.json({ reply: MEMORY_CLARIFY_REPLY, agentId: role.id, saved: false });
+    // Умная память (R1=C): «запомни контекст/беседу» — делаем отдельный
+    // не-стрим LLM-вызов, извлекаем durable-факты из диалога и сохраняем.
+    return await summarizeAndSave({ supabase, userId: user.id, roleId: role.id, messages: messages ?? [] });
   }
   if (memCmd?.kind === 'fact') {
     const { error: insErr } = await supabase
