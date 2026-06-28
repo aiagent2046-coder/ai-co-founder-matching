@@ -47,11 +47,21 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
-  const { data: messages, error: msgsErr } = await supabase
+  // ?after=<ISO created_at> — инкрементальная подгрузка: только сообщения новее.
+  // Без параметра возвращаем всё (начальная загрузка, обратная совместимость).
+  const afterTs = req.nextUrl.searchParams.get('after');
+
+  let query = supabase
     .from('messages')
     .select('*')
     .eq('match_id', matchId)
     .order('created_at', { ascending: true });
+
+  if (afterTs) {
+    query = query.gt('created_at', afterTs);
+  }
+
+  const { data: messages, error: msgsErr } = await query;
 
   if (msgsErr) {
     return NextResponse.json({ error: msgsErr.message }, { status: 500 });

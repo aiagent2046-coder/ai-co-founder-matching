@@ -247,8 +247,13 @@ client ──POST {agentId, messages}──▶ /api/agents/chat
 
 ## 12. Известный тех-долг
 
-- **Чат матчей — polling каждые 5s**, не Realtime: WebSocket нестабилен (закрывается
-  с кодом 1006). — `app/app/chat/[matchId]/page.tsx`.
+- **Чат матчей — polling, а не Supabase Realtime (внешнее ограничение).** Прямой
+  `wss://*.supabase.co` режется на сетевом уровне из РФ → WebSocket закрывается без
+  close-фрейма (код 1006). Это не баг кода и не конфиг БД: на проде `messages` уже в
+  публикации `supabase_realtime`, RLS-SELECT и replica identity корректны. REST уже
+  проксируется через свой домен (`getAuthToken`/`/api/*`), но Next.js rewrites не
+  проксируют WS. Polling оставлен сознательно (Путь A, см. §13). Альтернативы на будущее:
+  SSE с своего домена или WS-релей на отдельном сервисе (не Vercel serverless).
 - **ivfflat-индекс по `embedding` отсутствует в проде** (объявлен в `0000_init`, но никогда
   не создавался). При текущем объёме (~69 векторов) seq-scan мгновенен; добавить
   отдельной миграцией при росте до тысяч профилей.
@@ -256,6 +261,13 @@ client ──POST {agentId, messages}──▶ /api/agents/chat
   пост-обработки теперь пишутся через `console.error`).
 
 ## 13. Решённый тех-долг
+
+- **Polling чата оптимизирован (Путь A).** Вместо безусловного перезапроса всех
+  сообщений каждые 5s: (1) `GET /api/messages` принимает необязательный `?after=<ISO
+  created_at>` и отдаёт только сообщения новее (без параметра — всё, обратная
+  совместимость); (2) клиент паузит опрос при скрытой вкладке (Page Visibility API) и
+  делает мгновенный refetch при возврате; (3) инкрементальная подгрузка по последнему
+  `created_at`, мёрж в стейт по `id` (дедуп оптимистичных/AI-сообщений). — `app/app/chat/[matchId]/page.tsx`, `app/api/messages/route.ts`.
 
 - **Размерность embedding 1536 → 1024** (`0009_fix_embedding_dim.sql`). Исторически
   `0000_init.sql` объявлял `embedding VECTOR(1536)` (комментарий «для OpenAI»), но Replicate
