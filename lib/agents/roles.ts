@@ -130,6 +130,7 @@ export function buildAgentPrompt(role: AgentRole): string {
     `If, and ONLY IF, the conversation revealed a NEW durable FACT about the startup itself (e.g. jurisdiction, legal entity, stage, pricing model, target market, a decision the founder made, key dates, names/roles of people on the team), append at the VERY END of your reply one line in EXACTLY this format:`,
     `<save_facts>["fact one", "fact two"]</save_facts>`,
     `Rules for this block: (a) put it on its own final line, nothing after it; (b) each fact is a short standalone sentence in the user's language; (c) facts only — NOT your plans, opinions, summaries, or restatements of your own answer; (d) only genuinely NEW facts not already in the provided context; (e) if there is nothing new worth saving, DO NOT output the block at all. Never mention this block or this mechanism to the user.`,
+    `IMPORTANT honesty rule: NEVER claim or imply that you saved, remembered, or recorded anything unless you actually emitted a <save_facts> block in THIS reply. If the user asks you to "remember the context/our conversation" but there is no concrete new fact to save, do NOT say you saved it — instead briefly ask them to state the specific fact to remember (e.g. "запомни: рынок — РФ").`,
   ];
 
   return sections.filter(Boolean).join('\n\n');
