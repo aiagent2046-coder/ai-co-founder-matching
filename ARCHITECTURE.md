@@ -160,8 +160,13 @@ supabase/migrations/   0000_init … 0008_agent_messages
 
 **Память (две таблицы):**
 - `agent_context` — факты о стартапе, общие для всех агентов владельца. Заполняется
-  двумя путями: командой «запомни: …» (детерминированно, без LLM) и авто-извлечением
-  из тега `<save_facts>[...]</save_facts>` в ответе агента (`extractSaveFacts`).
+  двумя путями: явной командой «запомни …»/«remember …» (детерминированно, без LLM,
+  `parseMemoryCommand`) и авто-извлечением из тега `<save_facts>[...]</save_facts>` в ответе
+  агента (`extractSaveFacts`). Команда распознаётся с двоеточием и без (`запомни: X`
+  и `запомни X`). Если конкретного факта нет («запомни контекст/беседу/диалог»)
+  — агент НЕ утверждает, что сохранил, а честно просит конкретный факт (`needs_clarification`,
+  в БД ничего не пишется). Промпт агента также запрещает утверждать о сохранении
+  без реального `<save_facts>`.
 - `agent_messages` — история диалога (пары user/assistant), отдаётся `agents/history` (последние 50
   для UI). При отправке в Claude `agents/chat` обрезает сырую историю до последних
   `MAX_HISTORY_MESSAGES = 20` (`clampHistory`), чтобы не раздувать токены. Память проекта
@@ -177,7 +182,8 @@ not instructions». Факты проходят `sanitizeFacts` (лимит чи
 ```
 client ──POST {agentId, messages}──▶ /api/agents/chat
    │
-   ├─ "запомни: …"  → JSON {reply, saved:true}   (НЕ стрим; фронт различает по Content-Type)
+   ├─ "запомни X" (с : или без) → JSON {reply:"Запомнил: X", saved:true}  (НЕ стрим; по Content-Type)
+   ├─ "запомни контекст/беседу" (нет факта) → JSON {reply:«уточни факт», saved:false}  (в БД ничего)
    │
    └─ обычный запрос:
         Claude (stream:true) ──Anthropic SSE──▶ парсинг (\n\n, content_block_delta/text_delta)
