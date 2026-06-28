@@ -48,26 +48,50 @@ export default function ChatPage() {
 
   const [myFounderId, setMyFounderId] = useState<string | null>(null);
 
+  // Отслеживаем самый свежий created_at (ISO) для инкрементальной подгрузки ?after=.
+  const lastCreatedAtRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!matchId) return;
     let active = true;
 
-    const loadMessages = async () => {
+    // incremental=false — полная загрузка (первый раз / возврат на вкладку);
+    // incremental=true — тянем только новые сообщения через ?after=.
+    const loadMessages = async (incremental = false) => {
       try {
         const token = await getAuthToken();
         const headers = { Authorization: `Bearer ${token ?? ''}` };
-        const msgRes = await fetch(`/api/messages?matchId=${matchId}`, { headers });
+        const since = lastCreatedAtRef.current;
+        const url = incremental && since
+          ? `/api/messages?matchId=${matchId}&after=${encodeURIComponent(since)}`
+          : `/api/messages?matchId=${matchId}`;
+        const msgRes = await fetch(url, { headers });
         const msgData = await msgRes.json();
-        if (msgRes.ok && active) {
-          const msgs: Msg[] = (msgData.messages ?? []).map((m: any) => ({
-            id: m.id,
-            role: m.is_me ? 'me' : 'them',
-            text: m.content,
-            time: formatTime(m.created_at),
-          }));
-          setMessages(msgs);
-          setMyFounderId(msgData.myFounderId);
+        if (!(msgRes.ok && active)) return;
+
+        const incoming = (msgData.messages ?? []) as any[];
+        if (incoming.length > 0) {
+          lastCreatedAtRef.current = incoming[incoming.length - 1].created_at;
         }
+        const mapped: Msg[] = incoming.map((m: any) => ({
+          id: m.id,
+          role: m.is_me ? 'me' : 'them',
+          text: m.content,
+          time: formatTime(m.created_at),
+        }));
+
+        if (incremental && since) {
+          if (mapped.length === 0) return;
+          // Мёрж по id: заменяем оптимистичные/дубли, добавляем новые.
+          setMessages(prev => {
+            const known = new Set(prev.map(p => p.id));
+            const fresh = mapped.filter(m => !known.has(m.id));
+            return fresh.length ? [...prev, ...fresh] : prev;
+          });
+        } else {
+          setMessages(mapped);
+        }
+        if (msgData.myFounderId) setMyFounderId(msgData.myFounderId);
       } catch {
         // тихо — polling повторит
       }
@@ -102,12 +126,35 @@ export default function ChatPage() {
       }
     })();
 
-    // Polling каждые 5 секунд (Realtime WebSocket нестабилен — закрывается с кодом 1006)
-    const interval = setInterval(loadMessages, 5000);
+    // Polling каждые 5с (Realtime WebSocket недоступен из РФ: прямой wss://*.supabase.co
+    // режется на сетевом уровне → код 1006). При скрытой вкладке опрос паузится,
+    // при возврате — мгновенный инкрементальный refetch.
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const startPolling = () => {
+      if (interval) return;
+      interval = setInterval(() => loadMessages(true), 5000);
+    };
+    const stopPolling = () => {
+      if (interval) { clearInterval(interval); interval = null; }
+    };
+
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        loadMessages(true);
+        startPolling();
+      } else {
+        stopPolling();
+      }
+    };
+
+    if (document.visibilityState === 'visible') startPolling();
+    document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
       active = false;
-      clearInterval(interval);
+      stopPolling();
+      document.removeEventListener('visibilitychange', onVisibility);
     };
   }, [matchId]);
 
