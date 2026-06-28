@@ -238,7 +238,6 @@ client ──POST {agentId, messages}──▶ /api/agents/chat
 
 - **Чат матчей — polling каждые 5s**, не Realtime: WebSocket нестабилен (закрывается
   с кодом 1006). — `app/app/chat/[matchId]/page.tsx`.
-- **Нет UI очистки** истории/фактов агентов.
 - **ivfflat-индекс по `embedding` отсутствует в проде** (объявлен в `0000_init`, но никогда
   не создавался). При текущем объёме (~69 векторов) seq-scan мгновенен; добавить
   отдельной миграцией при росте до тысяч профилей.
@@ -259,3 +258,9 @@ client ──POST {agentId, messages}──▶ /api/agents/chat
   Долговременная память о проекте (`agent_context` → `<facts>`) подаётся отдельно
   и обрезкой не затрагивается — агент сохраняет понимание контекста независимо от
   длины переписки.
+- **UI очистки истории/фактов агентов** — в шапке чата агента добавлены две кнопки:
+  «Очистить диалог» (`DELETE /api/agents/history` — чистит `agent_messages` текущего
+  агента по `user_id`+`agentId`) и «Очистить память» (`DELETE /api/agents/context` —
+  чистит все факты `agent_context` владельца по `user_id`). Обе с `window.confirm`.
+  Роуты используют SERVICE_ROLE_KEY + `getUser(token)` и явный фильтр по `user_id`
+  (нельзя удалить чужие данные). — `app/app/agents/page.tsx`.
