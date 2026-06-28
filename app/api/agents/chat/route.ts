@@ -1,13 +1,19 @@
 import { NextRequest, NextResponse, after } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
-import { getAgentRole, buildAgentPrompt, buildContextBlock, type ProjectContext } from '@/lib/agents/roles';
+import { getAgentRole, buildAgentPrompt, buildContextBlock, clampHistory, type ProjectContext } from '@/lib/agents/roles';
 import { extractSaveFacts, sanitizeFacts, buildFactBlock } from '@/lib/agents/save-facts';
 
 export const maxDuration = 60;
 
 const TIMEOUT_MS = 55_000;
 const STREAM_START_TIMEOUT_MS = 30_000; // таймаут только на установление потока
+
+// Сколько последних сообщений сырой истории отправляем в Claude.
+// Фронт шлёт всё показанное (до 50), но в промпт кладём только хвост,
+// чтобы не раздувать токены/латентность на длинных диалогах. Долговременная
+// память о проекте живёт отдельно в agent_context (<facts>) и обрезкой НЕ затрагивается.
+const MAX_HISTORY_MESSAGES = 20; // последние ~10 пар user/assistant
 
 async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: number }): Promise<Response> {
   const timeout = init.timeout ?? TIMEOUT_MS;
@@ -121,10 +127,14 @@ export async function POST(req: NextRequest) {
   const factList = sanitizeFacts(facts ?? []);
 
   // 4. Гарантируем что последнее сообщение от user
-  const conversation = (messages ?? []).filter(m => m.content?.trim());
-  if (conversation.length === 0 || conversation[conversation.length - 1].role !== 'user') {
+  const allMessages = (messages ?? []).filter(m => m.content?.trim());
+  if (allMessages.length === 0 || allMessages[allMessages.length - 1].role !== 'user') {
     return NextResponse.json({ error: 'Last message must be from user' }, { status: 400 });
   }
+
+  // 4a. Обрезаем историю до последних MAX_HISTORY_MESSAGES (см. clampHistory).
+  //     Последнее сообщение (текущий вопрос user) всегда остаётся в окне.
+  const conversation = clampHistory(allMessages, MAX_HISTORY_MESSAGES);
 
   // 4b. Контекст (владелец+матчи) и факты подаём как ДАННЫЕ внутри первого
   //     user-сообщения, а не как инструкции в system. Блоки явно маркированы
