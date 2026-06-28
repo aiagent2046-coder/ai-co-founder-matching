@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse, after } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
 import { getAgentRole, buildAgentPrompt, buildContextBlock, type ProjectContext } from '@/lib/agents/roles';
@@ -179,20 +179,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Claude API error', detail }, { status: 500 });
   }
 
-  // 6+7. Читаем upstream SSE, копим полный текст, отдаём дельты как plain text.
-  //      По завершении потока: извлекаем <save_facts> из полного буфера,
-  //      сохраняем новые факты (Вариант B) и историю диалога (1a). Любая ошибка
-  //      пост-обработки НЕ должна ломать уже отданный поток.
   const upstream = claudeRes.body;
   const decoder = new TextDecoder();
   const encoder = new TextEncoder();
   const knownFacts = new Set((facts ?? []).map(f => f.content.trim().toLowerCase()));
 
+  // Полный текст копим во внешней переменной, чтобы пост-обработку выполнить
+  // в after() — ПОСЛЕ закрытия стрима, но в пределах жизненного цикла запроса.
+  // На Vercel сохранение внутри finally стрима не гарантировано: функция может
+  // быть завершена сразу после отдачи последнего чанка, и await insert не
+  // успевает долететь до Supabase (ответ виден, но история не сохранена).
+  // after() — штатный механизм Next/Vercel «доделать после ответа» (уже
+  // используется в app/api/messages/route.ts).
+  let fullText = '';
+
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       const reader = upstream.getReader();
       let buffer = '';
-      let fullText = '';
       try {
         while (true) {
           const { done, value } = await reader.read();
@@ -224,30 +228,38 @@ export async function POST(req: NextRequest) {
       } catch {
         // обрыв upstream — закрываем поток тем, что успели отдать
       } finally {
-        // Пост-обработка по полному буферу (не ломает поток при ошибке).
-        try {
-          const { reply, facts: newFacts } = extractSaveFacts(fullText);
-          if (newFacts.length) {
-            const toInsert = newFacts
-              .filter(f => !knownFacts.has(f.toLowerCase()))   // дедуп по уже известным
-              .filter((f, i, arr) => arr.indexOf(f) === i)     // дедуп внутри блока
-              .map(content => ({ user_id: user.id, content, created_by: role.id }));
-            if (toInsert.length) {
-              await supabase.from('agent_context').insert(toInsert);
-            }
-          }
-          if (lastUser?.content?.trim() && reply.trim()) {
-            await supabase.from('agent_messages').insert([
-              { user_id: user.id, agent_id: role.id, role: 'user', content: lastUser.content },
-              { user_id: user.id, agent_id: role.id, role: 'assistant', content: reply },
-            ]);
-          }
-        } catch {
-          // ошибка сохранения фактов/истории не должна ломать ответ
-        }
         controller.close();
       }
     },
+  });
+
+  // Пост-обработка после завершения запроса: извлекаем <save_facts> из полного
+  // буфера, сохраняем новые факты (Вариант B) и историю диалога (1a).
+  // after() гарантирует, что функция не завершится, пока промис не выполнится.
+  after(async () => {
+    try {
+      const { reply, facts: newFacts } = extractSaveFacts(fullText);
+      if (newFacts.length) {
+        const toInsert = newFacts
+          .filter(f => !knownFacts.has(f.toLowerCase()))   // дедуп по уже известным
+          .filter((f, i, arr) => arr.indexOf(f) === i)     // дедуп внутри блока
+          .map(content => ({ user_id: user.id, content, created_by: role.id }));
+        if (toInsert.length) {
+          const { error: factErr } = await supabase.from('agent_context').insert(toInsert);
+          if (factErr) console.error('[agents-chat] facts save failed:', factErr.message);
+        }
+      }
+      if (lastUser?.content?.trim() && reply.trim()) {
+        const { error: histErr } = await supabase.from('agent_messages').insert([
+          { user_id: user.id, agent_id: role.id, role: 'user', content: lastUser.content },
+          { user_id: user.id, agent_id: role.id, role: 'assistant', content: reply },
+        ]);
+        if (histErr) console.error('[agents-chat] history save failed:', histErr.message);
+      }
+    } catch (e: any) {
+      // ошибка сохранения не ломает ответ, но теперь она ВИДНА в логах
+      console.error('[agents-chat] post-stream save error:', e?.message ?? String(e));
+    }
   });
 
   return new Response(stream, {
