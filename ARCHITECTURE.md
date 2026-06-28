@@ -83,7 +83,10 @@ supabase/migrations/   0000_init … 0008_agent_messages
 > использовали `profiles`, `user1_id/user2_id`, `is_ai_generated`.
 
 ### Индексы
-- `idx_founder_profiles_embedding` — `ivfflat (embedding vector_cosine_ops) WITH (lists = 100)`.
+- `idx_founder_profiles_embedding` — `ivfflat (embedding vector_cosine_ops) WITH (lists = 100)`
+  объявлен в `0000_init.sql`, но **в проде фактически отсутствует** (при текущем объёме
+  профилей ANN-индекс не требуется — поиск идёт seq-scan'ом). Добавить отдельной
+  миграцией при росте до тысяч профилей.
 
 ### RLS
 - Включён на чувствительных таблицах. Политики ужесточались в `0006_tighten_founder_profiles_rls.sql`
@@ -230,10 +233,6 @@ client ──POST {agentId, messages}──▶ /api/agents/chat
 
 ## 12. Известный тех-долг
 
-- **Размерность embedding: `VECTOR(1536)` vs реальные `1024`.** Колонка и сигнатура
-  `match_founders` объявлены `VECTOR(1536)` (комментарий «для OpenAI»), но Replicate
-  e5-large отдаёт **1024**. Требует проверки и согласования (миграция размерности
-  или другой провайдер). — `0000_init.sql` vs `lib/avatar/essence.ts`.
 - **Чат матчей — polling каждые 5s**, не Realtime: WebSocket нестабилен (закрывается
   с кодом 1006). — `app/app/chat/[matchId]/page.tsx`.
 - **Объём истории агентов в промпте не ограничен** — фронт шлёт все показанные
@@ -241,3 +240,13 @@ client ──POST {agentId, messages}──▶ /api/agents/chat
 - **Нет UI очистки** истории/фактов агентов.
 - **Стрим-роуты слабо логируются** в `vercel logs` (учтено в `agents/chat`: ошибки
   пост-обработки теперь пишутся через `console.error`).
+
+## 13. Решённый тех-долг
+
+- **Размерность embedding 1536 → 1024** (`0009_fix_embedding_dim.sql`). Исторически
+  `0000_init.sql` объявлял `embedding VECTOR(1536)` (комментарий «для OpenAI»), но Replicate
+  e5-large всегда отдавал **1024**. Прямая проверка прода (28.06.2026) показала, что
+  колонка там уже `vector(1024)`, а сигнатура `match_founders` — `query_embedding vector`
+  (без жёсткой размерности). Миграция `0009` привела локальную историю в соответствие
+  с этим фактом (idempotent, прод не менялся). Чистая БД из миграций теперь
+  поднимается консистентно с кодом.
