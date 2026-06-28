@@ -2,7 +2,7 @@ import { NextRequest, NextResponse, after } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
 import { getAgentRole, buildAgentPrompt, buildContextBlock, clampHistory, type ProjectContext } from '@/lib/agents/roles';
-import { extractSaveFacts, sanitizeFacts, buildFactBlock } from '@/lib/agents/save-facts';
+import { extractSaveFacts, sanitizeFacts, buildFactBlock, parseMemoryCommand, MEMORY_CLARIFY_REPLY } from '@/lib/agents/save-facts';
 
 export const maxDuration = 60;
 
@@ -52,19 +52,22 @@ export async function POST(req: NextRequest) {
   const role = getAgentRole(agentId);
   if (!role) return NextResponse.json({ error: 'Unknown agent' }, { status: 400 });
 
-  // 0. Вариант A: явное сохранение факта о стартапе командой "запомни: ..." / "remember: ...".
+  // 0. Явное сохранение факта командой «запомни …» / «remember …» (решение R1=B).
   //    Детерминированно, без вызова Claude. Факт виден всем агентам владельца.
   //    Р4: этот путь остаётся JSON-ответом (не стрим) — фронт различает по Content-Type.
+  //    Распознаём форму с двоеточием и без. Если конкретного факта нет («запомни
+  //    контекст беседы») — НЕ врём, что сохранили (decision R2), а честно просим конкретику.
   const lastUser = (messages ?? []).filter(m => m.role === 'user').pop();
-  const memMatch = lastUser?.content?.trim().match(/^(?:запомни|remember)\s*:\s*([\s\S]+)/i);
-  if (memMatch) {
-    const fact = memMatch[1].trim();
-    if (!fact) return NextResponse.json({ error: 'Пустой факт' }, { status: 400 });
+  const memCmd = parseMemoryCommand(lastUser?.content);
+  if (memCmd?.kind === 'needs_clarification') {
+    return NextResponse.json({ reply: MEMORY_CLARIFY_REPLY, agentId: role.id, saved: false });
+  }
+  if (memCmd?.kind === 'fact') {
     const { error: insErr } = await supabase
       .from('agent_context')
-      .insert({ user_id: user.id, content: fact, created_by: role.id });
+      .insert({ user_id: user.id, content: memCmd.fact, created_by: role.id });
     if (insErr) return NextResponse.json({ error: 'Не удалось сохранить факт' }, { status: 500 });
-    return NextResponse.json({ reply: `Запомнил: ${fact}`, agentId: role.id, saved: true });
+    return NextResponse.json({ reply: `Запомнил: ${memCmd.fact}`, agentId: role.id, saved: true });
   }
 
   // 1. Профиль владельца
