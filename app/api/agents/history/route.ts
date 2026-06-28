@@ -38,3 +38,33 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({ agentId, messages });
 }
+
+// Очистка истории диалога с конкретным агентом. Удаляет только строки
+// текущего пользователя и текущего агента (user_id + agent_id) — память
+// проекта (agent_context) не затрагивается. Сервисный ключ + явный фильтр
+// по user_id (нельзя удалить чужое).
+export async function DELETE(req: NextRequest) {
+  const token = req.headers.get('authorization')?.replace('Bearer ', '');
+  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const agentId = req.nextUrl.searchParams.get('agentId') ?? '';
+  if (!getAgentRole(agentId)) return NextResponse.json({ error: 'Unknown agent' }, { status: 400 });
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+  );
+
+  const { data: { user }, error: userErr } = await supabase.auth.getUser(token);
+  if (userErr || !user) return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
+
+  const { error } = await supabase
+    .from('agent_messages')
+    .delete()
+    .eq('user_id', user.id)
+    .eq('agent_id', agentId);
+
+  if (error) return NextResponse.json({ error: 'Failed to clear history' }, { status: 500 });
+
+  return NextResponse.json({ ok: true });
+}
