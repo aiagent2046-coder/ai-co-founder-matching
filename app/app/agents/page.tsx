@@ -23,9 +23,39 @@ export default function AgentsPage() {
   const [sending, setSending] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Р5: статус подключения GitHub (только для engineer). null = ещё не загружали.
+  const [githubConn, setGithubConn] = useState<{ connected: boolean; github_login: string | null } | null>(null);
+  const [githubBusy, setGithubBusy] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const active = AGENT_ROLES.find(r => r.id === activeId) ?? null;
+
+  // Р5: читаем статус подключения GitHub. Роуты github-подсистемы на cookie-сессии
+  // (getServerUser), поэтому без Bearer — cookie уходят автоматически (same-origin).
+  async function refreshGithubConn() {
+    try {
+      const res = await fetch('/api/github/connection', { credentials: 'same-origin' });
+      if (res.ok) {
+        const data = await res.json();
+        setGithubConn({ connected: !!data.connected, github_login: data.github_login ?? null });
+      }
+    } catch {
+      // не блокируем чат, если статус не удалось получить
+    }
+  }
+
+  // Р5: после возврата из OAuth callback (?github=connected|error) обновляем статус
+  // и чистим query, чтобы не повторять при перезагрузке.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gh = params.get('github');
+    if (!gh) return;
+    if (gh === 'error') setError('Не удалось подключить GitHub. Попробуй ещё раз.');
+    void refreshGithubConn();
+    params.delete('github');
+    const qs = params.toString();
+    window.history.replaceState(null, '', window.location.pathname + (qs ? `?${qs}` : ''));
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,6 +66,9 @@ export default function AgentsPage() {
     setMessages([]);
     setInput('');
     setError(null);
+    // Р5: статус GitHub нужен только engineer-агенту.
+    if (id === 'engineer') void refreshGithubConn();
+    else setGithubConn(null);
     // 1a: подгружаем историю диалога этого агента (переживает закрытие чата).
     setLoadingHistory(true);
     try {
@@ -106,6 +139,33 @@ export default function AgentsPage() {
       setError(e?.message ?? 'Сетевая ошибка');
     } finally {
       setSending(false);
+    }
+  }
+
+  // Р5: старт OAuth-флоу — просто переход на серверный роут (он сделает redirect на GitHub).
+  function connectGithub() {
+    window.location.href = '/api/github/connect';
+  }
+
+  // Р5: отключить GitHub — удаляем запись с токеном.
+  async function disconnectGithub() {
+    if (githubBusy) return;
+    if (!window.confirm('Отключить GitHub? Агент потеряет доступ к твоим репозиториям.')) return;
+    setGithubBusy(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/github/connection', { method: 'DELETE', credentials: 'same-origin' });
+      if (!res.ok) {
+        let msg = 'Не удалось отключить GitHub';
+        try { msg = (await res.json()).error ?? msg; } catch { /* не JSON */ }
+        setError(msg);
+        return;
+      }
+      setGithubConn({ connected: false, github_login: null });
+    } catch (e: any) {
+      setError(e?.message ?? 'Сетевая ошибка');
+    } finally {
+      setGithubBusy(false);
     }
   }
 
@@ -195,6 +255,23 @@ export default function AgentsPage() {
           <div className="font-display" style={{ fontWeight: 700, fontSize: 16 }}>{active.name}</div>
           <div style={{ fontSize: 12, color: '#9ca3af' }}>{active.tagline}</div>
         </div>
+        {/* Р5: подключение GitHub — только для engineer-агента. */}
+        {active.id === 'engineer' && (
+          githubConn?.connected ? (
+            <button onClick={disconnectGithub} disabled={githubBusy}
+              title={`GitHub подключён: ${githubConn.github_login ?? ''}. Нажми, чтобы отключить.`}
+              style={{ color: '#34d399', background: 'none', border: '1px solid #065f46', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#34d399', display: 'inline-block' }} />
+              GitHub: {githubConn.github_login ?? 'подключён'}
+            </button>
+          ) : (
+            <button onClick={connectGithub} disabled={githubBusy}
+              title="Подключить GitHub, чтобы агент мог читать и анализировать твои репозитории"
+              style={{ color: '#9ca3af', background: 'none', border: '1px solid #374151', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '6px 10px' }}>
+              Подключить GitHub
+            </button>
+          )
+        )}
         <button onClick={clearHistory} title="Очистить историю диалога с этим агентом"
           style={{ color: '#9ca3af', background: 'none', border: '1px solid #374151', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '6px 10px' }}>
           Очистить диалог
