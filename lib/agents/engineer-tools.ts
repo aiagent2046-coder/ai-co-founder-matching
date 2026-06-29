@@ -113,8 +113,10 @@ export async function runEngineerWithTools(args: {
   system: string;
   messages: AnthropicMessage[];
   callClaude: (body: Record<string, unknown>) => Promise<any>;
+  // Опциональная тихая диагностика (только сервер-логи, не в текст ответа).
+  onMeta?: (m: { stop_reason: string; iter: number; len: number; via: 'loop' | 'fallback' }) => void;
 }): Promise<string> {
-  const { token, system, messages, callClaude } = args;
+  const { token, system, messages, callClaude, onMeta } = args;
   const convo: AnthropicMessage[] = [...messages];
 
   for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
@@ -130,6 +132,7 @@ export async function runEngineerWithTools(args: {
     const textOut = blocks.filter(b => b.type === 'text').map(b => b.text).join('');
 
     if (data?.stop_reason !== 'tool_use') {
+      onMeta?.({ stop_reason: String(data?.stop_reason), iter: i, len: textOut.length, via: 'loop' });
       return textOut; // финальный ответ
     }
 
@@ -161,5 +164,6 @@ export async function runEngineerWithTools(args: {
   });
   const finalText: string = (finalData?.content ?? [])
     .filter((b: any) => b.type === 'text').map((b: any) => b.text).join('');
+  onMeta?.({ stop_reason: String(finalData?.stop_reason), iter: MAX_TOOL_ITERATIONS, len: finalText.length, via: 'fallback' });
   return finalText || 'Не удалось завершить анализ за отведённое число шагов. Уточни запрос.';
 }
