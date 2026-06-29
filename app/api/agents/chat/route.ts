@@ -7,14 +7,14 @@ import { runEngineerWithTools } from '@/lib/agents/engineer-tools';
 import { getUserGitHubToken } from '@/lib/github/token';
 
 // engineer tool-loop делает несколько последовательных не-стрим вызовов Claude,
-// поэтому функции нужен большой потолок (Vercel Pro — до 300с).
-export const maxDuration = 300;
+// каждый ждёт ответ модели (wall-clock). Vercel Pro + Fluid Compute — до 800с.
+export const maxDuration = 800; // Pro+Fluid Compute: ожидание ответа Claude в tool-loop тратит wall-clock, нужен запас на несколько вызовов
 
 const TIMEOUT_MS = 55_000;
 const STREAM_START_TIMEOUT_MS = 30_000; // таймаут только на установление потока (стрим-путь)
 // Таймаут на ОДИН не-стрим вызов Claude в tool-loop. Длинный финальный
 // анализ может генерироваться >30с, поэтому берём с запасом.
-const TOOL_CALL_TIMEOUT_MS = 75_000; // один вызов в tool-loop не должен съедать половину бюджета maxDuration
+const TOOL_CALL_TIMEOUT_MS = 120_000; // потолок maxDuration=800 даёт запас; один длинный вызов не страшен
 
 // Сколько последних сообщений сырой истории отправляем в Claude.
 // Фронт шлёт всё показанное (до 50), но в промпт кладём только хвост,
