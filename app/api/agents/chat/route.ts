@@ -6,10 +6,15 @@ import { extractSaveFacts, sanitizeFacts, buildFactBlock, parseMemoryCommand, ME
 import { runEngineerWithTools } from '@/lib/agents/engineer-tools';
 import { getUserGitHubToken } from '@/lib/github/token';
 
-export const maxDuration = 60;
+// engineer tool-loop делает несколько последовательных не-стрим вызовов Claude,
+// поэтому функции нужен большой потолок (Vercel Pro — до 300с).
+export const maxDuration = 300;
 
 const TIMEOUT_MS = 55_000;
-const STREAM_START_TIMEOUT_MS = 30_000; // таймаут только на установление потока
+const STREAM_START_TIMEOUT_MS = 30_000; // таймаут только на установление потока (стрим-путь)
+// Таймаут на ОДИН не-стрим вызов Claude в tool-loop. Длинный финальный
+// анализ может генерироваться >30с, поэтому берём с запасом.
+const TOOL_CALL_TIMEOUT_MS = 120_000;
 
 // Сколько последних сообщений сырой истории отправляем в Claude.
 // Фронт шлёт всё показанное (до 50), но в промпт кладём только хвост,
@@ -268,7 +273,7 @@ export async function POST(req: NextRequest) {
           callClaude: async (body) => {
             const r = await fetchWithTimeout('https://api.anthropic.com/v1/messages', {
               method: 'POST',
-              timeout: STREAM_START_TIMEOUT_MS,
+              timeout: TOOL_CALL_TIMEOUT_MS,
               headers: {
                 'Content-Type': 'application/json',
                 'x-api-key': process.env.ANTHROPIC_API_KEY!,
@@ -301,10 +306,11 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ reply, agentId: role.id, saved: false });
       } catch (e: any) {
-        return NextResponse.json(
-          { error: `GitHub-анализ не удался: ${e?.message ?? String(e)}` },
-          { status: 502 },
-        );
+        const isTimeout = e?.name === 'AbortError' || e?.message?.includes('aborted');
+        const msg = isTimeout
+          ? 'Анализ занял слишком много времени. Попробуй сузить запрос (конкретный файл или папка).'
+          : `GitHub-анализ не удался: ${e?.message ?? String(e)}`;
+        return NextResponse.json({ error: msg }, { status: isTimeout ? 504 : 502 });
       }
     }
   }
