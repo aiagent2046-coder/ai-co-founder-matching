@@ -130,7 +130,8 @@ export async function runEngineerWithTools(args: {
     const textOut = blocks.filter(b => b.type === 'text').map(b => b.text).join('');
 
     if (data?.stop_reason !== 'tool_use') {
-      return textOut; // финальный ответ
+      // DEBUG (временно): диагностика обрыва ответа.
+      return textOut + `\n\n[debug: stop=${data?.stop_reason} len=${textOut.length} iter=${i}]`;
     }
 
     // Есть запросы инструментов — исполняем все и продолжаем диалог.
@@ -161,5 +162,6 @@ export async function runEngineerWithTools(args: {
   });
   const finalText: string = (finalData?.content ?? [])
     .filter((b: any) => b.type === 'text').map((b: any) => b.text).join('');
-  return finalText || 'Не удалось завершить анализ за отведённое число шагов. Уточни запрос.';
+  // DEBUG (временно): диагностика финального вызова.
+  return (finalText || 'Не удалось завершить анализ.') + `\n\n[debug: FINAL stop=${finalData?.stop_reason} len=${finalText.length}]`;
 }
