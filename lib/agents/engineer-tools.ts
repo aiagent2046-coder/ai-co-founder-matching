@@ -120,7 +120,7 @@ export async function runEngineerWithTools(args: {
   for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
     const data = await callClaude({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 4096,
+      max_tokens: 8192, // промежуточный шаг: выбор инструмента + часть текста
       system,
       tools: ENGINEER_TOOLS,
       messages: convo,
@@ -155,7 +155,7 @@ export async function runEngineerWithTools(args: {
   // Превышен лимит итераций — последний вызов без инструментов, чтобы выжать текст.
   const finalData = await callClaude({
     model: 'claude-sonnet-4-5-20250929',
-    max_tokens: 4096,
+    max_tokens: 16384, // финальный развёрнутый анализ — больше места
     system,
     messages: convo,
   });
