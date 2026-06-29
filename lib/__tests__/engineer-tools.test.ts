@@ -50,7 +50,7 @@ describe('runEngineerWithTools loop', () => {
       messages: [{ role: 'user', content: 'покажи репозитории' }],
       callClaude,
     });
-    expect(out).toContain('Готово: 0 репо.'); // суффикс [debug:...] временно допускается
+    expect(out).toBe('Готово: 0 репо.');
     expect(callClaude).toHaveBeenCalledTimes(2);
     // второй вызов должен содержать tool_result в истории
     const secondBody = (callClaude.mock.calls as any[])[1][0];

@@ -120,7 +120,7 @@ export async function runEngineerWithTools(args: {
   for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
     const data = await callClaude({
       model: 'claude-sonnet-4-5-20250929',
-      max_tokens: 8192, // промежуточный шаг: выбор инструмента + часть текста
+      max_tokens: 16384, // финальный анализ часто возвращается именно отсюда (stop≠tool_use)
       system,
       tools: ENGINEER_TOOLS,
       messages: convo,
@@ -130,8 +130,7 @@ export async function runEngineerWithTools(args: {
     const textOut = blocks.filter(b => b.type === 'text').map(b => b.text).join('');
 
     if (data?.stop_reason !== 'tool_use') {
-      // DEBUG (временно): диагностика обрыва ответа.
-      return textOut + `\n\n[debug: stop=${data?.stop_reason} len=${textOut.length} iter=${i}]`;
+      return textOut; // финальный ответ
     }
 
     // Есть запросы инструментов — исполняем все и продолжаем диалог.
@@ -162,6 +161,5 @@ export async function runEngineerWithTools(args: {
   });
   const finalText: string = (finalData?.content ?? [])
     .filter((b: any) => b.type === 'text').map((b: any) => b.text).join('');
-  // DEBUG (временно): диагностика финального вызова.
-  return (finalText || 'Не удалось завершить анализ.') + `\n\n[debug: FINAL stop=${finalData?.stop_reason} len=${finalText.length}]`;
+  return finalText || 'Не удалось завершить анализ за отведённое число шагов. Уточни запрос.';
 }
