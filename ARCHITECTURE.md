@@ -87,10 +87,20 @@ supabase/migrations/   0000_init … 0008_agent_messages
   объявлен в `0000_init.sql`, но **в проде фактически отсутствует** (при текущем объёме
   профилей ANN-индекс не требуется — поиск идёт seq-scan'ом). Добавить отдельной
   миграцией при росте до тысяч профилей.
+- **Индексы под FK** (Блок 2-3 техдолга): `messages_sender_id_idx` (`0011`),
+  `matches_founder2_id_idx` / `messages_match_id_idx` / `video_rooms_match_id_idx` (`0012`).
+  Закрыли линт `unindexed_foreign_keys`. (`matches.founder1_id` уже покрыт ведущей
+  колонкой составного UNIQUE `(founder1_id, founder2_id)`.)
 
 ### RLS
 - Включён на чувствительных таблицах. Политики ужесточались в `0006_tighten_founder_profiles_rls.sql`
   и далее для `agent_context` (0007) / `agent_messages` (0008): один SELECT по `auth.uid() = user_id`.
+- **Консолидированы в `0012` (Блок 3 техдолга, см. §13):** по одной permissive-политике
+  на каждую пару (таблица, действие); все вызовы `auth.uid()` обёрнуты в
+  `(select auth.uid())` (init-plan, оценивается один раз на запрос, а не на строку).
+  Нейминг: `founders_*`, `matches_select`, `messages_*`, `swipes_own_*`.
+- `video_rooms` — RLS включён, политик нет (deny-all для anon/auth-ключа; доступ
+  только service-role). Политику добавить вместе с реализацией видео-фичи (см. §12).
 - **Важно про ключи:** большинство API-роутов работают на `SUPABASE_SERVICE_ROLE_KEY`
   (RLS обходится, авторизация проверяется **вручную** через `supabase.auth.getUser(token)`).
   На `ANON_KEY` (RLS активна) работают только `matches/list`, `messages`, `swipe`.
@@ -255,12 +265,42 @@ client ──POST {agentId, messages}──▶ /api/agents/chat
   проксируют WS. Polling оставлен сознательно (Путь A, см. §13). Альтернативы на будущее:
   SSE с своего домена или WS-релей на отдельном сервисе (не Vercel serverless).
 - **ivfflat-индекс по `embedding` отсутствует в проде** (объявлен в `0000_init`, но никогда
-  не создавался). При текущем объёме (~69 векторов) seq-scan мгновенен; добавить
+  не создавался). При текущем объёме (~104 профиля) seq-scan мгновенен; добавить
   отдельной миграцией при росте до тысяч профилей.
 - **Стрим-роуты слабо логируются** в `vercel logs` (учтено в `agents/chat`: ошибки
   пост-обработки теперь пишутся через `console.error`).
+- **`vector` extension в схеме `public`** (Supabase security-линт `extension_in_public`,
+  WARN). Перенос в отдельную схему потребует пересоздания vector-колонки/индексов
+  и рискует сломать `match_founders`; оставлено как косметика.
+- **`video_rooms` — RLS-on без политик** (security-линт `rls_enabled_no_policy`, INFO).
+  Сознательный deny-all: фича видеозвонков в коде ещё не реализована (0 строк,
+  нет обращений из `app/`/`lib/`). Добавить SELECT-политику (участники матча,
+  по аналогии с `messages_select`) при реализации фичи.
+- **Leaked-password protection отключен** (security-линт, WARN). Это настройка
+  Auth-сервера (Dashboard → Authentication → Password / Management API), не миграция.
+  Включить проверку по HaveIBeenPwned при выходе в публичный бета-доступ.
+- **Auth DB connection strategy — абсолютная (10), не процентная** (perf-линт, INFO).
+  Актуально только при увеличении размера инстанса.
 
 ## 13. Решённый тех-долг
+
+- **NULL embeddings backfill (Блок 1).** Было 34 профиля с `embedding IS NULL`
+  (не участвовали в матчинге, т.к. `match_founders` фильтрует `embedding IS NOT NULL`).
+  Пересчитаны через `lib/avatar/essence.ts` (Claude → essence, Replicate e5-large →
+  1024-dim). Остался 1 пустой черновик (без bio/skills — матчинг неприменим).
+- **FK integrity (Блок 2, `0011`).** `messages.sender_id` → `founder_profiles`:
+  `NO ACTION` → `ON DELETE CASCADE` + покрывающий индекс (0 сирот на момент
+  применения). Остальные FK (`swipes_*` → auth.users, `messages_match_id`,
+  `matches_founder1/2`) уже были CASCADE — изменений не потребовалось.
+- **RLS consolidation (Блок 3, `0012`).** Убраны дублирующие permissive-политики
+  (старые `"Users can..."` + новые) → по одной на (таблица, действие); все
+  `auth.uid()` обёрнуты в `(select auth.uid())`. Добавлены индексы под FK.
+  Семантика доступа сохранена 1:1 (сверено по `pg_policies` до/после).
+  Performance-линты Supabase: **62 → 7** (устранены все WARN).
+- **Function search_path (Блок 4, `0013`).** `set_updated_at` → `SET search_path = ''`,
+  `match_founders` → `SET search_path = public` (тип `vector`/оператор `<=>` живут
+  в расширении `vector` в схеме public). Тела функций 1:1. Security-линты: **5 → 3**
+  (устранены оба `function_search_path_mutable`; остались только вынесенные в §12).
 
 - **Polling чата оптимизирован (Путь A).** Вместо безусловного перезапроса всех
   сообщений каждые 5s: (1) `GET /api/messages` принимает необязательный `?after=<ISO
