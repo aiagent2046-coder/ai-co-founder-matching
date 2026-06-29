@@ -10,7 +10,7 @@ import {
   listRepos, getTree, getFileContent, searchCode, GitHubError,
 } from '@/lib/github/client';
 
-export const MAX_TOOL_ITERATIONS = 8; // потолок шагов tool-use за один запрос
+export const MAX_TOOL_ITERATIONS = 6; // потолок шагов tool-use за один запрос (6: чтобы fallback успевал в бюджет maxDuration)
 
 // Схема инструментов в формате Anthropic tools.
 export const ENGINEER_TOOLS = [
@@ -155,11 +155,18 @@ export async function runEngineerWithTools(args: {
     });
   }
 
-  // Превышен лимит итераций — последний вызов без инструментов, чтобы выжать текст.
+  // Превышен лимит итераций — последний вызов без инструментов, чтобы выжать анализ.
+  // ВАЖНО: модель больше НЕ может звать инструменты — явно требуем дать разбор
+  // по УЖЕ собранным данным, иначе она пишет отписку вроде "сейчас посмотрю файлы".
+  const finalSystem = system +
+    '\n\nЛИМИТ ШАГОВ ИСЧЕРПАН. Инструменты больше НЕДОСТУПНЫ. ' +
+    'Дай финальный развёрнутый анализ ПРЯМО СЕЙЧАС на основе уже прочитанного. ' +
+    'НЕ обещай посмотреть ещё файлы и НЕ проси инструменты. ' +
+    'Если чего-то не хватило — коротко отметь это в конце списком "что стоит глянуть отдельно".';
   const finalData = await callClaude({
     model: 'claude-sonnet-4-5-20250929',
     max_tokens: 16384, // финальный развёрнутый анализ — больше места
-    system,
+    system: finalSystem,
     messages: convo,
   });
   const finalText: string = (finalData?.content ?? [])
