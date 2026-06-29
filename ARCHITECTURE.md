@@ -287,3 +287,66 @@ client ──POST {agentId, messages}──▶ /api/agents/chat
   чистит все факты `agent_context` владельца по `user_id`). Обе с `window.confirm`.
   Роуты используют SERVICE_ROLE_KEY + `getUser(token)` и явный фильтр по `user_id`
   (нельзя удалить чужие данные). — `app/app/agents/page.tsx`.
+
+## 14. GitHub-интеграция engineer-агента (read-only, MVP)
+
+engineer-агент (`lib/agents/roles.ts`) умеет читать и анализировать репозитории
+пользователя на GitHub. Доступ строго **read-only**: запись, ветки, PR и merge
+сознательно отложены до отдельной итерации (нужен GitHub App + явные write-сценарии).
+
+**Мультитенантность.** Каждый пользователь подключает СВОЙ GitHub через OAuth App.
+Токен агента одного пользователя никогда не виден другому — все инструменты берут
+токен строго по `user_id` текущей сессии.
+
+**Модель данных.** Таблица `github_connections` (`0010_github_connections.sql`):
+`user_id` UNIQUE → `auth.users`, `encrypted_token`, `github_login`, `scopes`,
+`created_at`/`updated_at`. RLS: SELECT только `auth.uid() = user_id`. Запись/чтение
+токена идёт через SERVICE_ROLE (RLS обходится сервером осознанно).
+
+**Шифрование токена** (`lib/github/crypto.ts`). AES-256-GCM, формат
+`ivHex:cipherHex:tagHex`, ключ из env `TOKEN_ENC_KEY` (32 байта = 64 hex). В БД
+хранится только шифротекст; наружу (в `/api/github/connection`) токен НИКОГДА не
+отдаётся — только факт подключения и `github_login`.
+
+**OAuth-флоу** (cookie-сессия через `getServerUser`, единый паттерн подсистемы):
+- `GET /api/github/connect` — redirect на GitHub authorize, scope `read:user repo`,
+  CSRF-state в httpOnly-cookie `gh_oauth_state` (10 мин).
+- `GET /api/github/callback` — проверка state, обмен code→token, чтение
+  `github_login`, шифрование и upsert (onConflict `user_id`), redirect на
+  `/app/agents?github=connected|error`.
+- `GET/DELETE /api/github/connection` — статус подключения / отключение (удаление записи).
+
+**Read-слой** (`lib/github/client.ts`). Read-only REST поверх GitHub API:
+`listRepos`, `getTree`, `getFileContent`, `searchCode`, ошибки → `GitHubError`
+(маппинг 401/403/404). Жёсткие лимиты против раздувания контекста и злоупотреблений:
+`MAX_FILE_BYTES = 100_000`, `MAX_TREE_ENTRIES = 300`, `MAX_SEARCH_RESULTS = 20`;
+бинарные файлы отсекаются по NUL-байту. Токен достаётся через
+`getUserGitHubToken(userId)` (`lib/github/token.ts`, SERVICE_ROLE; `null`, если не подключён).
+
+**Tool-use loop** (`lib/agents/engineer-tools.ts`). `ENGINEER_TOOLS` — 4 Anthropic
+tool-схемы (`list_repos`/`list_tree`/`read_file`/`search_code`). `runEngineerWithTools`
+крутит цикл «модель → tool_use → tool_result → модель» с потолком
+`MAX_TOOL_ITERATIONS = 8`; на последней итерации tools убираются, чтобы получить
+финальный текст. `callClaude` инъектируется параметром (тестируемость без сети).
+
+**Интеграция в чат** (`app/api/agents/chat/route.ts`, секция 4c). Узкая ветка:
+только если `role.id === 'engineer'` И у пользователя есть токен — идём по
+**нестримовому** JSON-пути (tool-use несовместим со стримом). Ответ —
+`NextResponse.json({ reply, agentId, saved })`; фронт различает по `Content-Type`
+(тот же приём, что для memory-команд). История сохраняется через `after()`.
+Остальные 4 агента и engineer без токена не затронуты — идут прежним стрим-путём.
+
+**Защита от prompt-injection.** Содержимое файлов и репозиториев подаётся модели
+как ДАННЫЕ: system-промпт явно предписывает не исполнять инструкции, встреченные
+внутри кода/файлов, а трактовать их как материал для анализа.
+
+**UI** (`app/app/agents/page.tsx`). В шапке чата engineer-агента — кнопка
+«Подключить GitHub» (переход на `/api/github/connect`) либо бейдж
+«GitHub: <login>» с отключением (`DELETE /api/github/connection`, через `window.confirm`).
+Статус читается из `GET /api/github/connection`; возврат из callback
+(`?github=connected|error`) обновляет статус и чистит query.
+
+**Ручная настройка перед прод-тестом.** Зарегистрировать GitHub OAuth App
+(Settings → Developer settings → OAuth Apps → New), callback URL
+`https://syndimatch.online/api/github/callback`; задать в Vercel env
+`GITHUB_OAUTH_CLIENT_ID`, `GITHUB_OAUTH_CLIENT_SECRET`, `TOKEN_ENC_KEY` (64 hex).
