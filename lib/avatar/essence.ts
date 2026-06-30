@@ -55,18 +55,81 @@ async function withRetry<T>(fn: () => Promise<T>, maxAttempts = 4): Promise<T> {
   throw new AIServiceError('AI service unavailable', 502, true);
 }
 
-export async function generateEssence(profile: any): Promise<string> {
-  const userMsg = `Profile data:
-- Name: ${profile.name || 'unknown'}
-- Role: ${profile.role || 'unknown'} in ${profile.domain || 'unknown'}
-- Stage: ${profile.stage || 'unknown'}
-- Bio: ${profile.bio || '(empty)'}
-- Skills: ${(profile.skills || []).join(', ') || '(none)'}
-- Can teach: ${(profile.can_teach || []).join(', ') || '(none)'}
-- Wants to learn: ${(profile.want_to_learn || []).join(', ') || '(none)'}
-- Looking for: ${(profile.looking_for || []).join(', ') || '(none)'}
+// Раскладывает шкалу 0..100 в один из трёх русских полюсов.
+// score === undefined/null → '' (поле пропускаем, не выдумываем данные).
+function pole(score: unknown, low: string, mid: string, high: string): string {
+  if (typeof score !== 'number' || Number.isNaN(score)) return '';
+  if (score < 40) return low;
+  if (score > 60) return high;
+  return mid;
+}
 
-Write ONE paragraph in English (3-5 sentences, max 100 words) capturing what they do, core strengths, and ideal co-founder. Be dense with keywords for semantic search. Output ONLY the paragraph.`;
+const CONFLICT_RU: Record<string, string> = {
+  competing: 'соперничество',
+  collaborating: 'сотрудничество',
+  compromising: 'компромисс',
+  avoiding: 'избегание',
+};
+
+// Собирает человекочитаемый русский блок психопрофиля из числовых полей.
+// Берёт только структурные сигналы (числа/enum); свободные тексты опускаем.
+export function psychoMarkers(profile: any): string[] {
+  const m: string[] = [];
+
+  const ws = profile.work_style;
+  if (ws) {
+    const parts = [
+      pole(ws.pace, 'размеренный темп', 'умеренный темп', 'быстрый темп'),
+      pole(ws.structure, 'гибкость и импровизация', 'баланс структуры', 'любит структуру и планы'),
+      pole(ws.communication, 'асинхронная текстовая коммуникация', 'смешанная коммуникация', 'синхронная коммуникация, созвоны'),
+      pole(ws.risk, 'осторожность к риску', 'умеренный риск', 'высокая толерантность к риску'),
+    ].filter(Boolean);
+    if (parts.length) m.push(`стиль работы: ${parts.join(', ')}`);
+  }
+
+  const hx = profile.hexaco?.domains;
+  if (hx) {
+    const parts = [
+      pole(hx.H, '', '', 'честность и скромность'),
+      pole(hx.E, 'эмоциональная устойчивость', '', 'чувствительность и эмпатия'),
+      pole(hx.X, 'интроверсия', '', 'экстраверсия и энергичность'),
+      pole(hx.A, 'прямолинейность', '', 'покладистость и терпимость'),
+      pole(hx.C, 'спонтанность', '', 'добросовестность и дисциплина'),
+      pole(hx.O, 'практичность', '', 'открытость новому и креативность'),
+    ].filter(Boolean);
+    if (parts.length) m.push(`черты личности: ${parts.join(', ')}`);
+  }
+
+  const beh = profile.behavioral_profile;
+  if (beh) {
+    const hh = pole(beh.honesty_humility, '', '', 'высокая честность-скромность');
+    if (hh) m.push(hh);
+    const style = CONFLICT_RU[beh.conflict?.primary_style];
+    if (style) m.push(`в конфликте: ${style}`);
+  }
+
+  if (profile.time_zone) m.push(`часовой пояс: ${profile.time_zone}`);
+
+  return m;
+}
+
+export async function generateEssence(profile: any): Promise<string> {
+  const markers = psychoMarkers(profile);
+  const psychoBlock = markers.length
+    ? `\n- Психопрофиль: ${markers.join('; ')}`
+    : '';
+
+  const userMsg = `Данные профиля:
+- Имя: ${profile.name || 'неизвестно'}
+- Роль: ${profile.role || 'неизвестно'} в сфере ${profile.domain || 'неизвестно'}
+- Стадия: ${profile.stage || 'неизвестно'}
+- О себе: ${profile.bio || '(пусто)'}
+- Навыки: ${(profile.skills || []).join(', ') || '(нет)'}
+- Может научить: ${(profile.can_teach || []).join(', ') || '(нет)'}
+- Хочет изучить: ${(profile.want_to_learn || []).join(', ') || '(нет)'}
+- Ищет: ${(profile.looking_for || []).join(', ') || '(нет)'}${psychoBlock}
+
+Напиши ОДИН абзац на русском языке (3-5 предложений, максимум 100 слов), описывающий чем человек занимается, его сильные стороны, рабочий стиль и идеального со-основателя. Насыщай текст ключевыми словами для семантического поиска. Выведи ТОЛЬКО абзац.`;
 
   return withRetry(async () => {
     console.log('[essence] calling Claude...');

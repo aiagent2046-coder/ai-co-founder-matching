@@ -15,7 +15,7 @@ export async function GET() {
   // (telegram_*, behavioral_profile, honesty_humility, user_id и т.д.).
   const { data, error } = await supabase
     .from('founder_profiles')
-    .select('name, role, domain, bio, location, stage, skills, looking_for, big_five, can_teach, want_to_learn, not_looking_for, goals, intent, birth_year, birth_month, birth_day')
+    .select('name, role, domain, bio, location, stage, skills, looking_for, big_five, can_teach, want_to_learn, not_looking_for, goals, intent, birth_year, birth_month, birth_day, time_zone, work_style, hexaco')
     .eq('user_id', user.id)
     .single();
 

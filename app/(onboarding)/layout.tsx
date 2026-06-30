@@ -7,7 +7,8 @@ const STEPS = [
   { n: 2, label: 'Профиль',   path: '/onboarding/profile' },
   { n: 3, label: 'Big Five',  path: '/onboarding/big-five' },
   { n: 4, label: 'Behavioral',path: '/onboarding/behavioral' },
-  { n: 5, label: 'Аватар',    path: '/onboarding/avatar' },
+  { n: 5, label: 'Стиль',     path: '/onboarding/workstyle' },
+  { n: 6, label: 'Аватар',    path: '/onboarding/avatar' },
 ];
 
 function currentStep(p: string) {
@@ -15,7 +16,8 @@ function currentStep(p: string) {
   if (p.includes('profile'))    return 2;
   if (p.includes('big-five'))   return 3;
   if (p.includes('behavioral')) return 4;
-  if (p.includes('avatar'))     return 5;
+  if (p.includes('workstyle'))  return 5;
+  if (p.includes('avatar'))     return 6;
   return 1;
 }
 

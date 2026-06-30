@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { soulCompat } from '@/lib/soul-matrix';
+import { hexacoCompat, tzFit, workStyleCompat, PSYCHO_V2_WEIGHTS } from '@/lib/psycho-match';
 import { checkLimit } from '@/lib/rate-limit';
 
 export const maxDuration = 30;
 
 const BEHAVIORAL_ENABLED = process.env.BEHAVIORAL_MATCH_ENABLED === 'true';
+// Psycho-Match v2 (Р3): HEXACO + tz + work-style. Дефолт off — данные накапливаются.
+const PSYCHO_V2_ENABLED = process.env.PSYCHO_V2_ENABLED === 'true';
 
 // Thomas-Kilmann compatibility matrix — score 0..1 для пары стилей
 // Высокие значения: оба collaborating, один collaborating + другой compromising
@@ -118,7 +121,7 @@ export async function POST(req: NextRequest) {
 
   const { data: me } = await supabase
     .from('founder_profiles')
-    .select('embedding, big_five, behavioral_profile, intent, birth_year, birth_month, birth_day')
+    .select('embedding, big_five, behavioral_profile, intent, birth_year, birth_month, birth_day, hexaco, work_style, time_zone')
     .eq('user_id', userId)
     .single();
 
@@ -147,15 +150,17 @@ export async function POST(req: NextRequest) {
   const behavioralMap = new Map<string, any>();
   const intentMap = new Map<string, string | null>();
   const birthMap = new Map<string, { birth_year: number | null; birth_month: number | null; birth_day: number | null }>();
+  const v2Map = new Map<string, { hexaco: any; work_style: any; time_zone: string | null }>();
   if (matchedIds.length > 0) {
     const { data: extra } = await supabase
       .from('founder_profiles')
-      .select('user_id, behavioral_profile, intent, birth_year, birth_month, birth_day')
+      .select('user_id, behavioral_profile, intent, birth_year, birth_month, birth_day, hexaco, work_style, time_zone')
       .in('user_id', matchedIds);
     for (const row of extra || []) {
       behavioralMap.set(row.user_id, row.behavioral_profile);
       intentMap.set(row.user_id, row.intent);
       birthMap.set(row.user_id, { birth_year: row.birth_year, birth_month: row.birth_month, birth_day: row.birth_day });
+      v2Map.set(row.user_id, { hexaco: row.hexaco, work_style: row.work_style, time_zone: row.time_zone });
     }
   }
 
@@ -170,9 +175,30 @@ export async function POST(req: NextRequest) {
     // Хард-фильтр: два looking_to_join (или другие крайне несовместимые пары) не показываем
     if (intCompat < 0.2) return null;
 
-    const baseHybrid = BEHAVIORAL_ENABLED
+    let baseHybrid = BEHAVIORAL_ENABLED
       ? m.similarity * 0.4 + oceanScore * 0.4 + behavScore * 0.2
       : m.similarity * 0.6 + oceanScore * 0.4;
+
+    // Psycho-Match v2: HEXACO + work-style + tz (за флагом, иначе формула как раньше).
+    // Отсутствующие данные деградируют на нейтральные 0.5 внутри функций.
+    let v2 = null as null | { hexaco: number; work_style: number; tz: number };
+    if (PSYCHO_V2_ENABLED) {
+      const cv2 = v2Map.get(m.user_id) ?? { hexaco: null, work_style: null, time_zone: null };
+      const hexacoScore = hexacoCompat((me as any).hexaco, cv2.hexaco);
+      const workScore = workStyleCompat((me as any).work_style, cv2.work_style);
+      const tzScore = tzFit((me as any).time_zone, cv2.time_zone);
+      v2 = {
+        hexaco: Math.round(hexacoScore * 100),
+        work_style: Math.round(workScore * 100),
+        tz: Math.round(tzScore * 100),
+      };
+      baseHybrid =
+        m.similarity     * PSYCHO_V2_WEIGHTS.similarity +
+        oceanScore       * PSYCHO_V2_WEIGHTS.ocean +
+        hexacoScore      * PSYCHO_V2_WEIGHTS.hexaco +
+        workScore        * PSYCHO_V2_WEIGHTS.workStyle +
+        tzScore          * PSYCHO_V2_WEIGHTS.tz;
+    }
     const soul = engine === 'soul'
       ? soulCompat(
           {
@@ -201,6 +227,7 @@ export async function POST(req: NextRequest) {
       behavioral_breakdown: breakdown,
       intent:               candidateIntent,
       intent_compat:        Math.round(intCompat * 100),
+      psycho_v2:            v2 ?? undefined,
       soul_score:           soul ? Math.round(hybridScore * 100) : undefined,
       soul_level:           soul ? soulLevelOf(Math.round(hybridScore * 100)) : undefined,
       soul_phrase:          soul ? soul.phrase : undefined,

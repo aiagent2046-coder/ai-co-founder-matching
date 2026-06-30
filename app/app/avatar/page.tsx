@@ -13,6 +13,10 @@ type Identity = {
   not_looking_for: string[];
   goals: { timeline: string; commitment: string; seeking: string[] };
   autonomy_level: number;
+  // Psycho-Match v2 (read-only в этой студии; редактируются в онбординге).
+  time_zone?: string | null;
+  work_style?: { pace?: number; structure?: number; communication?: number; risk?: number } | null;
+  hexaco?: { domains?: Record<string, number> | null; facets?: Record<string, number> | null } | null;
 };
 
 const EMPTY: Identity = {
@@ -176,7 +180,8 @@ function IdentityTab({ id, setId }: any) {
         </Field>
       </div>
 
-      <div className="card" style={{padding:24,height:'fit-content',position:'sticky',top:32}}>
+      <div style={{display:'flex',flexDirection:'column',gap:24,height:'fit-content',position:'sticky',top:32}}>
+        <div className="card" style={{padding:24}}>
         <div style={{fontSize:11,color:'#c77dff',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:16}}>OCEAN Profile</div>
         {id.big_five ? (
           <OceanRadar scores={id.big_five} size={240} color="#c77dff"/>
@@ -185,7 +190,85 @@ function IdentityTab({ id, setId }: any) {
             OCEAN профиль не построен.<br/>Пройди <a href="/onboarding/big-five" style={{color:'#00d4aa'}}>Big Five тест</a>.
           </div>
         )}
+        </div>
+        <PsychoProfileCard id={id} />
       </div>
+    </div>
+  );
+}
+
+// ── Психопрофиль (Psycho-Match v2): work_style + HEXACO + tz ──────────
+// Чисто презентация. Подписи полюсов совпадают с шагом онбординга WorkStyle.tsx.
+const WS_POLES: { key: string; hint: string; left: string; right: string }[] = [
+  { key: 'pace',          hint: 'Темп',          left: 'Методично',   right: 'Спринтер' },
+  { key: 'structure',     hint: 'Структура',     left: 'Импровизация', right: 'Чёткий процесс' },
+  { key: 'communication', hint: 'Коммуникация', left: 'Асинхронно',  right: 'Созвоны' },
+  { key: 'risk',          hint: 'Риск',          left: 'Осторожно',   right: 'Ва-банк' },
+];
+const HX_POLES: { key: string; hint: string; left: string; right: string }[] = [
+  { key: 'H', hint: 'Honesty',         left: 'Прагматичность', right: 'Честность' },
+  { key: 'E', hint: 'Emotionality',    left: 'Устойчивость',   right: 'Чувствительность' },
+  { key: 'X', hint: 'eXtraversion',    left: 'Сдержанность',   right: 'Экстраверсия' },
+  { key: 'A', hint: 'Agreeableness',   left: 'Принципиальность', right: 'Сговорчивость' },
+  { key: 'C', hint: 'Conscientious.',  left: 'Спонтанность',   right: 'Добросовестность' },
+  { key: 'O', hint: 'Openness',        left: 'Традиционность', right: 'Открытость' },
+];
+
+function PoleBar({ hint, left, right, value, color }: { hint: string; left: string; right: string; value: number; color: string }) {
+  const v = Math.max(0, Math.min(100, value));
+  const pole = v >= 60 ? right : v <= 40 ? left : 'баланс';
+  return (
+    <div style={{marginBottom:10}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:4}}>
+        <span style={{fontSize:11,color:'#9ca3af'}}>{hint}</span>
+        <span style={{fontSize:11,color:'#d1d5db',fontWeight:500}}>{pole} · {v}</span>
+      </div>
+      <div style={{height:4,background:'#374151',borderRadius:9999,overflow:'hidden'}}>
+        <div style={{width:`${v}%`,height:'100%',background:color,transition:'width 0.2s'}}/>
+      </div>
+    </div>
+  );
+}
+
+function PsychoProfileCard({ id }: { id: Identity }) {
+  const ws = id.work_style;
+  const hx = id.hexaco?.domains;
+  const hasWs = !!ws && WS_POLES.some(p => typeof (ws as any)[p.key] === 'number');
+  const hasHx = !!hx && HX_POLES.some(p => typeof (hx as any)[p.key] === 'number');
+  const hasTz = typeof id.time_zone === 'string' && !!id.time_zone;
+  const hasAny = hasWs || hasHx || hasTz;
+
+  return (
+    <div className="card" style={{padding:24}}>
+      <div style={{fontSize:11,color:'#00d4aa',letterSpacing:'0.1em',textTransform:'uppercase',marginBottom:16}}>Психопрофиль</div>
+      {!hasAny ? (
+        <div style={{textAlign:'center',padding:'24px 0',color:'#6b7280',fontSize:13}}>
+          Не заполнен.<br/>Пройди шаг <a href="/onboarding/workstyle" style={{color:'#00d4aa'}}>Стиль работы</a>.
+        </div>
+      ) : (
+        <>
+          {hasTz && (
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:16}}>
+              <span style={{fontSize:11,color:'#9ca3af'}}>Часовой пояс:</span>
+              <span style={{fontSize:12,fontWeight:600,color:'#00d4aa'}}>{id.time_zone}</span>
+            </div>
+          )}
+          {hasWs && (
+            <div style={{marginBottom:hasHx?18:0}}>
+              <div style={{fontSize:10,fontWeight:600,color:'#00d4aa',letterSpacing:'0.04em',textTransform:'uppercase',marginBottom:8}}>Стиль работы</div>
+              {WS_POLES.filter(p => typeof (ws as any)[p.key] === 'number')
+                .map(p => <PoleBar key={p.key} hint={p.hint} left={p.left} right={p.right} value={(ws as any)[p.key]} color="#00d4aa"/>)}
+            </div>
+          )}
+          {hasHx && (
+            <div>
+              <div style={{fontSize:10,fontWeight:600,color:'#c77dff',letterSpacing:'0.04em',textTransform:'uppercase',marginBottom:8}}>Черты характера</div>
+              {HX_POLES.filter(p => typeof (hx as any)[p.key] === 'number')
+                .map(p => <PoleBar key={p.key} hint={p.hint} left={p.left} right={p.right} value={(hx as any)[p.key]} color="#c77dff"/>)}
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
