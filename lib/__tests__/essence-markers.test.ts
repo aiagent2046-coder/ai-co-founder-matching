@@ -13,7 +13,7 @@ describe('psychoMarkers', () => {
     expect(out).toHaveLength(1);
     expect(out[0]).toContain('быстрый темп');
     expect(out[0]).toContain('гибкость и импровизация');
-    expect(out[0]).toContain('умеренная коммуникация');
+    expect(out[0]).toContain('смешанная коммуникация');
     expect(out[0]).toContain('высокая толерантность к риску');
   });
 
