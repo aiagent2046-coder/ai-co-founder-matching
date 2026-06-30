@@ -68,7 +68,7 @@ export default function AvatarOnboardingPage() {
       <div style={{marginBottom:28}}>
         <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:10}}>
           <span style={{width:8,height:8,borderRadius:'50%',background:'#ff6b9d',boxShadow:'0 0 8px #ff6b9d',animation:'twinkle 2s infinite'}}/>
-          <span style={{fontSize:11,fontWeight:600,color:'#ff6b9d',letterSpacing:'0.12em',textTransform:'uppercase'}}>Шаг 5 из 5 — Финал</span>
+          <span style={{fontSize:11,fontWeight:600,color:'#ff6b9d',letterSpacing:'0.12em',textTransform:'uppercase'}}>Шаг 6 из 6 — Финал</span>
         </div>
         <h1 className="font-display" style={{fontWeight:700,fontSize:32,letterSpacing:'-0.01em',marginBottom:8}}>
           Активируй <span className="gradient-text-full">AI-двойника</span>
