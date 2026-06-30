@@ -245,7 +245,7 @@ function Results({ scores, onSave, saving }: { scores: Scores; onSave: ()=>void;
       <button onClick={onSave} disabled={saving} className="btn-primary" style={{
         width:'100%',padding:'16px',justifyContent:'center',fontSize:14,letterSpacing:'0.04em'
       }}>
-        {saving ? 'Сохраняем...' : 'Создать AI-аватар →'}
+        {saving ? 'Сохраняем...' : 'Дальше → поведенческий слепок'}
       </button>
     </div>
   );
