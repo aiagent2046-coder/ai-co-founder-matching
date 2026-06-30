@@ -6,6 +6,7 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
+    "calibrate": "vitest run -c vitest.calib.config.ts",
     "test:e2e": "playwright test --project=chromium"
   },
   "dependencies": {
