@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { checkLimit } from '@/lib/rate-limit';
 import { buildSystemPrompt, DEFAULT_IDENTITY, type AvatarIdentity } from '@/lib/avatar/identity';
+import { anthropicDispatcher } from '@/lib/anthropic-dispatcher';
 
 const TIMEOUT_MS = 25_000;
 const RETRY_DELAY_MS = 1_000;
@@ -10,8 +11,9 @@ async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: num
   const timeout = init.timeout ?? TIMEOUT_MS;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
+  const dispatcher = url.startsWith('https://api.anthropic.com') ? anthropicDispatcher() : undefined;
   try {
-    const res = await fetch(url, { ...init, signal: controller.signal });
+    const res = await fetch(url, { ...init, signal: controller.signal, dispatcher } as RequestInit);
     return res;
   } finally {
     clearTimeout(timer);

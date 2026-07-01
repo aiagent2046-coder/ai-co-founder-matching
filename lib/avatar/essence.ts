@@ -1,3 +1,5 @@
+import { anthropicDispatcher } from '@/lib/anthropic-dispatcher';
+
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages';
 const REPLICATE_OWNER = 'beautyyuyanli';
 const REPLICATE_NAME  = 'multilingual-e5-large';
@@ -20,8 +22,9 @@ async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: num
   const timeout = init.timeout ?? TIMEOUT_MS;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
+  const dispatcher = url.startsWith('https://api.anthropic.com') ? anthropicDispatcher() : undefined;
   try {
-    const res = await fetch(url, { ...init, signal: controller.signal });
+    const res = await fetch(url, { ...init, signal: controller.signal, dispatcher } as RequestInit);
     return res;
   } finally {
     clearTimeout(timer);

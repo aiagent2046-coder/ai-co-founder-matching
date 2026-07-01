@@ -5,6 +5,7 @@ import { getAgentRole, buildAgentPrompt, buildContextBlock, clampHistory, type P
 import { extractSaveFacts, sanitizeFacts, buildFactBlock, parseMemoryCommand, MEMORY_CLARIFY_REPLY, buildSummarizePrompt, buildDialogBlock, MAX_SUMMARY_FACTS } from '@/lib/agents/save-facts';
 import { runEngineerWithTools } from '@/lib/agents/engineer-tools';
 import { getUserGitHubToken } from '@/lib/github/token';
+import { anthropicDispatcher } from '@/lib/anthropic-dispatcher';
 
 // engineer tool-loop делает несколько последовательных не-стрим вызовов Claude,
 // каждый ждёт ответ модели (wall-clock). Vercel Pro + Fluid Compute — до 800с.
@@ -26,8 +27,9 @@ async function fetchWithTimeout(url: string, init: RequestInit & { timeout?: num
   const timeout = init.timeout ?? TIMEOUT_MS;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
+  const dispatcher = url.startsWith('https://api.anthropic.com') ? anthropicDispatcher() : undefined;
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    return await fetch(url, { ...init, signal: controller.signal, dispatcher } as RequestInit);
   } finally {
     clearTimeout(timer);
   }

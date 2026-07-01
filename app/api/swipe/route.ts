@@ -2,6 +2,7 @@ import { checkLimit } from '@/lib/rate-limit';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { parseBody, swipeSchema } from '@/lib/validation';
+import { anthropicDispatcher } from '@/lib/anthropic-dispatcher';
 
 export const maxDuration = 30;
 
@@ -173,7 +174,8 @@ async function generateAutoReply(
         messages: [{ role: 'user', content: prompt }],
       }),
       signal: controller.signal,
-    });
+      dispatcher: anthropicDispatcher(),
+    } as RequestInit);
 
     clearTimeout(timer);
 

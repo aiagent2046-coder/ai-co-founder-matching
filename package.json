@@ -21,6 +21,7 @@
     "posthog-node": "^5.36.6",
     "react": "^18.3.0",
     "react-dom": "^18.3.0",
+    "undici": "^6.27.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

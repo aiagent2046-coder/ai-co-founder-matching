@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { parseBody, messagesSchema } from '@/lib/validation';
 import { buildSystemPrompt, DEFAULT_IDENTITY, type AvatarIdentity } from '@/lib/avatar/identity';
 import { checkLimit } from '@/lib/rate-limit';
+import { anthropicDispatcher } from '@/lib/anthropic-dispatcher';
 
 export async function GET(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
@@ -218,7 +219,8 @@ export async function POST(req: NextRequest) {
               messages: [{ role: 'user', content: content.trim() }],
             }),
             signal: controller.signal,
-          });
+            dispatcher: anthropicDispatcher(),
+          } as RequestInit);
 
           clearTimeout(timer);
 
