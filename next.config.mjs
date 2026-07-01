@@ -23,7 +23,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://us.i.posthog.com https://app.posthog.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://us.i.posthog.com https://app.posthog.com wss://livekit.syndimatch.online:8443 https://livekit.syndimatch.online:8443",
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'"
@@ -40,7 +40,7 @@ const nextConfig = {
           { key: "X-Origin", value: "syndimatch.online" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           { key: "Content-Security-Policy", value: csp },
-          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+          { key: "Permissions-Policy", value: "camera=(self), microphone=(self), display-capture=(self), geolocation=(), interest-cohort=()" },
         ],
       },
     ];
