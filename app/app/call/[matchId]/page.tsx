@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getAuthToken } from '@/lib/supabase';
 import { LiveKitRoom, VideoConference } from '@livekit/components-react';
@@ -8,6 +8,7 @@ import '@livekit/components-styles';
 
 export default function CallPage() {
   const params = useParams();
+  const router = useRouter();
   const matchId = params?.matchId as string;
 
   const [url, setUrl] = useState<string | null>(null);
@@ -73,6 +74,8 @@ export default function CallPage() {
         video={true}
         audio={true}
         style={{ height: '100%' }}
+        onDisconnected={() => router.push(`/app/chat/${matchId}`)}
+        onError={(e) => setError(e.message)}
       >
         <VideoConference />
       </LiveKitRoom>
