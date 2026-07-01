@@ -10,8 +10,12 @@
     "test:e2e": "playwright test --project=chromium"
   },
   "dependencies": {
+    "@livekit/components-react": "^2.0.0",
+    "@livekit/components-styles": "^1.0.0",
     "@supabase/ssr": "^0.3.0",
     "@supabase/supabase-js": "^2.43.0",
+    "livekit-client": "^2.0.0",
+    "livekit-server-sdk": "^2.0.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "@vercel/og": "^0.11.1",
