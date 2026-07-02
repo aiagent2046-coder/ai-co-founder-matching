@@ -5,6 +5,7 @@ import { getAuthToken } from '@/lib/supabase';
 import { AGENT_ROLES, type AgentId } from '@/lib/agents/roles';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
+type Fact = { id: string; content: string; created_by: string | null; created_at: string | null };
 
 // Р1c: блок <save_facts>[...]</save_facts> — служебный (сервер сохраняет факты
 // из полного буфера). При отображении его прячем, в т.ч. незакрытый хвост,
@@ -26,6 +27,13 @@ export default function AgentsPage() {
   // Р5: статус подключения GitHub (только для engineer). null = ещё не загружали.
   const [githubConn, setGithubConn] = useState<{ connected: boolean; github_login: string | null } | null>(null);
   const [githubBusy, setGithubBusy] = useState(false);
+  // Р3: память проекта (agent_context) — раскрывающаяся панель с фактами.
+  const [memoryOpen, setMemoryOpen] = useState(false);
+  const [facts, setFacts] = useState<Fact[]>([]);
+  const [memLoading, setMemLoading] = useState(false);
+  const [memBusy, setMemBusy] = useState(false); // идёт запись (save/delete)
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const active = AGENT_ROLES.find(r => r.id === activeId) ?? null;
@@ -192,10 +200,92 @@ export default function AgentsPage() {
     }
   }
 
-  // Очистка памяти проекта (agent_context) — факты, общие для всех агентов.
+  // Р3: открыть/обновить панель памяти проекта — грузим список фактов.
+  async function openMemory() {
+    setMemoryOpen(true);
+    setMemLoading(true);
+    setError(null);
+    try {
+      const token = await getAuthToken();
+      const res = await fetch('/api/agents/context', {
+        headers: { Authorization: `Bearer ${token ?? ''}` },
+      });
+      if (!res.ok) {
+        let msg = 'Не удалось загрузить память';
+        try { msg = (await res.json()).error ?? msg; } catch { /* не JSON */ }
+        setError(msg);
+        return;
+      }
+      const data = await res.json();
+      setFacts(Array.isArray(data.facts) ? data.facts : []);
+    } catch (e: any) {
+      setError(e?.message ?? 'Сетевая ошибка');
+    } finally {
+      setMemLoading(false);
+    }
+  }
+
+  // Р3: сохранить отредактированный факт (PATCH).
+  async function saveFact(id: string) {
+    const content = editText.trim();
+    if (!content || memBusy) return;
+    setMemBusy(true);
+    setError(null);
+    try {
+      const token = await getAuthToken();
+      const res = await fetch('/api/agents/context', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token ?? ''}` },
+        body: JSON.stringify({ id, content }),
+      });
+      if (!res.ok) {
+        let msg = 'Не удалось сохранить факт';
+        try { msg = (await res.json()).error ?? msg; } catch { /* не JSON */ }
+        setError(msg);
+        return;
+      }
+      setFacts(prev => prev.map(f => (f.id === id ? { ...f, content } : f)));
+      setEditingId(null);
+      setEditText('');
+    } catch (e: any) {
+      setError(e?.message ?? 'Сетевая ошибка');
+    } finally {
+      setMemBusy(false);
+    }
+  }
+
+  // Р3: удалить один факт (DELETE ?id).
+  async function deleteFact(id: string) {
+    if (memBusy) return;
+    if (!window.confirm('Удалить этот факт? Это необратимо.')) return;
+    setMemBusy(true);
+    setError(null);
+    try {
+      const token = await getAuthToken();
+      const res = await fetch(`/api/agents/context?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token ?? ''}` },
+      });
+      if (!res.ok) {
+        let msg = 'Не удалось удалить факт';
+        try { msg = (await res.json()).error ?? msg; } catch { /* не JSON */ }
+        setError(msg);
+        return;
+      }
+      setFacts(prev => prev.filter(f => f.id !== id));
+      if (editingId === id) { setEditingId(null); setEditText(''); }
+    } catch (e: any) {
+      setError(e?.message ?? 'Сетевая ошибка');
+    } finally {
+      setMemBusy(false);
+    }
+  }
+
+  // Очистка всей памяти проекта (agent_context) — факты, общие для всех агентов.
   async function clearMemory() {
-    if (sending) return;
+    if (memBusy) return;
     if (!window.confirm('Очистить память проекта? Будут удалены все сохранённые факты о стартапе (общие для всех агентов). Это необратимо.')) return;
+    setMemBusy(true);
     setError(null);
     try {
       const token = await getAuthToken();
@@ -209,8 +299,11 @@ export default function AgentsPage() {
         setError(msg);
         return;
       }
+      setFacts([]);
     } catch (e: any) {
       setError(e?.message ?? 'Сетевая ошибка');
+    } finally {
+      setMemBusy(false);
     }
   }
 
@@ -276,11 +369,77 @@ export default function AgentsPage() {
           style={{ color: '#9ca3af', background: 'none', border: '1px solid #374151', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '6px 10px' }}>
           Очистить диалог
         </button>
-        <button onClick={clearMemory} title="Удалить все сохранённые факты о проекте (общие для всех агентов)"
+        <button onClick={openMemory} title="Посмотреть и отредактировать факты о проекте (общие для всех агентов)"
           style={{ color: '#9ca3af', background: 'none', border: '1px solid #374151', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '6px 10px' }}>
-          Очистить память
+          Память проекта
         </button>
       </div>
+
+      {/* Р3: панель памяти проекта — inline-редактирование и удаление отдельных фактов. */}
+      {memoryOpen && (
+        <div style={{ borderBottom: '1px solid #374151', background: '#111827', padding: '16px 32px', maxHeight: '46vh', overflow: 'auto' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+            <div className="font-display" style={{ fontWeight: 700, fontSize: 14, color: '#f9fafb', flex: 1 }}>
+              Память проекта <span style={{ color: '#6b7280', fontWeight: 400 }}>— факты, общие для всех агентов</span>
+            </div>
+            {facts.length > 0 && (
+              <button onClick={clearMemory} disabled={memBusy} title="Удалить все факты"
+                style={{ color: '#f87171', background: 'none', border: '1px solid #7f1d1d', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '5px 10px' }}>
+                Очистить всё
+              </button>
+            )}
+            <button onClick={() => { setMemoryOpen(false); setEditingId(null); setEditText(''); }}
+              style={{ color: '#9ca3af', background: 'none', border: '1px solid #374151', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '5px 10px' }}>
+              Закрыть
+            </button>
+          </div>
+
+          {memLoading && (
+            <div style={{ color: '#6b7280', fontSize: 13, padding: '16px 0' }}>Загружаю память…</div>
+          )}
+          {!memLoading && facts.length === 0 && (
+            <div style={{ color: '#6b7280', fontSize: 13, padding: '16px 0', lineHeight: 1.6 }}>
+              Пока пусто. Напиши агенту «запомни: …» — и факт появится здесь.
+            </div>
+          )}
+          {!memLoading && facts.map(f => (
+            <div key={f.id} style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 10, padding: 12, marginBottom: 8 }}>
+              {editingId === f.id ? (
+                <>
+                  <textarea value={editText} onChange={e => setEditText(e.target.value)} maxLength={500} rows={3}
+                    style={{ width: '100%', background: '#0a0e17', color: '#f9fafb', border: '1px solid #374151', borderRadius: 8, padding: '8px 10px', fontSize: 13, lineHeight: 1.5, resize: 'vertical', boxSizing: 'border-box' }} />
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
+                    <button onClick={() => saveFact(f.id)} disabled={memBusy || !editText.trim()}
+                      style={{ color: '#0a0e17', background: '#00d4aa', border: 'none', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '6px 12px', fontWeight: 600 }}>
+                      Сохранить
+                    </button>
+                    <button onClick={() => { setEditingId(null); setEditText(''); }} disabled={memBusy}
+                      style={{ color: '#9ca3af', background: 'none', border: '1px solid #374151', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '6px 12px' }}>
+                      Отмена
+                    </button>
+                    <span style={{ color: '#4b5563', fontSize: 11, marginLeft: 'auto' }}>{editText.length}/500</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{ color: '#e5e7eb', fontSize: 13, lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{f.content}</div>
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center' }}>
+                    <button onClick={() => { setEditingId(f.id); setEditText(f.content); }} disabled={memBusy}
+                      style={{ color: '#9ca3af', background: 'none', border: '1px solid #374151', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '5px 10px' }}>
+                      Изменить
+                    </button>
+                    <button onClick={() => deleteFact(f.id)} disabled={memBusy}
+                      style={{ color: '#f87171', background: 'none', border: '1px solid #7f1d1d', borderRadius: 8, cursor: 'pointer', fontSize: 12, padding: '5px 10px' }}>
+                      Удалить
+                    </button>
+                    {f.created_by && <span style={{ color: '#4b5563', fontSize: 11, marginLeft: 'auto' }}>{f.created_by}</span>}
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Messages */}
       <div style={{ flex: 1, overflow: 'auto', padding: '24px 32px', display: 'flex', flexDirection: 'column', gap: 12 }}>
