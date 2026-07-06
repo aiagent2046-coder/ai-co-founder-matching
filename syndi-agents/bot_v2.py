@@ -8,6 +8,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import random
 import time
 from dataclasses import dataclass, field
@@ -89,17 +90,22 @@ class BotState:
     conversations: dict[str, list[dict]] = field(default_factory=dict)
 
 
+DEFAULT_APP_URL = os.environ.get("SYNDI_APP_URL", "https://syndimatch.online")
+
+
 class SyndiBot:
     def __init__(
         self,
         profile: dict[str, Any],
         supabase_url: str,
         supabase_anon_key: str,
+        app_url: str | None = None,
     ) -> None:
         self.profile = profile
         self.state = BotState()
         self.supabase_url = supabase_url.rstrip("/")
         self.supabase_anon_key = supabase_anon_key
+        self.app_url = (app_url or DEFAULT_APP_URL).rstrip("/")
         self._client: Optional[httpx.AsyncClient] = None
 
     async def _client_(self) -> httpx.AsyncClient:
@@ -418,28 +424,45 @@ class SyndiBot:
         logger.info(f"[{self.profile['name']}] Behavioral: H={honesty_humility}, conflict={q7}, e:emp={e['empathy']}/ang={e['anger']}/cun={e['cunning']}")
         return behavioral_profile
 
-    def _generate_embedding(self) -> list[float]:
-        """Генерирует 1024-мерный pseudo-embedding на основе профиля.
-        Детерминированный — одинаковые профили дают одинаковый embedding."""
-        import hashlib
-        # Seed from profile data
-        seed_data = f"{self.profile['name']}|{self.profile['role']}|{self.profile['domain']}|{','.join(self.profile['skills'])}|{self.profile['bio'][:100]}"
-        seed = int(hashlib.md5(seed_data.encode()).hexdigest(), 16)
-        rng = random.Random(seed)
-        # 1024-мерный вектор, нормальное распределение
-        return [rng.gauss(0, 0.05) for _ in range(1024)]
-
     async def _save_embedding(self) -> bool:
-        """Сохраняет embedding в профиль."""
-        embedding = self._generate_embedding()
-        ok = await self._supabase_patch(
-            "founder_profiles",
-            {"user_id": f"eq.{self.state.user_id}"},
-            {"embedding": embedding},
-        )
-        if ok:
-            logger.info(f"[{self.profile['name']}] Embedding saved ({len(embedding)}d)")
-        return ok
+        """Вычисляет реальный embedding через /api/embedding/recompute.
+
+        Старая реализация (_generate_embedding) записывала случайный
+        pseudo-вектор (random.gauss от MD5 хеша имени) напрямую в Supabase.
+        Это приводило к тому, что match_founders RPC возвращал пустые или
+        случайные результаты, а агенты без эмбеддинга получали 400 от
+        /api/discover/match.
+
+        Теперь вызываем тот же Replicate multilingual-e5-large путь,
+        что и реальные пользователи через Avatar Studio.
+        """
+        if not self.state.access_token:
+            logger.warning(f"[{self.profile['name']}] No token for embedding recompute")
+            return False
+
+        try:
+            client = await self._client_()
+            r = await client.post(
+                f"{self.app_url}/api/embedding/recompute",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {self.state.access_token}",
+                },
+                json={},
+            )
+            if r.status_code == 200:
+                data = r.json()
+                dim = data.get("dim", "?")
+                logger.info(f"[{self.profile['name']}] Embedding computed via API (dim={dim})")
+                return True
+            logger.warning(
+                f"[{self.profile['name']}] /api/embedding/recompute -> "
+                f"{r.status_code}: {r.text[:200]}"
+            )
+            return False
+        except Exception as e:
+            logger.error(f"[{self.profile['name']}] Embedding recompute failed: {e}")
+            return False
 
     async def complete_onboarding(self) -> bool:
         await asyncio.sleep(random.uniform(0.5, 2))
