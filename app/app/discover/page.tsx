@@ -105,6 +105,7 @@ export default function DiscoverPage() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [needsEmbedding, setNeedsEmbedding] = useState(false);
 
   const swipe = async (action: 'like' | 'pass') => {
     const candidate = candidates[idx];
@@ -148,7 +149,7 @@ export default function DiscoverPage() {
   useEffect(() => { setIdx(0); load(); }, [engine]);
 
   const load = async () => {
-    setLoading(true); setError(null);
+    setLoading(true); setError(null); setNeedsEmbedding(false);
     try {
       const token = await getAuthToken();
       const res = await fetch(`/api/discover/match${engine === 'soul' ? '?engine=soul' : ''}`, {
@@ -157,7 +158,12 @@ export default function DiscoverPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? 'Не удалось загрузить кандидатов');
+        // 400 + пустые кандидаты = эмбеддинг не сгенерирован, направляем в Avatar Studio
+        if (res.status === 400 && Array.isArray(data.candidates) && data.candidates.length === 0) {
+          setNeedsEmbedding(true);
+        } else {
+          setError(data.error ?? 'Не удалось загрузить кандидатов');
+        }
         setCandidates([]);
       } else {
         setCandidates(data.candidates ?? []);
@@ -215,12 +221,33 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      {!loading && error && (
-        <div className="card" style={{padding:32,textAlign:'center',borderColor:'rgba(255,159,28,0.3)'}}>
-          <div style={{fontSize:14,color:'#ff9f1c',marginBottom:12,fontWeight:500}}>{error}</div>
-          <Link href="/app/avatar" className="btn-primary" style={{marginTop:8}}>
+      {!loading && needsEmbedding && (
+        <div className="card" style={{padding:40,textAlign:'center',borderColor:'rgba(0,212,170,0.3)'}}>
+          <div style={{
+            width:72,height:72,borderRadius:'50%',
+            background:'rgba(0,212,170,0.08)',border:'1px solid rgba(0,212,170,0.3)',
+            margin:'0 auto 20px',display:'flex',alignItems:'center',justifyContent:'center',
+            fontSize:32
+          }}>🧬</div>
+          <h3 className="font-display" style={{fontWeight:700,fontSize:20,marginBottom:8}}>
+            Сначала создай AI-двойника
+          </h3>
+          <p style={{color:'#9ca3af',fontSize:13,maxWidth:360,margin:'0 auto 24px',lineHeight:1.6}}>
+            Для поиска сооснователей нужен твой embedding — смысловой отпечаток профиля.
+            Зайди в Avatar Studio и нажми&nbsp;<strong style={{color:'#00d4aa'}}>Recompute embedding</strong>.
+          </p>
+          <Link href="/app/avatar" className="btn-primary">
             Открыть Avatar Studio →
           </Link>
+        </div>
+      )}
+
+      {!loading && !needsEmbedding && error && (
+        <div className="card" style={{padding:32,textAlign:'center',borderColor:'rgba(255,159,28,0.3)'}}>
+          <div style={{fontSize:14,color:'#ff9f1c',marginBottom:12,fontWeight:500}}>{error}</div>
+          <button onClick={load} className="btn-ghost" style={{marginTop:8}}>
+            Попробовать снова
+          </button>
         </div>
       )}
 

@@ -100,6 +100,14 @@ function oceanComplement(a: any, b: any): number {
   return Math.exp(-Math.pow(avg - peak, 2) / (2 * sigma * sigma));
 }
 
+// GET не поддерживается — явный 405 вместо дефолтного Next.js
+export async function GET() {
+  return NextResponse.json(
+    { error: 'Method Not Allowed. Use POST to discover matches.' },
+    { status: 405, headers: { Allow: 'POST' } },
+  );
+}
+
 export async function POST(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
